@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build output (every app builds its own)
+dist/
+dist-*/
+build/
+out/
+*.tsbuildinfo
+
+# Package build output (rebuilt by `npm run pack:package` and `npm run vendor`)
+*.tgz
+packages/orders-elements/orders-elements.js
+packages/orders-elements/3rdpartylicenses.txt
+apps/backoffice-vanilla/vendor/
+
+# Framework caches
+.angular/
+.vite/
+.cache/
+.eslintcache
+
+# Tests and coverage
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Mock API working data (recreated from db.seed.json on npm start)
+tools/mock-api/db.json
+
+# Local environment overrides (the committed .env files hold only localhost URLs)
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+*.log
+
+# Editors and OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
+
+# Claude Code personal settings (shared commands in .claude/commands are committed)
+.claude/settings.local.json

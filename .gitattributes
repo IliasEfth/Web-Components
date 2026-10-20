@@ -1,0 +1,23 @@
+# Normalise line endings so Windows, macOS and Linux contributors produce identical diffs
+* text=auto eol=lf
+
+# Windows scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files: never touch
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.pdf binary
+*.pptx binary
+
+# Lock files: no merge noise in diffs
+package-lock.json -diff linguist-generated=true
