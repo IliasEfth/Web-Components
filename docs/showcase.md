@@ -3,8 +3,8 @@
 Two acts: write a Web Component by hand, then let three micro-frontends, each with its own
 framework and its own server, run together in three different shells.
 
-Start everything first with `docker compose up --build --watch`, and restore the seed data
-afterwards with `docker compose up -d --force-recreate mock-api`.
+Start everything first with `tools\scripts\start-all.bat` (or `docker compose up --build
+--detach`), and restore the seed data afterwards with `tools\scripts\deploy-mock-api.bat`.
 
 ## Act 1: Pure Web Components
 
@@ -57,22 +57,23 @@ document.querySelector('shop-orders-list').getAttribute('ng-version'); // the cu
 
 ### 2.4 Independent and resilient
 
-Run `docker compose stop orders` and reload `http://localhost:4500/orders`.
+In Docker Desktop, stop the `orders` container and reload `http://localhost:4500/orders`.
 
 - Only the Orders card shows an error; the Vue and React parts keep working.
-- Run `docker compose start orders` and click Retry.
+- Start `orders` again in Docker Desktop and click Retry.
 
 **Message:** one team's outage never takes down the page.
 
 ### 2.5 One release, every shell
 
-With `--watch` running, open
-`apps/microfrontends/orders/src/app/orders/components/orders-list/orders-list.html` and change the
-heading `Orders` to `Orders to ship`. Save, then reload `http://localhost:4200/orders`,
+Open `apps/microfrontends/orders/src/app/orders/components/orders-list/orders-list.html` and
+change the heading `Orders` to `Orders to ship`. Save, then deploy only the Orders team's
+service with `tools\scripts\deploy-mf-orders.bat`. Reload `http://localhost:4200/orders`,
 `http://localhost:4400/orders` and `http://localhost:4500/orders`.
 
 - All three shells show the new heading. None of them was rebuilt or restarted.
 - DevTools, Network tab: the Angular code comes from `localhost:4201`, the Orders team's server.
+- Change the heading back and deploy again with the same script.
 
 **Message:** each team deploys on its own; a new release reaches every page at the next load.
 

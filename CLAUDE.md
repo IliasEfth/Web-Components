@@ -109,7 +109,7 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | 6 | `feature/notes-and-backoffice-vue` | `apps/microfrontends/notes`, the notes API, the `microfrontends` / `backoffices` folders | Notes' `remoteEntry.js` exposes `./elements` and works from another origin |
 | 6b | `feature/backoffice-vue` | `apps/backoffices/backoffice-vue` | Vue shell shows Angular + React + Vue on `/orders`; only the failed remote shows an error card |
 | 7 | `feature/backoffice-angular16` | `apps/backoffices/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
-| 8 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
+| 8 | `feature/run-scripts` | Windows `.bat` shortcuts in `tools/scripts/` around `docker compose` `start-all`, `live-all` and one `deploy-*` per service; stopping is done from Docker Desktop |
 
 ## Known pitfalls
 

@@ -99,6 +99,7 @@ apps/
     backoffice-angular16/   act 2   Angular 16
 tools/
   mock-api/                 the orders REST API
+  scripts/                  Windows shortcuts around docker compose
 docs/                       architecture, demo script, one guide per app
 ```
 
@@ -130,6 +131,21 @@ after a demo.
 
 The remotes run on 4201 (`orders`), 4202 (`insights`) and 4402 (`notes`).
 
+### Windows shortcuts
+
+Double-click a script in `tools/scripts`. Each one runs a single `docker compose` command.
+
+| Script | What it does |
+| --- | --- |
+| `start-all.bat` | Builds and starts every service and waits until all are healthy |
+| `live-all.bat` | Starts everything with Compose Watch: saved edits reach the containers at once |
+| `deploy-mf-orders.bat`, `deploy-mf-insights.bat`, `deploy-mf-notes.bat` | Rebuilds and restarts one micro-frontend from the current source; everything else keeps running |
+| `deploy-backoffice-react.bat`, `deploy-backoffice-vue.bat`, `deploy-backoffice-angular16.bat` | The same for one back office |
+| `deploy-mock-api.bat` | The same for the API; the orders and notes go back to the seed data |
+| `deploy-web-components-basics.bat` | The same for the act 1 page |
+
+Stop and start single containers, or all of them, from Docker Desktop.
+
 ## Status
 
 | Stage | Adds | Act | State |
@@ -142,7 +158,7 @@ The remotes run on 4201 (`orders`), 4202 (`insights`) and 4402 (`notes`).
 | 6 | `notes` (Vue) and the `apps/` folders | 2 | done |
 | 6b | `backoffice-vue` | 2 | done |
 | 7 | `backoffice-angular16` | 2 | in review |
-| 8 | Windows shortcuts | | planned |
+| 8 | Windows shortcuts in `tools/scripts` | | in review |
 
 ## Tech stack
 
