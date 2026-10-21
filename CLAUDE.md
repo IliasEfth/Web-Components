@@ -113,6 +113,8 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `shop-` tags in the Vite Vue plugin |
 | React remote in another page: `@vitejs/plugin-react can't detect preamble` | Exclude the exposed folder from Fast Refresh: `react({ exclude: [/\/node_modules\//, /\/src\/insights\//] })` |
 | Remote files load from the shell's port instead of the remote's | Set `server.origin` to the remote's own URL in `vite.config.ts` |
+| A Vite shell downloads every `remoteEntry.js` on its first page | Module Federation's default `shareStrategy: 'version-first'` fetches all remotes up front; set `shareStrategy: 'loaded-first'` in the host |
+| Retry never recovers a Module Federation remote after an outage | The browser caches a failed `import()` of `remoteEntry.js` until the page reloads; reload the page. Native Federation fetches `remoteEntry.json` first, so its Retry works |
 | Two federation formats | Angular remotes: Native Federation (`remoteEntry.json`). React and Vue remotes: `@module-federation/vite` (`remoteEntry.js`). Shells load each with its own runtime |
 | Do not set `ENV NODE_ENV=development` in a Vite `Dockerfile.dev` | The React guide does not; Vite sets the mode itself |
 | Angular 16: "Module not found" for a URL import | Write `import(/* webpackIgnore: true */ url)`; this is the one allowed comment, webpack needs it |

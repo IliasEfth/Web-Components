@@ -149,11 +149,19 @@ The same dev server on port 4202 serves the app and the remote:
 | `http://localhost:4202/components`, `/web-components` | the app, exactly as before |
 | `http://localhost:4202/remoteEntry.js` | the Module Federation container, exposing `./elements` |
 
-A shell loads it through the Module Federation runtime:
+A shell built with Vite lists it as a remote of the same plugin and imports it like a module;
+[backoffice-react.md](backoffice-react.md) shows the whole host:
 
 ```ts
-registerRemotes([{ name: 'insights', entry: 'http://localhost:4202/remoteEntry.js' }]);
-const { defineElements } = await loadRemote('insights/elements');
+federation({
+  name: 'backoffice',
+  remotes: {
+    insights: { type: 'module', name: 'insights', entry: 'http://localhost:4202/remoteEntry.js' },
+  },
+  shared: ['react', 'react-dom'],
+});
+
+const { defineElements } = await import('insights/elements');
 await defineElements({ apiBase: 'http://localhost:3000' });
 ```
 
