@@ -1,6 +1,6 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { App } from './app/app';
-import { appConfig } from './app/app.config';
+import { initFederation } from '@angular-architects/native-federation';
 
-bootstrapApplication(App, appConfig)
+initFederation({}, { hostRemoteEntry: { url: './remoteEntry.json' }, shimMode: false })
+  .catch((error: unknown) => console.error(error))
+  .then(() => import('./bootstrap'))
   .catch((error: unknown) => console.error(error));

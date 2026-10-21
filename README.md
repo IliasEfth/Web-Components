@@ -156,8 +156,7 @@ The apps are being added one at a time, each through its own pull request.
 | 6 | `notes` and `backoffice-vue` | 2 | planned |
 | 7 | `backoffice-angular16` | 2 | planned |
 | 8 | `@shop/orders-elements` and `backoffice-vanilla` | 3 | planned |
-| 9 | Production images for the demo | | planned |
-| 10 | Windows shortcuts | | planned |
+| 9 | Windows shortcuts | | planned |
 
 ## Tech stack
 

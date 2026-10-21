@@ -2,7 +2,9 @@ name: shop-backoffice
 
 services:
   mock-api:
-    build: tools/mock-api
+    build:
+      context: tools/mock-api
+      dockerfile: Dockerfile.dev
     ports:
       - '3000:3000'
     develop:
@@ -16,7 +18,9 @@ services:
           path: tools/mock-api/db.seed.json
 
   web-components-basics:
-    build: examples/web-components-basics
+    build:
+      context: examples/web-components-basics
+      dockerfile: Dockerfile.dev
     ports:
       - '4100:80'
     develop:
@@ -26,7 +30,7 @@ services:
           target: /usr/share/nginx/html
           ignore:
             - node_modules/
-            - Dockerfile
+            - Dockerfile.dev
             - nginx.conf
             - eslint.config.js
             - package.json
@@ -35,7 +39,9 @@ services:
           path: examples/web-components-basics/nginx.conf
 
   orders:
-    build: apps/orders
+    build:
+      context: apps/orders
+      dockerfile: Dockerfile.dev
     ports:
       - '4201:4201'
     depends_on:
@@ -50,3 +56,5 @@ services:
           path: apps/orders/package.json
         - action: rebuild
           path: apps/orders/angular.json
+        - action: rebuild
+          path: apps/orders/federation.config.mjs
