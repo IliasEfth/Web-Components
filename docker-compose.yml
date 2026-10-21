@@ -33,3 +33,20 @@ services:
             - package-lock.json
         - action: rebuild
           path: examples/web-components-basics/nginx.conf
+
+  orders:
+    build: apps/orders
+    ports:
+      - '4201:4201'
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: apps/orders/src
+          target: /app/src
+        - action: rebuild
+          path: apps/orders/package.json
+        - action: rebuild
+          path: apps/orders/angular.json

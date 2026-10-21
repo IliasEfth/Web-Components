@@ -1,0 +1,39 @@
+<section class="card">
+  <header>
+    <h2>Orders</h2>
+    <span class="count">{{ visibleOrders().length }} shown</span>
+  </header>
+
+  @if (ordersResource.error()) {
+    <p class="message error">Could not load the orders.</p>
+  } @else {
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Order</th>
+          <th scope="col">Customer</th>
+          <th scope="col" class="amount">Total</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of visibleOrders(); track order.id) {
+          <tr tabindex="0" (click)="select(order)" (keydown.enter)="select(order)">
+            <td>{{ order.id }}</td>
+            <td>{{ order.customer }}</td>
+            <td class="amount">{{ order.total | currency: 'EUR' }}</td>
+            <td>
+              <span class="status" [class.shipped]="order.status === 'shipped'">{{ order.status }}</span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="message">
+              {{ ordersResource.isLoading() ? 'Loading…' : 'No orders.' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>

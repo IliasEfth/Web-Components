@@ -1,0 +1,35 @@
+<section class="card">
+  @if (orderResource.value(); as order) {
+    <header>
+      <h2>Order {{ order.id }}</h2>
+      <button type="button" class="close" aria-label="Close the order" (click)="close(order)">✕</button>
+    </header>
+
+    <dl>
+      <dt>Customer</dt>
+      <dd>{{ order.customer }}</dd>
+      <dt>Total</dt>
+      <dd>{{ order.total | currency: 'EUR' }}</dd>
+      <dt>Placed</dt>
+      <dd>{{ order.createdAt | date: 'mediumDate' }}</dd>
+      <dt>Status</dt>
+      <dd>
+        <span class="status" [class.shipped]="order.status === 'shipped'">{{ order.status }}</span>
+      </dd>
+    </dl>
+
+    <button type="button" class="primary" [disabled]="saving()" (click)="toggleStatus(order)">
+      {{ order.status === 'open' ? 'Mark as shipped' : 'Reopen order' }}
+    </button>
+
+    @if (saveFailed()) {
+      <p class="message error">Could not save the change.</p>
+    }
+  } @else if (orderResource.error()) {
+    <p class="message error">Could not load order {{ orderId() }}.</p>
+  } @else if (orderResource.isLoading()) {
+    <p class="message">Loading…</p>
+  } @else {
+    <p class="message">Select an order to see its details.</p>
+  }
+</section>

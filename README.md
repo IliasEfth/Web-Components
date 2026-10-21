@@ -39,10 +39,11 @@ The Angular 16 shell hosts components built with the latest Angular, so two Angu
 side by side. No app imports another app's code. They use the same contract as act 1:
 
 ```html
-<shop-orders-list status="open" api-base="http://localhost:3000"></shop-orders-list>
+<shop-orders-list status="open"></shop-orders-list>
 ```
 
 ```js
+await defineElements({ apiBase: 'http://localhost:3000' });
 list.addEventListener('orderSelected', (event) => {
   detail.setAttribute('order-id', event.detail.id);
 });

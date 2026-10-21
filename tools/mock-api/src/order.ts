@@ -4,7 +4,7 @@ export type OrderStatus = (typeof orderStatuses)[number];
 
 export type OrderStatusFilter = OrderStatus | 'all';
 
-export interface Order {
+export interface IOrder {
   id: string;
   customer: string;
   total: number;

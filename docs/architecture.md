@@ -48,10 +48,11 @@ All     tools/mock-api :3000   GET/PATCH /orders
 
 | Concern | Rule | Why |
 | --- | --- | --- |
-| Host to element | Strings and numbers as kebab-case attributes; objects, arrays and secrets as properties | Attributes show in DevTools; tokens must not |
+| Configuration | Passed once to `defineElements({ apiBase, getAuthToken })`, never as attributes | The same as dependency injection inside a framework app; tokens never appear in the DOM |
+| Host to element | Strings and numbers as kebab-case attributes; objects and arrays as properties | Attributes show in DevTools and work from plain HTML |
 | Element to host | `CustomEvent` with `bubbles: true, composed: true` and an object `detail` | Crosses Shadow DOM and works in every framework |
 | Element to element | Always through the host | Each element stays usable and understandable on its own |
-| Loading a remote | Each remote exports one idempotent `defineElements(): Promise<void>` | Safe to call from every page and every host |
+| Loading a remote | Each remote exports one idempotent `defineElements(config): Promise<void>` | Safe to call from every page and every host; the first call's configuration wins |
 | Routing | The host owns the URL and passes state down as inputs | Deep links (`/orders/A-1003`) set `order-id` |
 | Styling | Each component styles itself inside its Shadow DOM and reads the host's `--shop-*` custom properties | Custom properties cross the shadow boundary; nothing else leaks, so the host decides the colours |
 | Rendering data | `textContent` only: never `innerHTML`, `dangerouslySetInnerHTML`, `v-html` or `[innerHTML]` | Customer data cannot run code |
@@ -64,15 +65,29 @@ These names are shared between apps. Renaming one breaks another app silently.
 
 | Tag | Owner | Inputs (attribute / property) | Events (`detail`) |
 | --- | --- | --- | --- |
-| `shop-orders-list` | `apps/orders` | `status`, `page-size`, `api-base`; property `authToken` | `orderSelected` `{ id }` |
-| `shop-order-detail` | `apps/orders` | `order-id`, `api-base`; property `authToken` | `orderUpdated` `{ id, status }`, `closed` |
-| `shop-order-stats` | `apps/insights` | `api-base`, `refresh-key` | `statusPicked` `{ status }` |
+| `shop-orders-list` | `apps/orders` | `status`, `page-size` | `orderSelected` `{ id }` |
+| `shop-order-detail` | `apps/orders` | `order-id` | `orderUpdated` `{ id, status }`, `closed` `{ id }` |
+| `shop-order-stats` | `apps/insights` | `refresh-key` | `statusPicked` `{ status }` |
 | `shop-activity-feed` | `apps/insights` | property `entries` (assign a new array to update) | `cleared` |
 | `shop-status-filter` | `apps/notes` | `value` | `statusChange` `{ status }` |
 | `shop-order-notes` | `apps/notes` | `order-id` | `noteAdded` `{ orderId, text }` |
 
 `status` is one of `all`, `open`, `shipped`. Event names are case-sensitive: `orderSelected`,
 never `orderselected`.
+
+Every remote that calls the API is configured once, before its tags are used:
+
+```ts
+interface IRemoteConfig {
+  apiBase: string;
+  getAuthToken?: () => string | undefined;
+}
+
+await defineElements({ apiBase: 'http://localhost:3000' });
+```
+
+`getAuthToken` is a function, so a host can hand over a token that changes after login without
+redefining anything.
 
 ### Theme tokens
 
