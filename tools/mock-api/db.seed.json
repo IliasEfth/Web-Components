@@ -1,0 +1,9 @@
+{
+  "orders": [
+    { "id": "A-1001", "customer": "Nikos Papadopoulos", "total": 129.9, "status": "open", "createdAt": "2026-10-12" },
+    { "id": "A-1002", "customer": "Maria Konstantinou", "total": 54.0, "status": "shipped", "createdAt": "2026-10-13" },
+    { "id": "A-1003", "customer": "Giorgos Ioannou", "total": 310.5, "status": "open", "createdAt": "2026-10-15" },
+    { "id": "A-1004", "customer": "Eleni Dimitriou", "total": 18.75, "status": "open", "createdAt": "2026-10-17" },
+    { "id": "A-1005", "customer": "Kostas Georgiou", "total": 76.2, "status": "shipped", "createdAt": "2026-10-18" }
+  ]
+}

@@ -1,0 +1,16 @@
+name: shop-backoffice
+
+services:
+  mock-api:
+    build: tools/mock-api
+    ports:
+      - '3000:3000'
+    develop:
+      watch:
+        - action: sync+restart
+          path: tools/mock-api/src
+          target: /app/src
+        - action: rebuild
+          path: tools/mock-api/package.json
+        - action: rebuild
+          path: tools/mock-api/db.seed.json
