@@ -103,7 +103,8 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | 3 | `feature/orders` | `apps/microfrontends/orders` (latest Angular) | dev page lists orders, row click fills the detail, "Mark as shipped" updates the list; `remoteEntry.json` exposes `./elements`; no `zone.js` |
 | 4 | `feature/insights` | `apps/microfrontends/insights` | `/components` and `/web-components` work; `remoteEntry.js` exposes `./elements` and works from another origin |
 | 5 | `feature/backoffice-react` | `apps/backoffices/backoffice-react` | dashboard, `/orders` master-detail, deep link, theme switch, error card |
-| 6 | `feature/notes-and-backoffice-vue` | `apps/microfrontends/notes`, `apps/backoffices/backoffice-vue` | Notes' `remoteEntry.js` exposes `./elements`; Vue shell shows Angular + React + Vue |
+| 6 | `feature/notes-and-backoffice-vue` | `apps/microfrontends/notes`, the notes API, the `microfrontends` / `backoffices` folders | Notes' `remoteEntry.js` exposes `./elements` and works from another origin |
+| 6b | `feature/backoffice-vue` | `apps/backoffices/backoffice-vue` | Vue shell shows Angular + React + Vue on `/orders`; only the failed remote shows an error card |
 | 7 | `feature/backoffice-angular16` | `apps/backoffices/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
 | 8 | `feature/orders-package-and-vanilla` | act 3: `packages/orders-elements`, `apps/backoffices/backoffice-vanilla`, package option in `backoffice-react` | demo act 3 passes; only `localhost:4600` scripts; no CSP errors |
 | 9 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
