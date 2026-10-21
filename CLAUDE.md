@@ -50,7 +50,8 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    can tell an interface from a class (`OrdersService`, `OrdersClient`) at a glance. Type aliases
    (`OrderStatus`) and classes keep plain names.
 9. **Latest stable versions**, except `apps/backoffices/backoffice-angular16`, the shell, which stays on
-   Angular 16 with Zone.js, `*ngIf`, `@Input()` and `standalone: true` on purpose. The Angular
+   Angular 16 with Zone.js, `*ngIf`, `@Input()` and NgModules (`AppModule`, `AppRoutingModule`, no standalone components)
+   on purpose, the way most Angular developers know it. The Angular
    web components it hosts come from `apps/microfrontends/orders`, on the latest Angular.
 10. When a guide's code does not work with the installed version, fix it minimally and update
     the guide in the same change.
