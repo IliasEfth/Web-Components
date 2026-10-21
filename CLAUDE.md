@@ -1,8 +1,16 @@
 # CLAUDE.md
 
-This repository is a conference demo: one online shop back office built from React, Vue,
-Angular 16, a current Angular and plain JavaScript, all exchanging data on one page through
-custom elements. The audience reads the code on screen, so the code must be clean and obvious.
+This repository is a conference demo: one online shop back office, told in three acts.
+The audience reads the code on screen, so the code must be clean and obvious.
+
+1. **Pure Web Components:** `examples/web-components-basics`, the native API with no framework.
+2. **Frameworks calling each other:** the latest Angular (`apps/orders`), React (`apps/insights`)
+   and Vue (`apps/notes`) export custom elements; the React, Vue and Angular 16 shells use them
+   all on one page. The Angular 16 shell hosts web components built with the latest Angular.
+3. **A package instead of a server:** the Orders components are exported as
+   `@shop/orders-elements` and installed into `apps/backoffice-vanilla`, a page with no framework.
+
+Every README, guide and demo step should make clear which act it belongs to.
 
 - [docs/architecture.md](docs/architecture.md): the apps, the rules, the contracts.
 - [docs/showcase.md](docs/showcase.md): the live demo script.
@@ -32,13 +40,14 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    `ng new`), on the host and in containers. Give the exact command and folder, then wait.
    Docker image builds that run `npm ci` from a reviewed `package-lock.json` are fine.
 7. **Strict TypeScript** (`"strict": true`) in every TypeScript project. Plain JavaScript only
-   where the point is "no build": `examples/`, `packages/ui`, `apps/backoffice-vanilla`.
+   where the point is "no build": `examples/`, `apps/backoffice-vanilla`.
 8. **ESLint** in every project (`npm run lint`), with each framework's recommended flat config.
    **No Prettier.** Formatting is VS Code's built-in formatters, set in the committed
    `.vscode/settings.json` (format on save, single quotes, semicolons), plus `.editorconfig`.
    Write code in that style: 2-space indent, single quotes, semicolons, lines under ~100 chars.
-9. **Latest stable versions**, except `apps/backoffice-angular16`, which stays on Angular 16
-   with Zone.js, `*ngIf`, `@Input()` and `standalone: true` on purpose.
+9. **Latest stable versions**, except `apps/backoffice-angular16`, the shell, which stays on
+   Angular 16 with Zone.js, `*ngIf`, `@Input()` and `standalone: true` on purpose. The Angular
+   web components it hosts come from `apps/orders`, on the latest Angular.
 10. When a guide's code does not work with the installed version, fix it minimally and update
     the guide in the same change.
 11. **Everything runs through Docker.** Each app has its own `Dockerfile` and a service in the
@@ -48,19 +57,18 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
 
 ## Layout and ports
 
-| Folder | What | Port | Compose service |
-| --- | --- | --- | --- |
-| `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | 3000 | `mock-api` |
-| `examples/web-components-basics` | Native Web Components warm-up | 4100 | `web-components-basics` |
-| `packages/ui` | `@shop/ui` design system (`ui-*`) | 4300 | `ui` |
-| `apps/orders` | Angular remote (`shop-orders-list`, `shop-order-detail`) | 4201 | `orders` |
-| `apps/insights` | React remote (`shop-order-stats`, `shop-activity-feed`) | 4202 | `insights` |
-| `apps/notes` | Vue remote (`shop-status-filter`, `shop-order-notes`) | 4402 | `notes` |
-| `packages/orders-elements` | `@shop/orders-elements`, built from `apps/orders` | none | built inside the `backoffice-vanilla` image |
-| `apps/backoffice-react` | React host | 4200 | `backoffice-react` |
-| `apps/backoffice-vue` | Vue host | 4400 | `backoffice-vue` |
-| `apps/backoffice-angular16` | Angular 16 host (`node:18` image) | 4500 | `backoffice-angular16` |
-| `apps/backoffice-vanilla` | Plain JavaScript host with a strict CSP | 4600 | `backoffice-vanilla` |
+| Act | Folder | What | Port | Compose service |
+| --- | --- | --- | --- | --- |
+| 1 | `examples/web-components-basics` | Three native Web Components | 4100 | `web-components-basics` |
+| 2 | `apps/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | 4201 | `orders` |
+| 2 | `apps/insights` | React, exports `shop-order-stats`, `shop-activity-feed` | 4202 | `insights` |
+| 2 | `apps/notes` | Vue, exports `shop-status-filter`, `shop-order-notes` | 4402 | `notes` |
+| 2 | `apps/backoffice-react` | React shell | 4200 | `backoffice-react` |
+| 2 | `apps/backoffice-vue` | Vue shell | 4400 | `backoffice-vue` |
+| 2 | `apps/backoffice-angular16` | Angular 16 shell (`node:18` image) | 4500 | `backoffice-angular16` |
+| 3 | `packages/orders-elements` | `@shop/orders-elements`, built from `apps/orders` | none | built inside the `backoffice-vanilla` image |
+| 3 | `apps/backoffice-vanilla` | Plain JavaScript page that installs the package, strict CSP | 4600 | `backoffice-vanilla` |
+| all | `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | 3000 | `mock-api` |
 
 ```bash
 docker compose up --build --watch        # everything, edits sync into the containers
@@ -69,7 +77,9 @@ docker compose down                      # stop everything
 docker compose up -d --force-recreate mock-api   # back to the seed data
 ```
 
-Inside every image the app starts with `npm start`. Dev servers must listen on `0.0.0.0`.
+Plain JavaScript projects (`examples/`) are served by `nginx:stable-alpine` with no
+npm at runtime; Node projects start with `npm start` inside their image. Dev servers must listen
+on `0.0.0.0`.
 Use Compose Watch (`develop.watch`), not bind mounts, so edits on Windows reach the container.
 
 ## Stages
@@ -80,13 +90,13 @@ every app arrives with its `Dockerfile` and its `docker-compose.yml` service.
 | # | Branch | Adds | Done when |
 | --- | --- | --- | --- |
 | 1 | `feature/foundation` | README, CLAUDE.md, architecture and demo docs, VS Code settings, `tools/mock-api`, `docker-compose.yml` | container is healthy; `/orders` returns 5, `?status=open` returns 3, PATCH works, recreating the container restores the seed |
-| 2 | `feature/ui-kit` | `packages/ui`, `examples/web-components-basics` | both demo pages work; `ui.js` loads from 4300 |
-| 3 | `feature/orders` | `apps/orders` | harness lists orders, row click fills the detail, "Mark as shipped" updates the list; `remoteEntry.json` exposes `./elements`; no `zone.js` |
-| 4 | `feature/insights` | `apps/insights` | `insights-elements.js` loads; tiles and feed work in the harness |
+| 2 | `feature/web-components-basics` | act 1: `examples/web-components-basics` | the page works; typed HTML shows as text |
+| 3 | `feature/orders` | `apps/orders` (latest Angular) | dev page lists orders, row click fills the detail, "Mark as shipped" updates the list; `remoteEntry.json` exposes `./elements`; no `zone.js` |
+| 4 | `feature/insights` | `apps/insights` | `insights-elements.js` loads; tiles and feed work on its dev page |
 | 5 | `feature/backoffice-react` | `apps/backoffice-react` | dashboard, `/orders` master-detail, deep link, theme switch, error card |
-| 6 | `feature/notes-and-backoffice-vue` | `apps/notes`, `apps/backoffice-vue` | `notes-elements.js` loads; Vue host shows Angular + React + Vue |
-| 7 | `feature/backoffice-angular16` | `apps/backoffice-angular16` | demo steps 3, 4 and 6 pass; two `ng-version` values on one page |
-| 8 | `feature/orders-package-and-vanilla` | `packages/orders-elements`, `apps/backoffice-vanilla`, package option in `backoffice-react` | demo step 7 passes; only `localhost:4600` scripts; no CSP errors |
+| 6 | `feature/notes-and-backoffice-vue` | `apps/notes`, `apps/backoffice-vue` | `notes-elements.js` loads; Vue shell shows Angular + React + Vue |
+| 7 | `feature/backoffice-angular16` | `apps/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
+| 8 | `feature/orders-package-and-vanilla` | act 3: `packages/orders-elements`, `apps/backoffice-vanilla`, package option in `backoffice-react` | demo act 3 passes; only `localhost:4600` scripts; no CSP errors |
 | 9 | `feature/demo-images` | `docker-compose.demo.yml`: production builds served by nginx | the whole demo script passes against the built images |
 | 10 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
 
@@ -95,12 +105,14 @@ every app arrives with its `Dockerfile` and its `docker-compose.yml` service.
 | Symptom | Fix |
 | --- | --- |
 | CORS error loading `remoteEntry.json` | Add `Access-Control-Allow-Origin: *` to the `serve` options of `apps/orders` |
-| `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `ui-` and `shop-` tags in the Vite Vue plugin |
+| `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `shop-` tags in the Vite Vue plugin |
 | React remote: `process is not defined` | Keep the `define` block for `process.env.NODE_ENV` in the library build |
 | Angular 16: "Module not found" for a URL import | Write `import(/* webpackIgnore: true */ url)`; this is the one allowed comment, webpack needs it |
 | Angular 16 CLI refuses to run | Its image must be `node:18`; run its `npm`/`ng` commands in that container, not on the host |
 | Page does not load on `localhost:<port>` | The dev server listens on `127.0.0.1` inside the container: start it with `--host 0.0.0.0` |
 | Edits do not reach the container | Start with `--watch`, and check the service's `develop.watch` paths |
+| `docker compose watch` says "cannot take exclusive lock" | Another `watch` for this project is still running; stop it first |
+| nginx container is "unhealthy" but the page loads | Alpine resolves `localhost` to `::1`: nginx needs `listen [::]:80;` as well as `listen 80;` |
 | `esbuild` or `rollup` binary errors in a container | Host `node_modules` leaked in: keep `node_modules` in every `.dockerignore` |
 | An event never arrives | Event names are case-sensitive, and the listener must be on the element itself |
 | The activity feed does not update | Assign a new array to `entries`; never mutate it |

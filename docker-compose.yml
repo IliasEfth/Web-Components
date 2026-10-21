@@ -14,3 +14,22 @@ services:
           path: tools/mock-api/package.json
         - action: rebuild
           path: tools/mock-api/db.seed.json
+
+  web-components-basics:
+    build: examples/web-components-basics
+    ports:
+      - '4100:80'
+    develop:
+      watch:
+        - action: sync
+          path: examples/web-components-basics
+          target: /usr/share/nginx/html
+          ignore:
+            - node_modules/
+            - Dockerfile
+            - nginx.conf
+            - eslint.config.js
+            - package.json
+            - package-lock.json
+        - action: rebuild
+          path: examples/web-components-basics/nginx.conf
