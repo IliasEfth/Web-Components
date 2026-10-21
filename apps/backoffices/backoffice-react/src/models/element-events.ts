@@ -16,3 +16,12 @@ export interface IOrderClosedDetail {
 export interface IStatusPickedDetail {
   status: OrderStatusFilter;
 }
+
+export interface IStatusChangeDetail {
+  status: OrderStatusFilter;
+}
+
+export interface INoteAddedDetail {
+  orderId: string;
+  text: string;
+}

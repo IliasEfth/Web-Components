@@ -10,8 +10,10 @@ are loaded at runtime, the first time `/orders` opens. Its colour is green (`#16
 | `http://localhost:4400/dashboard` | Plain Vue with no remote: counts, revenue, and links to the open orders |
 | `http://localhost:4400/orders` | All six elements, wired together by the shell |
 | `http://localhost:4400/orders/A-1003` | The same page opened with an order (a deep link) |
+| `http://localhost:4400/settings` | The theme switch |
 
-It is built like [backoffice-react](backoffice-react.md), so this guide shows what is different.
+It has the same pages and layout as [backoffice-react](backoffice-react.md), so this guide shows
+what is different.
 
 ## The project
 
@@ -27,7 +29,8 @@ src/
     remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
   models/                    the contract shapes, including the Notes events
   clients/orders-client.ts   the dashboard's own fetch
-  pages/                     DashboardPage.vue, OrdersPage.vue
+  pages/                     DashboardPage.vue, OrdersPage.vue, SettingsPage.vue
+  theme/themes.ts            the three themes and the injection key
   shared/use-activity-log.ts
   App.vue  router.ts  main.ts  styles.css
 ```
@@ -90,6 +93,12 @@ shows "Orders is unavailable"; the Vue filter, the notes and the React statistic
 and Retry recovers after `docker compose start orders`. As in the React shell, a Module
 Federation remote that was down recovers on a page reload.
 
+## Theme
+
+`App.vue` keeps the theme in a `ref`, writes `--shop-color-primary` on `:root` with
+`watchEffect`, and `provide`s the ref. `SettingsPage.vue` `inject`s it and changes it. Custom
+properties cross shadow roots, so every component recolours with the shell.
+
 ## Run it
 
 ```bash
@@ -106,5 +115,5 @@ The API and all three remotes start with it.
 - The Vue filter changes the Angular list; a React tile changes the Vue filter and the list.
 - A row click changes the URL; the detail and the notes follow.
 - A Vue note appears in the React feed; "Mark as shipped" changes the React counts.
-- Everything is green, inside every shadow root too.
+- Everything is green, inside every shadow root too; in Settings, Orange recolours every component.
 - `docker compose stop orders`: only the Orders card fails; Retry recovers it.

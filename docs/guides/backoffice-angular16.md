@@ -10,6 +10,10 @@ Its colour is red (`#dc2626`).
 | `http://localhost:4500/dashboard` | Plain Angular 16 with no remote: counts, revenue, and links to the open orders |
 | `http://localhost:4500/orders` | All six elements, wired together by the shell |
 | `http://localhost:4500/orders/A-1003` | The same page opened with an order (a deep link) |
+| `http://localhost:4500/settings` | The theme switch |
+
+It has the same pages and layout as [backoffice-react](backoffice-react.md) and
+[backoffice-vue](backoffice-vue.md).
 
 It was created with the Angular 16 CLI (`ng new --standalone=false`), so it has the classic
 `AppModule` and `AppRoutingModule`.
@@ -27,6 +31,8 @@ src/app/
     remote-elements.service.ts   loads the three remotes, once each
     orders-client.service.ts     HttpClient for the dashboard
   dashboard/                  DashboardPageComponent (async pipe, *ngIf, *ngFor)
+  settings/                   SettingsPageComponent, uses ThemeService
+  services/theme.service.ts   the three themes; apply() sets --shop-color-primary
   orders/
     orders.module.ts          declares the page and the gate, CUSTOM_ELEMENTS_SCHEMA
     orders-routing.module.ts  one route for /orders and /orders/:orderId
@@ -106,6 +112,12 @@ the same page and its activity feed. The order id comes from `route.paramMap` th
 Zone.js triggers change detection for every event and every resolved load, as in any Angular 16
 app; the Angular 22 elements run zoneless inside the same page.
 
+## Theme
+
+`ThemeService` is a root service, so the chosen theme survives navigation. Settings calls
+`theme.apply(name)`, which writes `--shop-color-primary` on `:root` through the injected
+`DOCUMENT`. Custom properties cross shadow roots, so every component recolours with the shell.
+
 ## Two Angular versions on one page
 
 ```js
@@ -128,4 +140,4 @@ The image uses Node 18, which Angular 16 needs. The API and all three remotes st
   "Mark as shipped" changes the React counts.
 - Demo act 2.2: two different `ng-version` values on one page.
 - Demo act 2.4: `docker compose stop orders` leaves only the Orders card failing; Retry recovers it.
-- Everything is red, inside every shadow root too.
+- Everything is red, inside every shadow root too; in Settings, Orange recolours every component.
