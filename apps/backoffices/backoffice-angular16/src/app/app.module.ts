@@ -6,9 +6,10 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DashboardPageComponent } from './dashboard/dashboard-page.component';
 import { REMOTE_CONFIG } from './models/remote-config';
+import { SettingsPageComponent } from './settings/settings-page.component';
 
 @NgModule({
-  declarations: [AppComponent, DashboardPageComponent],
+  declarations: [AppComponent, DashboardPageComponent, SettingsPageComponent],
   imports: [BrowserModule, HttpClientModule, AppRoutingModule],
   providers: [{ provide: REMOTE_CONFIG, useValue: { apiBase: 'http://localhost:3000' } }],
   bootstrap: [AppComponent],

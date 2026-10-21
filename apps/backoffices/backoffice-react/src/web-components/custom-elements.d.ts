@@ -1,9 +1,11 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react';
 import type { IActivityEntry } from '../models/activity-entry';
 import type {
+  INoteAddedDetail,
   IOrderClosedDetail,
   IOrderSelectedDetail,
   IOrderUpdatedDetail,
+  IStatusChangeDetail,
   IStatusPickedDetail,
 } from '../models/element-events';
 import type { OrderStatusFilter } from '../models/order';
@@ -31,6 +33,14 @@ declare module 'react' {
       'shop-activity-feed': CustomElementProps<{
         entries?: IActivityEntry[];
         oncleared?: (event: CustomEvent<object>) => void;
+      }>;
+      'shop-status-filter': CustomElementProps<{
+        value?: OrderStatusFilter;
+        onstatusChange?: (event: CustomEvent<IStatusChangeDetail>) => void;
+      }>;
+      'shop-order-notes': CustomElementProps<{
+        'order-id'?: string;
+        onnoteAdded?: (event: CustomEvent<INoteAddedDetail>) => void;
       }>;
     }
   }

@@ -51,7 +51,7 @@ document.querySelector('shop-orders-list').getAttribute('ng-version'); // the cu
 
 - The same Angular, React and Vue components, unchanged, with no rebuild.
 - Each host paints everything in its own colour: Vue green, React blue, Angular red.
-  In `backoffice-react`, change the theme in Settings and watch the Angular list recolour.
+  In any back office, change the theme in Settings and watch every component recolour.
 
 **Message:** the host decides the theme and the layout; the components don't care who hosts them.
 

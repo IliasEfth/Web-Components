@@ -116,6 +116,8 @@ services:
         condition: service_healthy
       insights:
         condition: service_healthy
+      notes:
+        condition: service_healthy
     develop:
       watch:
         - action: sync

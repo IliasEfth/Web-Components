@@ -1,0 +1,18 @@
+<section class="card">
+  <h2>Theme</h2>
+  <p class="intro">
+    Sets <code>--shop-color-primary</code> on <code>:root</code>. The custom property crosses
+    every shadow root, so the Angular, React and Vue components recolour too.
+  </p>
+  <div class="toolbar">
+    <button
+      *ngFor="let name of theme.names"
+      type="button"
+      class="button"
+      [attr.aria-pressed]="name === theme.current"
+      (click)="theme.apply(name)"
+    >
+      {{ name }}
+    </button>
+  </div>
+</section>

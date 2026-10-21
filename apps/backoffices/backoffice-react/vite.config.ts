@@ -14,6 +14,11 @@ export default defineConfig({
           name: 'insights',
           entry: remoteEntries.insights,
         },
+        notes: {
+          type: 'module',
+          name: 'notes',
+          entry: remoteEntries.notes,
+        },
       },
       shared: ['react', 'react-dom'],
       shareStrategy: 'loaded-first',

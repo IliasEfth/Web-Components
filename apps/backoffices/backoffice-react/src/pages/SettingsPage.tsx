@@ -9,7 +9,7 @@ export function SettingsPage() {
       <h2>Theme</h2>
       <p className="intro">
         Sets <code>--shop-color-primary</code> on <code>:root</code>. The custom property crosses
-        every shadow root, so the Angular and React components recolour too.
+        every shadow root, so the Angular, React and Vue components recolour too.
       </p>
       <div className="toolbar">
         {themeNames.map((name) => (

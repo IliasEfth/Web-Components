@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { StatusFilter } from '../components/StatusFilter';
 import type { OrderStatusFilter } from '../models/order';
 import { loadInsightsElements } from '../remotes/insights-remote';
+import { loadNotesElements } from '../remotes/notes-remote';
 import { loadOrdersElements } from '../remotes/orders-remote';
 import { RemoteGate } from '../remotes/RemoteGate';
 import { useActivityLog } from '../shared/useActivityLog';
@@ -14,19 +14,23 @@ export function OrdersPage() {
   const [refreshCount, setRefreshCount] = useState(0);
   const { entries, log, clear } = useActivityLog();
 
-  const changeStatus = (next: OrderStatusFilter, source: string) => {
-    setStatus(next);
-    log(`${source}: status ${next}`);
-  };
-
   return (
     <>
       <p className="intro">
-        React owns the URL, the filter and the layout. The list and the detail are Angular, the
-        statistics and the feed are React from another server. They meet only in this page.
+        React owns the URL and the layout. The filter and the notes are Vue, the list and the
+        detail are Angular, the statistics and the feed are React. They meet only in this page.
       </p>
 
-      <StatusFilter value={status} onChange={(next) => changeStatus(next, 'React filter')} />
+      <RemoteGate name="Notes" load={loadNotesElements}>
+        <shop-status-filter
+          className="filter"
+          value={status}
+          onstatusChange={(event) => {
+            setStatus(event.detail.status);
+            log(`statusChange { status: ${event.detail.status} }`);
+          }}
+        />
+      </RemoteGate>
 
       <div className="layout">
         <RemoteGate name="Orders" load={loadOrdersElements}>
@@ -53,15 +57,28 @@ export function OrdersPage() {
           </div>
         </RemoteGate>
 
-        <RemoteGate name="Insights" load={loadInsightsElements}>
-          <div className="stack">
+        <div className="stack">
+          <RemoteGate name="Insights" load={loadInsightsElements}>
             <shop-order-stats
               refresh-key={String(refreshCount)}
-              onstatusPicked={(event) => changeStatus(event.detail.status, 'statusPicked')}
+              onstatusPicked={(event) => {
+                setStatus(event.detail.status);
+                log(`statusPicked { status: ${event.detail.status} }`);
+              }}
             />
+          </RemoteGate>
+          <RemoteGate name="Notes" load={loadNotesElements}>
+            <shop-order-notes
+              order-id={orderId}
+              onnoteAdded={(event) =>
+                log(`noteAdded { orderId: ${event.detail.orderId}, text: ${event.detail.text} }`)
+              }
+            />
+          </RemoteGate>
+          <RemoteGate name="Insights" load={loadInsightsElements}>
             <shop-activity-feed entries={entries} oncleared={clear} />
-          </div>
-        </RemoteGate>
+          </RemoteGate>
+        </div>
       </div>
     </>
   );

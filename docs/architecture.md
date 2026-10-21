@@ -98,9 +98,11 @@ Each host sets these on `:root`; every component reads them, with a fallback of 
 | Host | Primary colour |
 | --- | --- |
 | each remote's own dev page | teal `#0d9488` |
-| `backoffice-react` | blue `#2563eb` (switchable in Settings) |
+| `backoffice-react` | blue `#2563eb` |
 | `backoffice-vue` | green `#16a34a` |
 | `backoffice-angular16` | red `#dc2626` |
+
+Every back office has a Settings page that switches between its own colour, Dark and Orange.
 
 ## The data
 
