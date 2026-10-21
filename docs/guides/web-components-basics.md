@@ -31,10 +31,9 @@ docker compose up --build --watch web-components-basics
 
 Open `http://localhost:4100` and follow act 1 of [the demo script](../showcase.md).
 
-## Done when
+## What to try
 
 - Typing a name updates the card.
 - Clicking "Likes" updates the line below it with the new count.
 - "Add Milk from the page" adds an item to the list.
 - Typing `<img src=x onerror=alert(1)>` as the name shows it as text.
-- `npm run lint` passes.

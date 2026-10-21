@@ -33,7 +33,7 @@ src/
 ```
 
 The same packages as the React shell, in their Vue versions: `vue-router`,
-`@softarc/native-federation-orchestrator`, `@module-federation/vite` and `oxlint`.
+`@softarc/native-federation-orchestrator` and `@module-federation/vite`.
 
 ## Three remotes, two runtimes
 
@@ -96,15 +96,15 @@ Federation remote that was down recovers on a page reload.
 docker compose up --build --watch backoffice-vue    # http://localhost:4400
 ```
 
-The service waits for the API and all three remotes to be healthy.
+The API and all three remotes start with it.
 
-## Done when
+## What to try
 
-- `/dashboard` shows the counts and the open orders, with no request to 4201, 4202 or 4402.
+- `/dashboard` shows the counts and the open orders; the Network tab shows no request to 4201,
+  4202 or 4402.
 - An order link opens `/orders/<id>` with that order in the Angular detail and the Vue notes.
 - The Vue filter changes the Angular list; a React tile changes the Vue filter and the list.
 - A row click changes the URL; the detail and the notes follow.
 - A Vue note appears in the React feed; "Mark as shipped" changes the React counts.
 - Everything is green, inside every shadow root too.
 - `docker compose stop orders`: only the Orders card fails; Retry recovers it.
-- `npm run build` and `npm run lint` pass.

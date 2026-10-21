@@ -1,16 +1,20 @@
 # CLAUDE.md
 
-This repository is a conference demo: one online shop back office, told in three acts.
+This repository is a conference demo: one online shop back office, told in two acts.
 The audience reads the code on screen, so the code must be clean and obvious.
 
 1. **Pure Web Components:** `examples/web-components-basics`, the native API with no framework.
-2. **Frameworks calling each other:** the latest Angular (`apps/microfrontends/orders`), React (`apps/microfrontends/insights`)
-   and Vue (`apps/microfrontends/notes`) export custom elements; the React, Vue and Angular 16 shells use them
-   all on one page. The Angular 16 shell hosts web components built with the latest Angular.
-3. **A package instead of a server:** the Orders components are exported as
-   `@shop/orders-elements` and installed into `apps/backoffices/backoffice-vanilla`, a page with no framework.
+2. **Micro-frontends calling each other:** the latest Angular (`apps/microfrontends/orders`),
+   React (`apps/microfrontends/insights`) and Vue (`apps/microfrontends/notes`) export custom
+   elements, each from its own live server; the React, Vue and Angular 16 shells load them at
+   runtime through federation and use them all on one page. The Angular 16 shell hosts web
+   components built with the latest Angular.
 
+There is no package or "installed instead of loaded" variant: remotes are always live services.
 Every README, guide and demo step should make clear which act it belongs to.
+
+README and `docs/` are for someone who downloads the repo: what each app is, how to run it, how
+it works. Build warnings, workarounds and package debates go in the pitfalls below, not there.
 
 - [docs/architecture.md](docs/architecture.md): the apps, the rules, the contracts.
 - [docs/showcase.md](docs/showcase.md): the live demo script.
@@ -40,7 +44,7 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    `ng new`), on the host and in containers. Give the exact command and folder, then wait.
    Docker image builds that run `npm ci` from a reviewed `package-lock.json` are fine.
 7. **Strict TypeScript** (`"strict": true`) in every TypeScript project. Plain JavaScript only
-   where the point is "no build": `examples/`, `apps/backoffices/backoffice-vanilla`.
+   where the point is "no build": `examples/`.
 8. **Each framework's default linter** behind `npm run lint`: ESLint with angular-eslint for
    Angular and the plain projects, oxlint (what `npm create vite` generates) for React and Vue.
    **No Prettier.** Formatting is VS Code's built-in formatters, set in the committed
@@ -76,8 +80,6 @@ in `apps/backoffices/`. A reader should see from the path which side an app is o
 | 2 | `apps/backoffices/backoffice-react` | React shell | 4200 | `backoffice-react` |
 | 2 | `apps/backoffices/backoffice-vue` | Vue shell | 4400 | `backoffice-vue` |
 | 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | 4500 | `backoffice-angular16` |
-| 3 | `packages/orders-elements` | `@shop/orders-elements`, built from `apps/microfrontends/orders` | none | built inside the `backoffice-vanilla` image |
-| 3 | `apps/backoffices/backoffice-vanilla` | Plain JavaScript page that installs the package, strict CSP | 4600 | `backoffice-vanilla` |
 | all | `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | 3000 | `mock-api` |
 
 ```bash
@@ -107,8 +109,7 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | 6 | `feature/notes-and-backoffice-vue` | `apps/microfrontends/notes`, the notes API, the `microfrontends` / `backoffices` folders | Notes' `remoteEntry.js` exposes `./elements` and works from another origin |
 | 6b | `feature/backoffice-vue` | `apps/backoffices/backoffice-vue` | Vue shell shows Angular + React + Vue on `/orders`; only the failed remote shows an error card |
 | 7 | `feature/backoffice-angular16` | `apps/backoffices/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
-| 8 | `feature/orders-package-and-vanilla` | act 3: `packages/orders-elements`, `apps/backoffices/backoffice-vanilla`, package option in `backoffice-react` | demo act 3 passes; only `localhost:4600` scripts; no CSP errors |
-| 9 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
+| 8 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
 
 ## Known pitfalls
 
@@ -141,4 +142,3 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | Federation: `Could not resolve "@angular/animations/browser"` | `keepAll` shares every Angular entry point; add `@angular/platform-browser/animations` and `.../animations/async` to `skip` |
 | `ng add` for federation adds `es-module-shims` and the orchestrator to `package.json` | Both are already dependencies of `@angular-architects/native-federation`; keep only that one. Use native import maps: `shimMode: false` in `initFederation` and `esmsInitOptions` |
 | Native Federation `ng add` fails | On Angular 20 or 21 the package is `@angular-architects/native-federation-v4`; on 22+ it is `@angular-architects/native-federation` |
-| `npm ci` fails with `EINTEGRITY` in `backoffice-vanilla` | The package was rebuilt without a new version: bump it in `packages/orders-elements/package.json`, repack, reinstall |

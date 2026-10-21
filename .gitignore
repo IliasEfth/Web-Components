@@ -8,12 +8,6 @@ build/
 out/
 *.tsbuildinfo
 
-# Package build output (rebuilt by `npm run pack:package` and `npm run vendor`)
-*.tgz
-packages/orders-elements/orders-elements.js
-packages/orders-elements/3rdpartylicenses.txt
-apps/backoffices/backoffice-vanilla/vendor/
-
 # Framework caches
 .angular/
 .vite/
