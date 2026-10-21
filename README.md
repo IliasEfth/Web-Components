@@ -76,7 +76,7 @@ flowchart LR
       vue[backoffice-vue]
       ng16[backoffice-angular16]
     end
-    remotes -- "import() at runtime" --> shells
+    remotes -- "loaded at runtime (Native / Module Federation)" --> shells
   end
 
   subgraph act3[Act 3: a package instead of a server]
@@ -164,6 +164,6 @@ The apps are being added one at a time, each through its own pull request.
 | --- | --- |
 | Contract | Custom elements: attributes, properties, `CustomEvent`s |
 | Styling | Shadow DOM and `--shop-*` CSS custom properties set by each shell |
-| Loading | Native Federation (Angular), ESM `import()` (React, Vue), or an installed package |
+| Loading | Native Federation (Angular), Module Federation (React, Vue), or an installed package |
 | Safety | `textContent` everywhere, one error boundary per remote, strict CSP with packaged components |
 | Code style | Strict TypeScript, ESLint, VS Code's built-in formatters |

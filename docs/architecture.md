@@ -16,8 +16,8 @@ One online shop back office, told in three acts:
 | --- | --- | --- | --- | --- | --- |
 | 1 | `examples/web-components-basics` | Three native components | none | 4100 | static files |
 | 2 | `apps/orders` | Remote: order list and order detail | current Angular, zoneless | 4201 | `remoteEntry.json` (Native Federation) |
-| 2 | `apps/insights` | Remote: order statistics and activity feed | React 19 | 4202 | `insights-elements.js` |
-| 2 | `apps/notes` | Remote: status filter and order notes | Vue 3.5 | 4402 | `notes-elements.js` |
+| 2 | `apps/insights` | Remote: order statistics and activity feed | React 19 | 4202 | `remoteEntry.js` (Module Federation) |
+| 2 | `apps/notes` | Remote: status filter and order notes | Vue 3.5 | 4402 | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/backoffice-react` | Host | React 19 + React Router | 4200 | the site |
 | 2 | `apps/backoffice-vue` | Host | Vue 3.5 + Vue Router | 4400 | the site |
 | 2 | `apps/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | 4500 | the site |
@@ -30,7 +30,7 @@ Act 1   examples/web-components-basics          user-card · counter-button · t
 
 Act 2   remotes                                   hosts
         apps/orders     Angular  :4201  ──┐
-          shop-orders-list                 ├──── import() at runtime ───►  backoffice-react      :4200
+          shop-orders-list                 ├──── federation runtime ───►  backoffice-react      :4200
           shop-order-detail                │                                backoffice-vue        :4400
         apps/insights   React    :4202  ──┤                                backoffice-angular16  :4500
           shop-order-stats                 │
@@ -132,7 +132,7 @@ file is missing, and saves every change there. The file lives inside the contain
 
 ## Act 2 or act 3: two ways to ship a remote
 
-| | Runtime remote (`import(url)`) | Installed package |
+| | Runtime remote (Native or Module Federation) | Installed package |
 | --- | --- | --- |
 | Used by | `backoffice-react`, `backoffice-vue`, `backoffice-angular16` | `backoffice-vanilla` |
 | A new release reaches users | at the next page load, with no host rebuild | after the host updates the package |

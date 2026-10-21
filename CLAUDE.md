@@ -41,7 +41,8 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    Docker image builds that run `npm ci` from a reviewed `package-lock.json` are fine.
 7. **Strict TypeScript** (`"strict": true`) in every TypeScript project. Plain JavaScript only
    where the point is "no build": `examples/`, `apps/backoffice-vanilla`.
-8. **ESLint** in every project (`npm run lint`), with each framework's recommended flat config.
+8. **Each framework's default linter** behind `npm run lint`: ESLint with angular-eslint for
+   Angular and the plain projects, oxlint (what `npm create vite` generates) for React and Vue.
    **No Prettier.** Formatting is VS Code's built-in formatters, set in the committed
    `.vscode/settings.json` (format on save, single quotes, semicolons), plus `.editorconfig`.
    Write code in that style: 2-space indent, single quotes, semicolons, lines under ~100 chars.
@@ -97,9 +98,9 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | 1 | `feature/foundation` | README, CLAUDE.md, architecture and demo docs, VS Code settings, `tools/mock-api`, `compose.yaml` | container is healthy; `/orders` returns 5, `?status=open` returns 3, PATCH works, recreating the container restores the seed |
 | 2 | `feature/web-components-basics` | act 1: `examples/web-components-basics` | the page works; typed HTML shows as text |
 | 3 | `feature/orders` | `apps/orders` (latest Angular) | dev page lists orders, row click fills the detail, "Mark as shipped" updates the list; `remoteEntry.json` exposes `./elements`; no `zone.js` |
-| 4 | `feature/insights` | `apps/insights` | `insights-elements.js` loads; tiles and feed work on its dev page |
+| 4 | `feature/insights` | `apps/insights` | `/components` and `/web-components` work; `remoteEntry.js` exposes `./elements` and works from another origin |
 | 5 | `feature/backoffice-react` | `apps/backoffice-react` | dashboard, `/orders` master-detail, deep link, theme switch, error card |
-| 6 | `feature/notes-and-backoffice-vue` | `apps/notes`, `apps/backoffice-vue` | `notes-elements.js` loads; Vue shell shows Angular + React + Vue |
+| 6 | `feature/notes-and-backoffice-vue` | `apps/notes`, `apps/backoffice-vue` | Notes' `remoteEntry.js` exposes `./elements`; Vue shell shows Angular + React + Vue |
 | 7 | `feature/backoffice-angular16` | `apps/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
 | 8 | `feature/orders-package-and-vanilla` | act 3: `packages/orders-elements`, `apps/backoffice-vanilla`, package option in `backoffice-react` | demo act 3 passes; only `localhost:4600` scripts; no CSP errors |
 | 9 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
@@ -110,7 +111,10 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | --- | --- |
 | CORS error loading `remoteEntry.json` | Add `Access-Control-Allow-Origin: *` to the `serve` options of `apps/orders` |
 | `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `shop-` tags in the Vite Vue plugin |
-| React remote: `process is not defined` | Keep the `define` block for `process.env.NODE_ENV` in the library build |
+| React remote in another page: `@vitejs/plugin-react can't detect preamble` | Exclude the exposed folder from Fast Refresh: `react({ exclude: [/\/node_modules\//, /\/src\/insights\//] })` |
+| Remote files load from the shell's port instead of the remote's | Set `server.origin` to the remote's own URL in `vite.config.ts` |
+| Two federation formats | Angular remotes: Native Federation (`remoteEntry.json`). React and Vue remotes: `@module-federation/vite` (`remoteEntry.js`). Shells load each with its own runtime |
+| Do not set `ENV NODE_ENV=development` in a Vite `Dockerfile.dev` | The React guide does not; Vite sets the mode itself |
 | Angular 16: "Module not found" for a URL import | Write `import(/* webpackIgnore: true */ url)`; this is the one allowed comment, webpack needs it |
 | Angular 16 CLI refuses to run | Its image must be `node:18`; run its `npm`/`ng` commands in that container, not on the host |
 | Page does not load on `localhost:<port>` | The dev server listens on `127.0.0.1` inside the container. Bind `0.0.0.0` in Docker only (a `docker` configuration or a `start:docker` script), never in the local `npm start` |
@@ -119,6 +123,7 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | nginx container is "unhealthy" but the page loads | Alpine resolves `localhost` to `::1`: nginx needs `listen [::]:80;` as well as `listen 80;` |
 | `esbuild` or `rollup` binary errors in a container | Host `node_modules` leaked in: keep `node_modules` in every `.dockerignore` |
 | An event never arrives | Event names are case-sensitive, and the listener must be on the element itself |
+| React 19: a custom element event never arrives | React keeps the name after `on` exactly as written: `onstatusPicked` listens to `statusPicked`; `onStatusPicked` would listen to `StatusPicked` |
 | The activity feed does not update | Assign a new array to `entries`; never mutate it |
 | `Unknown argument: host` from `ng serve` | The federation builder has no `host` option. Put `"host": "0.0.0.0"` in a `docker` configuration of the `serve-original` dev server, point the federation `serve` target's `docker` configuration at it, and run `npm run start:docker` in the image. Local `npm start` keeps `localhost` |
 | Federation: `Could not resolve "@angular/animations/browser"` | `keepAll` shares every Angular entry point; add `@angular/platform-browser/animations` and `.../animations/async` to `skip` |
