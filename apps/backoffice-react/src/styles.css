@@ -1,0 +1,160 @@
+:root {
+  --shop-color-primary: #2563eb;
+  --shop-color-on-primary: #ffffff;
+  --shop-radius: 8px;
+  --shop-surface: #ffffff;
+  --shop-border: #e5e7eb;
+}
+
+body {
+  max-width: 1120px;
+  margin: 32px auto;
+  padding: 0 16px;
+  font-family: system-ui, sans-serif;
+  color: #111827;
+  background: #f8fafc;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: var(--shop-color-primary);
+}
+
+.page-header p,
+.intro {
+  color: #6b7280;
+}
+
+.page-nav {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.page-nav a {
+  padding: 6px 12px;
+  border: 1px solid var(--shop-border);
+  border-radius: var(--shop-radius);
+  color: #374151;
+  text-decoration: none;
+}
+
+.page-nav a.active {
+  border-color: var(--shop-color-primary);
+  background: var(--shop-color-primary);
+  color: var(--shop-color-on-primary);
+}
+
+.card {
+  padding: 16px;
+  background: var(--shop-surface);
+  border: 1px solid var(--shop-border);
+  border-radius: var(--shop-radius);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.button {
+  padding: 6px 12px;
+  font: inherit;
+  text-transform: capitalize;
+  cursor: pointer;
+  color: var(--shop-color-primary);
+  background: var(--shop-surface);
+  border: 1px solid var(--shop-color-primary);
+  border-radius: var(--shop-radius);
+}
+
+.button[aria-pressed='true'],
+.remote-card .button {
+  color: var(--shop-color-on-primary);
+  background: var(--shop-color-primary);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tile {
+  display: grid;
+  gap: 4px;
+}
+
+.tile__label {
+  color: #6b7280;
+}
+
+.tile__value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--shop-color-primary);
+}
+
+.order-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-links li {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--shop-border);
+}
+
+.order-links a {
+  font-weight: 600;
+  color: var(--shop-color-primary);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+.remote-card {
+  color: #6b7280;
+}
+
+.remote-card--failed {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.remote-card--failed h2 {
+  color: #b91c1c;
+}
+
+.remote-card__error {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 720px) {
+  .layout,
+  .tiles {
+    grid-template-columns: 1fr;
+  }
+}

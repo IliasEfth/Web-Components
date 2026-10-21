@@ -148,12 +148,12 @@ The apps are being added one at a time, each through its own pull request.
 
 | Stage | Adds | Act | State |
 | --- | --- | --- | --- |
-| 1 | Docs, mock API, editor settings, Docker Compose | | pull request open |
-| 2 | `web-components-basics` | 1 | in review |
-| 3 | `orders` (latest Angular) | 2 | next |
-| 4 | `insights` (React) | 2 | planned |
-| 5 | `backoffice-react` | 2 | planned |
-| 6 | `notes` and `backoffice-vue` | 2 | planned |
+| 1 | Docs, mock API, editor settings, Docker Compose | | done |
+| 2 | `web-components-basics` | 1 | done |
+| 3 | `orders` (latest Angular) | 2 | done |
+| 4 | `insights` (React) | 2 | done |
+| 5 | `backoffice-react` | 2 | in review |
+| 6 | `notes` and `backoffice-vue` | 2 | next |
 | 7 | `backoffice-angular16` | 2 | planned |
 | 8 | `@shop/orders-elements` and `backoffice-vanilla` | 3 | planned |
 | 9 | Windows shortcuts | | planned |
