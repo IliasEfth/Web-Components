@@ -29,12 +29,12 @@ Three teams ship their features as custom elements, each with its own framework:
 
 | App | Framework | Exports |
 | --- | --- | --- |
-| [`apps/orders`](apps/orders) | latest Angular | `<shop-orders-list>`, `<shop-order-detail>` |
-| [`apps/insights`](apps/insights) | React | `<shop-order-stats>`, `<shop-activity-feed>` |
-| [`apps/notes`](apps/notes) | Vue | `<shop-status-filter>`, `<shop-order-notes>` |
+| [`apps/microfrontends/orders`](apps/microfrontends/orders) | latest Angular | `<shop-orders-list>`, `<shop-order-detail>` |
+| [`apps/microfrontends/insights`](apps/microfrontends/insights) | React | `<shop-order-stats>`, `<shop-activity-feed>` |
+| [`apps/microfrontends/notes`](apps/microfrontends/notes) | Vue | `<shop-status-filter>`, `<shop-order-notes>` |
 
-Three shells put all of them on one page: [`backoffice-react`](apps/backoffice-react),
-[`backoffice-vue`](apps/backoffice-vue) and [`backoffice-angular16`](apps/backoffice-angular16).
+Three shells put all of them on one page: [`backoffice-react`](apps/backoffices/backoffice-react),
+[`backoffice-vue`](apps/backoffices/backoffice-vue) and [`backoffice-angular16`](apps/backoffices/backoffice-angular16).
 The Angular 16 shell hosts components built with the latest Angular, so two Angular versions run
 side by side. No app imports another app's code. They use the same contract as act 1:
 
@@ -52,7 +52,7 @@ list.addEventListener('orderSelected', (event) => {
 ### Act 3: A package instead of a server
 
 The Angular components are exported as the npm package `@shop/orders-elements` and installed
-into [`apps/backoffice-vanilla`](apps/backoffice-vanilla), a page with no framework and a strict
+into [`apps/backoffices/backoffice-vanilla`](apps/backoffices/backoffice-vanilla), a page with no framework and a strict
 Content Security Policy. Nothing is loaded from the Orders server: the code was installed,
 reviewed and pinned by hash.
 
@@ -99,13 +99,15 @@ The full contract (tags, attributes, events, theme tokens) is in
 examples/
   web-components-basics/  act 1   plain JavaScript
 apps/
-  orders/                 act 2   latest Angular, exports custom elements
-  insights/               act 2   React 19, exports custom elements
-  notes/                  act 2   Vue 3.5, exports custom elements
-  backoffice-react/       act 2   React shell
-  backoffice-vue/         act 2   Vue shell
-  backoffice-angular16/   act 2   Angular 16 shell
-  backoffice-vanilla/     act 3   plain JavaScript, installs the package
+  microfrontends/           the apps that export custom elements
+    orders/                 act 2   latest Angular
+    insights/               act 2   React 19
+    notes/                  act 2   Vue 3.5
+  backoffices/              the shells that host them
+    backoffice-react/       act 2   React
+    backoffice-vue/         act 2   Vue
+    backoffice-angular16/   act 2   Angular 16
+    backoffice-vanilla/     act 3   plain JavaScript, installs the package
 packages/
   orders-elements/        act 3   @shop/orders-elements
 tools/
@@ -134,10 +136,10 @@ after a demo.
 | Act | Open | Project |
 | --- | --- | --- |
 | 1 | `http://localhost:4100` | `examples/web-components-basics` |
-| 2 | `http://localhost:4500/orders` | `apps/backoffice-angular16` |
-| 2 | `http://localhost:4400/orders` | `apps/backoffice-vue` |
-| 2 | `http://localhost:4200/orders` | `apps/backoffice-react` |
-| 3 | `http://localhost:4600` | `apps/backoffice-vanilla` |
+| 2 | `http://localhost:4500/orders` | `apps/backoffices/backoffice-angular16` |
+| 2 | `http://localhost:4400/orders` | `apps/backoffices/backoffice-vue` |
+| 2 | `http://localhost:4200/orders` | `apps/backoffices/backoffice-react` |
+| 3 | `http://localhost:4600` | `apps/backoffices/backoffice-vanilla` |
 | | `http://localhost:3000/orders` | `tools/mock-api` |
 
 The remotes run on 4201 (`orders`), 4202 (`insights`) and 4402 (`notes`).

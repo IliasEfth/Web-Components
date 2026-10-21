@@ -4,11 +4,11 @@ This repository is a conference demo: one online shop back office, told in three
 The audience reads the code on screen, so the code must be clean and obvious.
 
 1. **Pure Web Components:** `examples/web-components-basics`, the native API with no framework.
-2. **Frameworks calling each other:** the latest Angular (`apps/orders`), React (`apps/insights`)
-   and Vue (`apps/notes`) export custom elements; the React, Vue and Angular 16 shells use them
+2. **Frameworks calling each other:** the latest Angular (`apps/microfrontends/orders`), React (`apps/microfrontends/insights`)
+   and Vue (`apps/microfrontends/notes`) export custom elements; the React, Vue and Angular 16 shells use them
    all on one page. The Angular 16 shell hosts web components built with the latest Angular.
 3. **A package instead of a server:** the Orders components are exported as
-   `@shop/orders-elements` and installed into `apps/backoffice-vanilla`, a page with no framework.
+   `@shop/orders-elements` and installed into `apps/backoffices/backoffice-vanilla`, a page with no framework.
 
 Every README, guide and demo step should make clear which act it belongs to.
 
@@ -40,7 +40,7 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    `ng new`), on the host and in containers. Give the exact command and folder, then wait.
    Docker image builds that run `npm ci` from a reviewed `package-lock.json` are fine.
 7. **Strict TypeScript** (`"strict": true`) in every TypeScript project. Plain JavaScript only
-   where the point is "no build": `examples/`, `apps/backoffice-vanilla`.
+   where the point is "no build": `examples/`, `apps/backoffices/backoffice-vanilla`.
 8. **Each framework's default linter** behind `npm run lint`: ESLint with angular-eslint for
    Angular and the plain projects, oxlint (what `npm create vite` generates) for React and Vue.
    **No Prettier.** Formatting is VS Code's built-in formatters, set in the committed
@@ -49,9 +49,9 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    **Interfaces start with `I`** (`IOrder`, `IOrdersConfig`, `IOrderSelectedDetail`) so a reader
    can tell an interface from a class (`OrdersService`, `OrdersClient`) at a glance. Type aliases
    (`OrderStatus`) and classes keep plain names.
-9. **Latest stable versions**, except `apps/backoffice-angular16`, the shell, which stays on
+9. **Latest stable versions**, except `apps/backoffices/backoffice-angular16`, the shell, which stays on
    Angular 16 with Zone.js, `*ngIf`, `@Input()` and `standalone: true` on purpose. The Angular
-   web components it hosts come from `apps/orders`, on the latest Angular.
+   web components it hosts come from `apps/microfrontends/orders`, on the latest Angular.
 10. When a guide's code does not work with the installed version, fix it minimally and update
     the guide in the same change.
 11. **Everything runs through Docker**, following Docker's official guides
@@ -63,17 +63,20 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
 
 ## Layout and ports
 
+Apps that export custom elements live in `apps/microfrontends/`; the shells that host them live
+in `apps/backoffices/`. A reader should see from the path which side an app is on.
+
 | Act | Folder | What | Port | Compose service |
 | --- | --- | --- | --- | --- |
 | 1 | `examples/web-components-basics` | Three native Web Components | 4100 | `web-components-basics` |
-| 2 | `apps/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | 4201 | `orders` |
-| 2 | `apps/insights` | React, exports `shop-order-stats`, `shop-activity-feed` | 4202 | `insights` |
-| 2 | `apps/notes` | Vue, exports `shop-status-filter`, `shop-order-notes` | 4402 | `notes` |
-| 2 | `apps/backoffice-react` | React shell | 4200 | `backoffice-react` |
-| 2 | `apps/backoffice-vue` | Vue shell | 4400 | `backoffice-vue` |
-| 2 | `apps/backoffice-angular16` | Angular 16 shell (`node:18` image) | 4500 | `backoffice-angular16` |
-| 3 | `packages/orders-elements` | `@shop/orders-elements`, built from `apps/orders` | none | built inside the `backoffice-vanilla` image |
-| 3 | `apps/backoffice-vanilla` | Plain JavaScript page that installs the package, strict CSP | 4600 | `backoffice-vanilla` |
+| 2 | `apps/microfrontends/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | 4201 | `orders` |
+| 2 | `apps/microfrontends/insights` | React, exports `shop-order-stats`, `shop-activity-feed` | 4202 | `insights` |
+| 2 | `apps/microfrontends/notes` | Vue, exports `shop-status-filter`, `shop-order-notes` | 4402 | `notes` |
+| 2 | `apps/backoffices/backoffice-react` | React shell | 4200 | `backoffice-react` |
+| 2 | `apps/backoffices/backoffice-vue` | Vue shell | 4400 | `backoffice-vue` |
+| 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | 4500 | `backoffice-angular16` |
+| 3 | `packages/orders-elements` | `@shop/orders-elements`, built from `apps/microfrontends/orders` | none | built inside the `backoffice-vanilla` image |
+| 3 | `apps/backoffices/backoffice-vanilla` | Plain JavaScript page that installs the package, strict CSP | 4600 | `backoffice-vanilla` |
 | all | `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | 3000 | `mock-api` |
 
 ```bash
@@ -97,20 +100,22 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | --- | --- | --- | --- |
 | 1 | `feature/foundation` | README, CLAUDE.md, architecture and demo docs, VS Code settings, `tools/mock-api`, `compose.yaml` | container is healthy; `/orders` returns 5, `?status=open` returns 3, PATCH works, recreating the container restores the seed |
 | 2 | `feature/web-components-basics` | act 1: `examples/web-components-basics` | the page works; typed HTML shows as text |
-| 3 | `feature/orders` | `apps/orders` (latest Angular) | dev page lists orders, row click fills the detail, "Mark as shipped" updates the list; `remoteEntry.json` exposes `./elements`; no `zone.js` |
-| 4 | `feature/insights` | `apps/insights` | `/components` and `/web-components` work; `remoteEntry.js` exposes `./elements` and works from another origin |
-| 5 | `feature/backoffice-react` | `apps/backoffice-react` | dashboard, `/orders` master-detail, deep link, theme switch, error card |
-| 6 | `feature/notes-and-backoffice-vue` | `apps/notes`, `apps/backoffice-vue` | Notes' `remoteEntry.js` exposes `./elements`; Vue shell shows Angular + React + Vue |
-| 7 | `feature/backoffice-angular16` | `apps/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
-| 8 | `feature/orders-package-and-vanilla` | act 3: `packages/orders-elements`, `apps/backoffice-vanilla`, package option in `backoffice-react` | demo act 3 passes; only `localhost:4600` scripts; no CSP errors |
+| 3 | `feature/orders` | `apps/microfrontends/orders` (latest Angular) | dev page lists orders, row click fills the detail, "Mark as shipped" updates the list; `remoteEntry.json` exposes `./elements`; no `zone.js` |
+| 4 | `feature/insights` | `apps/microfrontends/insights` | `/components` and `/web-components` work; `remoteEntry.js` exposes `./elements` and works from another origin |
+| 5 | `feature/backoffice-react` | `apps/backoffices/backoffice-react` | dashboard, `/orders` master-detail, deep link, theme switch, error card |
+| 6 | `feature/notes-and-backoffice-vue` | `apps/microfrontends/notes`, `apps/backoffices/backoffice-vue` | Notes' `remoteEntry.js` exposes `./elements`; Vue shell shows Angular + React + Vue |
+| 7 | `feature/backoffice-angular16` | `apps/backoffices/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
+| 8 | `feature/orders-package-and-vanilla` | act 3: `packages/orders-elements`, `apps/backoffices/backoffice-vanilla`, package option in `backoffice-react` | demo act 3 passes; only `localhost:4600` scripts; no CSP errors |
 | 9 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
 
 ## Known pitfalls
 
 | Symptom | Fix |
 | --- | --- |
-| CORS error loading `remoteEntry.json` | Add `Access-Control-Allow-Origin: *` to the `serve` options of `apps/orders` |
+| CORS error loading `remoteEntry.json` | Add `Access-Control-Allow-Origin: *` to the `serve` options of `apps/microfrontends/orders` |
 | `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `shop-` tags in the Vite Vue plugin |
+| Vue custom element events have an array `detail` and do not bubble | Vue's `defineCustomElement` dispatches `detail: [...args]` without `bubbles`/`composed`. `defineVueElement` in `apps/microfrontends/notes` wraps the component and dispatches the contract `CustomEvent` from `useHost()` instead |
+| oxlint reports React hook rules in a Vue project | Use the Vue plugins in `.oxlintrc.json` (`vue`, `typescript`, `oxc`), not the React config |
 | React remote in another page: `@vitejs/plugin-react can't detect preamble` | Exclude the exposed folder from Fast Refresh: `react({ exclude: [/\/node_modules\//, /\/src\/insights\//] })` |
 | Remote files load from the shell's port instead of the remote's | Set `server.origin` to the remote's own URL in `vite.config.ts` |
 | A Vite shell downloads every `remoteEntry.js` on its first page | Module Federation's default `shareStrategy: 'version-first'` fetches all remotes up front; set `shareStrategy: 'loaded-first'` in the host |

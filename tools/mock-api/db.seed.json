@@ -5,5 +5,8 @@
     { "id": "A-1003", "customer": "Giorgos Ioannou", "total": 310.5, "status": "open", "createdAt": "2026-10-15" },
     { "id": "A-1004", "customer": "Eleni Dimitriou", "total": 18.75, "status": "open", "createdAt": "2026-10-17" },
     { "id": "A-1005", "customer": "Kostas Georgiou", "total": 76.2, "status": "shipped", "createdAt": "2026-10-18" }
+  ],
+  "notes": [
+    { "id": 1, "orderId": "A-1001", "text": "Customer asked for gift wrapping.", "createdAt": "2026-10-12T09:30:00.000Z" }
   ]
 }

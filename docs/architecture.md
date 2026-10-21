@@ -15,33 +15,33 @@ One online shop back office, told in three acts:
 | Act | Folder | Role | Framework | Port | Ships |
 | --- | --- | --- | --- | --- | --- |
 | 1 | `examples/web-components-basics` | Three native components | none | 4100 | static files |
-| 2 | `apps/orders` | Remote: order list and order detail | current Angular, zoneless | 4201 | `remoteEntry.json` (Native Federation) |
-| 2 | `apps/insights` | Remote: order statistics and activity feed | React 19 | 4202 | `remoteEntry.js` (Module Federation) |
-| 2 | `apps/notes` | Remote: status filter and order notes | Vue 3.5 | 4402 | `remoteEntry.js` (Module Federation) |
-| 2 | `apps/backoffice-react` | Host | React 19 + React Router | 4200 | the site |
-| 2 | `apps/backoffice-vue` | Host | Vue 3.5 + Vue Router | 4400 | the site |
-| 2 | `apps/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | 4500 | the site |
+| 2 | `apps/microfrontends/orders` | Remote: order list and order detail | current Angular, zoneless | 4201 | `remoteEntry.json` (Native Federation) |
+| 2 | `apps/microfrontends/insights` | Remote: order statistics and activity feed | React 19 | 4202 | `remoteEntry.js` (Module Federation) |
+| 2 | `apps/microfrontends/notes` | Remote: status filter and order notes | Vue 3.5 | 4402 | `remoteEntry.js` (Module Federation) |
+| 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | 4200 | the site |
+| 2 | `apps/backoffices/backoffice-vue` | Host | Vue 3.5 + Vue Router | 4400 | the site |
+| 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | 4500 | the site |
 | 3 | `packages/orders-elements` | `@shop/orders-elements`: the Orders components as an npm package | Angular, bundled | none | `orders-elements.js` |
-| 3 | `apps/backoffice-vanilla` | Host that installs the package, with a strict CSP | none | 4600 | the site |
-| all | `tools/mock-api` | Orders REST API | Express, TypeScript | 3000 | `GET/PATCH /orders` |
+| 3 | `apps/backoffices/backoffice-vanilla` | Host that installs the package, with a strict CSP | none | 4600 | the site |
+| all | `tools/mock-api` | Orders REST API | Express, TypeScript | 3000 | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
 
 ```text
 Act 1   examples/web-components-basics          user-card · counter-button · todo-list
 
 Act 2   remotes                                   hosts
-        apps/orders     Angular  :4201  ──┐
+        apps/microfrontends/orders     Angular  :4201  ──┐
           shop-orders-list                 ├──── federation runtime ───►  backoffice-react      :4200
           shop-order-detail                │                                backoffice-vue        :4400
-        apps/insights   React    :4202  ──┤                                backoffice-angular16  :4500
+        apps/microfrontends/insights   React    :4202  ──┤                                backoffice-angular16  :4500
           shop-order-stats                 │
           shop-activity-feed               │
-        apps/notes      Vue      :4402  ──┘
+        apps/microfrontends/notes      Vue      :4402  ──┘
           shop-status-filter
           shop-order-notes
 
-Act 3   apps/orders ── npm pack ──► @shop/orders-elements ── npm install ──► backoffice-vanilla :4600
+Act 3   apps/microfrontends/orders ── npm pack ──► @shop/orders-elements ── npm install ──► backoffice-vanilla :4600
 
-All     tools/mock-api :3000   GET/PATCH /orders
+All     tools/mock-api :3000   GET/PATCH /orders · GET/POST /orders/:id/notes
 ```
 
 ## Rules every app follows
@@ -65,12 +65,12 @@ These names are shared between apps. Renaming one breaks another app silently.
 
 | Tag | Owner | Inputs (attribute / property) | Events (`detail`) |
 | --- | --- | --- | --- |
-| `shop-orders-list` | `apps/orders` | `status`, `page-size` | `orderSelected` `{ id }` |
-| `shop-order-detail` | `apps/orders` | `order-id` | `orderUpdated` `{ id, status }`, `closed` `{ id }` |
-| `shop-order-stats` | `apps/insights` | `refresh-key` | `statusPicked` `{ status }` |
-| `shop-activity-feed` | `apps/insights` | property `entries` (assign a new array to update) | `cleared` |
-| `shop-status-filter` | `apps/notes` | `value` | `statusChange` `{ status }` |
-| `shop-order-notes` | `apps/notes` | `order-id` | `noteAdded` `{ orderId, text }` |
+| `shop-orders-list` | `apps/microfrontends/orders` | `status`, `page-size` | `orderSelected` `{ id }` |
+| `shop-order-detail` | `apps/microfrontends/orders` | `order-id` | `orderUpdated` `{ id, status }`, `closed` `{ id }` |
+| `shop-order-stats` | `apps/microfrontends/insights` | `refresh-key` | `statusPicked` `{ status }` |
+| `shop-activity-feed` | `apps/microfrontends/insights` | property `entries` (assign a new array to update) | `cleared` |
+| `shop-status-filter` | `apps/microfrontends/notes` | `value` | `statusChange` `{ status }` |
+| `shop-order-notes` | `apps/microfrontends/notes` | `order-id` | `noteAdded` `{ orderId, text }` |
 
 `status` is one of `all`, `open`, `shipped`. Event names are case-sensitive: `orderSelected`,
 never `orderselected`.
@@ -111,7 +111,7 @@ Each host sets these on `:root`; every component reads them, with a fallback of 
 
 ## The data
 
-`tools/mock-api` serves five orders from `db.seed.json`:
+`tools/mock-api` serves five orders and their notes from `db.seed.json`:
 
 | Request | Result |
 | --- | --- |
@@ -119,12 +119,15 @@ Each host sets these on `:root`; every component reads them, with a fallback of 
 | `GET /orders?status=open` | the 3 open orders (`all`, `open` or `shipped`; anything else is a 400) |
 | `GET /orders/A-1001` | one order, or a 404 |
 | `PATCH /orders/A-1001` `{ "status": "shipped" }` | the updated order (only `status` can change) |
+| `GET /orders/A-1001/notes` | the notes of one order, or a 404 |
+| `POST /orders/A-1001/notes` `{ "text": "Call first" }` | the new note, `201` (1 to 500 characters, or a 400) |
 
 ```json
 { "id": "A-1001", "customer": "Nikos Papadopoulos", "total": 129.9, "status": "open", "createdAt": "2026-10-12" }
+{ "id": 1, "orderId": "A-1001", "text": "Customer asked for gift wrapping.", "createdAt": "2026-10-12T09:30:00.000Z" }
 ```
 
-The server is about 100 lines of Express in `tools/mock-api/src`, run by Node's built-in
+The server is about 150 lines of Express in `tools/mock-api/src`, run by Node's built-in
 TypeScript support with no build step. On start it copies `db.seed.json` to `db.json` if that
 file is missing, and saves every change there. The file lives inside the container, so
 `docker compose up -d --force-recreate mock-api` restores the seed after a demo. CORS is open

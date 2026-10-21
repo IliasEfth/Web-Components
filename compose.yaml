@@ -40,7 +40,7 @@ services:
 
   orders:
     build:
-      context: apps/orders
+      context: apps/microfrontends/orders
       dockerfile: Dockerfile.dev
     ports:
       - '4201:4201'
@@ -50,18 +50,18 @@ services:
     develop:
       watch:
         - action: sync
-          path: apps/orders/src
+          path: apps/microfrontends/orders/src
           target: /app/src
         - action: rebuild
-          path: apps/orders/package.json
+          path: apps/microfrontends/orders/package.json
         - action: rebuild
-          path: apps/orders/angular.json
+          path: apps/microfrontends/orders/angular.json
         - action: rebuild
-          path: apps/orders/federation.config.mjs
+          path: apps/microfrontends/orders/federation.config.mjs
 
   insights:
     build:
-      context: apps/insights
+      context: apps/microfrontends/insights
       dockerfile: Dockerfile.dev
     ports:
       - '4202:4202'
@@ -71,19 +71,41 @@ services:
     develop:
       watch:
         - action: sync
-          path: apps/insights/src
+          path: apps/microfrontends/insights/src
           target: /app/src
         - action: sync
-          path: apps/insights/index.html
+          path: apps/microfrontends/insights/index.html
           target: /app/index.html
         - action: rebuild
-          path: apps/insights/package.json
+          path: apps/microfrontends/insights/package.json
         - action: rebuild
-          path: apps/insights/vite.config.ts
+          path: apps/microfrontends/insights/vite.config.ts
+
+  notes:
+    build:
+      context: apps/microfrontends/notes
+      dockerfile: Dockerfile.dev
+    ports:
+      - '4402:4402'
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: apps/microfrontends/notes/src
+          target: /app/src
+        - action: sync
+          path: apps/microfrontends/notes/index.html
+          target: /app/index.html
+        - action: rebuild
+          path: apps/microfrontends/notes/package.json
+        - action: rebuild
+          path: apps/microfrontends/notes/vite.config.ts
 
   backoffice-react:
     build:
-      context: apps/backoffice-react
+      context: apps/backoffices/backoffice-react
       dockerfile: Dockerfile.dev
     ports:
       - '4200:4200'
@@ -97,12 +119,12 @@ services:
     develop:
       watch:
         - action: sync
-          path: apps/backoffice-react/src
+          path: apps/backoffices/backoffice-react/src
           target: /app/src
         - action: sync
-          path: apps/backoffice-react/index.html
+          path: apps/backoffices/backoffice-react/index.html
           target: /app/index.html
         - action: rebuild
-          path: apps/backoffice-react/package.json
+          path: apps/backoffices/backoffice-react/package.json
         - action: rebuild
-          path: apps/backoffice-react/vite.config.ts
+          path: apps/backoffices/backoffice-react/vite.config.ts
