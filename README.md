@@ -146,20 +146,6 @@ Double-click a script in `tools/scripts`. Each one runs a single `docker compose
 
 Stop and start single containers, or all of them, from Docker Desktop.
 
-## Status
-
-| Stage | Adds | Act | State |
-| --- | --- | --- | --- |
-| 1 | Docs, mock API, editor settings, Docker Compose | | done |
-| 2 | `web-components-basics` | 1 | done |
-| 3 | `orders` (latest Angular) | 2 | done |
-| 4 | `insights` (React) | 2 | done |
-| 5 | `backoffice-react` | 2 | done |
-| 6 | `notes` (Vue) and the `apps/` folders | 2 | done |
-| 6b | `backoffice-vue` | 2 | done |
-| 7 | `backoffice-angular16` | 2 | in review |
-| 8 | Windows shortcuts in `tools/scripts` | | in review |
-
 ## Tech stack
 
 | Layer | Technology |
