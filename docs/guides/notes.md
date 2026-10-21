@@ -1,6 +1,6 @@
 # Act 2: Notes, from a Vue app to web components
 
-`apps/notes` is a regular Vue application, created with `npm create vite@latest` (Vue +
+`apps/microfrontends/notes` is a regular Vue application, created with `npm create vite@latest` (Vue +
 TypeScript template). The same two components are then turned into custom elements without
 changing a line inside them. The app shows both side by side:
 

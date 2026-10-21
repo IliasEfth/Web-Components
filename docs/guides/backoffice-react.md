@@ -1,8 +1,8 @@
 # Act 2: the React back office, hosting other apps' components
 
-`apps/backoffice-react` is the first shell: a React app (`npm create vite@latest`, React +
-TypeScript template) that puts the Angular components from `apps/orders` and the React
-components from `apps/insights` on one page. It imports neither app. Both are loaded at
+`apps/backoffices/backoffice-react` is the first shell: a React app (`npm create vite@latest`, React +
+TypeScript template) that puts the Angular components from `apps/microfrontends/orders` and the React
+components from `apps/microfrontends/insights` on one page. It imports neither app. Both are loaded at
 runtime, the first time `/orders` opens.
 
 | Route | What it shows |

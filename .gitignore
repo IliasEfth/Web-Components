@@ -12,7 +12,7 @@ out/
 *.tgz
 packages/orders-elements/orders-elements.js
 packages/orders-elements/3rdpartylicenses.txt
-apps/backoffice-vanilla/vendor/
+apps/backoffices/backoffice-vanilla/vendor/
 
 # Framework caches
 .angular/
