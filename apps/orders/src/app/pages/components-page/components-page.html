@@ -1,0 +1,18 @@
+<p class="intro">
+  A regular Angular page: the components get <code>OrdersService</code> through dependency injection,
+  <code>[inputs]</code> go in, <code>(outputs)</code> come out, and the compiler checks every name
+  and type.
+</p>
+
+<app-order-status-select [(status)]="status" />
+
+<div class="layout">
+  <app-orders-list [status]="status()" (orderSelected)="selectOrder($event)" />
+  <app-order-detail
+    [orderId]="selectedOrderId()"
+    (orderUpdated)="orderUpdated($event)"
+    (closed)="closeOrder($event)"
+  />
+</div>
+
+<app-event-log [entries]="events()" />

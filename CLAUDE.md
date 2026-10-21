@@ -45,6 +45,9 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    **No Prettier.** Formatting is VS Code's built-in formatters, set in the committed
    `.vscode/settings.json` (format on save, single quotes, semicolons), plus `.editorconfig`.
    Write code in that style: 2-space indent, single quotes, semicolons, lines under ~100 chars.
+   **Interfaces start with `I`** (`IOrder`, `IOrdersConfig`, `IOrderSelectedDetail`) so a reader
+   can tell an interface from a class (`OrdersService`, `OrdersClient`) at a glance. Type aliases
+   (`OrderStatus`) and classes keep plain names.
 9. **Latest stable versions**, except `apps/backoffice-angular16`, the shell, which stays on
    Angular 16 with Zone.js, `*ngIf`, `@Input()` and `standalone: true` on purpose. The Angular
    web components it hosts come from `apps/orders`, on the latest Angular.

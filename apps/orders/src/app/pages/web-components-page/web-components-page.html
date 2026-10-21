@@ -1,0 +1,21 @@
+<p class="intro">
+  The same components as custom elements, registered by
+  <code>defineElements(&#123; apiBase &#125;)</code> when the app starts: attributes in and DOM
+  events out, exactly the way React, Vue and Angular 16 will use them.
+</p>
+
+<app-order-status-select [(status)]="status" />
+
+<div class="layout">
+  <shop-orders-list
+    [attr.status]="status()"
+    (orderSelected)="selectOrder($event)"
+  ></shop-orders-list>
+  <shop-order-detail
+    [attr.order-id]="selectedOrderId()"
+    (orderUpdated)="orderUpdated($event)"
+    (closed)="closeOrder($event)"
+  ></shop-order-detail>
+</div>
+
+<app-event-log [entries]="events()" />
