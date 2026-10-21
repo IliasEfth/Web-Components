@@ -156,3 +156,28 @@ services:
           path: apps/backoffices/backoffice-vue/package.json
         - action: rebuild
           path: apps/backoffices/backoffice-vue/vite.config.ts
+
+  backoffice-angular16:
+    build:
+      context: apps/backoffices/backoffice-angular16
+      dockerfile: Dockerfile.dev
+    ports:
+      - '4500:4500'
+    depends_on:
+      mock-api:
+        condition: service_healthy
+      orders:
+        condition: service_healthy
+      insights:
+        condition: service_healthy
+      notes:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: apps/backoffices/backoffice-angular16/src
+          target: /app/src
+        - action: rebuild
+          path: apps/backoffices/backoffice-angular16/package.json
+        - action: rebuild
+          path: apps/backoffices/backoffice-angular16/angular.json
