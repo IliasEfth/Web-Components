@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.activity-feed {
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+  background: var(--shop-surface, #ffffff);
+  border: 1px solid var(--shop-border, #e5e7eb);
+  border-radius: var(--shop-radius, 8px);
+}
+
+.activity-feed__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.activity-feed__title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--shop-color-primary, #0d9488);
+}
+
+.activity-feed__clear {
+  padding: 4px 12px;
+  font: inherit;
+  cursor: pointer;
+  color: var(--shop-color-primary, #0d9488);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--shop-radius, 8px);
+}
+
+.activity-feed__clear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.activity-feed__list {
+  max-height: 240px;
+  margin: 12px 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.activity-feed__entry {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--shop-border, #e5e7eb);
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+}
+
+.activity-feed__time {
+  margin-right: 8px;
+  color: #6b7280;
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-feed__message {
+  color: #6b7280;
+}

@@ -58,3 +58,25 @@ services:
           path: apps/orders/angular.json
         - action: rebuild
           path: apps/orders/federation.config.mjs
+
+  insights:
+    build:
+      context: apps/insights
+      dockerfile: Dockerfile.dev
+    ports:
+      - '4202:4202'
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: apps/insights/src
+          target: /app/src
+        - action: sync
+          path: apps/insights/index.html
+          target: /app/index.html
+        - action: rebuild
+          path: apps/insights/package.json
+        - action: rebuild
+          path: apps/insights/vite.config.ts
