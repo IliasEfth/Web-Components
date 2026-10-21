@@ -1,10 +1,12 @@
 # Demo script
 
-Seven steps, from "it's just the browser" to four frameworks on one page, ending with the
-safest way to ship components. Start everything first with `docker compose up --build --watch`,
-and restore the seed data afterwards with `docker compose up -d --force-recreate mock-api`.
+Three acts: write a Web Component by hand, let three frameworks use each other's components,
+then install those components as a package instead of loading them from a server.
 
-## 1. It's just the browser
+Start everything first with `docker compose up --build --watch`, and restore the seed data
+afterwards with `docker compose up -d --force-recreate mock-api`.
+
+## Act 1: Pure Web Components
 
 **Open** `http://localhost:4100` (`examples/web-components-basics`).
 
@@ -13,18 +15,12 @@ and restore the seed data afterwards with `docker compose up -d --force-recreate
 - Click "Add Milk from the page": the page calls the component's public method.
 - Type `<img src=x onerror=alert(1)>` as the name: it shows as text. `textContent` cannot run code.
 
-**Message:** Web Components are a browser standard. No framework, no build.
+**Message:** Web Components are a browser standard. No framework, no build. Attributes go in,
+events come out, and that is the whole contract.
 
-## 2. One design system for everyone
+## Act 2: Frameworks calling each other
 
-**Open** `http://localhost:4300` (the `@shop/ui` demo page).
-
-- Four components: `ui-button`, `ui-card`, `ui-badge`, `ui-data-table`.
-- Every app that follows renders with these same tags.
-
-**Message:** write a design system once; every framework can use it.
-
-## 3. Any framework hosts any other
+### 2.1 Any framework hosts any other
 
 **Open** `http://localhost:4500/orders` (`backoffice-angular16`).
 
@@ -34,10 +30,10 @@ and restore the seed data afterwards with `docker compose up -d --force-recreate
 - Add a note in **Vue**: it appears in the **React** feed.
 - Mark the order as shipped in **Angular**: the **React** counts update.
 
-**Message:** components talk through events up and attributes or properties down.
-None of them imports another framework.
+**Message:** the same contract as act 1. Angular, React and Vue each ship a custom element; the
+host listens to events and sets attributes. None of them imports another framework.
 
-## 4. Versions don't matter
+### 2.2 Versions don't matter
 
 In the browser console:
 
@@ -48,7 +44,7 @@ document.querySelector('shop-orders-list').getAttribute('ng-version'); // the cu
 
 **Message:** Angular 16 and a current Angular run side by side. Teams upgrade on their own schedule.
 
-## 5. Same remotes, different host
+### 2.3 Same components, different host
 
 **Open** `http://localhost:4400/orders` (`backoffice-vue`) and `http://localhost:4200/orders`
 (`backoffice-react`).
@@ -57,9 +53,9 @@ document.querySelector('shop-orders-list').getAttribute('ng-version'); // the cu
 - Each host paints everything in its own colour: Vue green, React blue, Angular red.
   In `backoffice-react`, change the theme in Settings and watch the Angular list recolour.
 
-**Message:** the host decides the theme and the layout; the remotes don't care who hosts them.
+**Message:** the host decides the theme and the layout; the components don't care who hosts them.
 
-## 6. Independent and resilient
+### 2.4 Independent and resilient
 
 Run `docker compose stop orders` and reload `http://localhost:4500/orders`.
 
@@ -68,12 +64,13 @@ Run `docker compose stop orders` and reload `http://localhost:4500/orders`.
 
 **Message:** one team's outage never takes down the page. Each app deploys on its own.
 
-## 7. The safe way: a package, no remote code
+## Act 3: A package instead of a server
 
-**Open** `http://localhost:4600` (`backoffice-vanilla`). Keep the Orders server stopped.
+**Open** `http://localhost:4600` (`backoffice-vanilla`). Stop the Orders server again with
+`docker compose stop orders`.
 
 - The same Angular list and detail on a page with **no framework**: open `app.js` and show
-  `querySelector`, `setAttribute`, `addEventListener`.
+  `querySelector`, `setAttribute`, `addEventListener`, exactly as in act 1.
 - DevTools, Network tab: every script comes from `localhost:4600`. The Angular code was installed
   as `@shop/orders-elements`, and its hash is in `package-lock.json`.
 - In the console, try to reach another server:
@@ -92,12 +89,12 @@ the Network tab open:
   It is lazy loaded from the app's own origin, and the Orders server can stay stopped.
 
 **Message:** runtime remotes give independent deployments; an installed package gives control.
+Nothing runs that you did not install and review.
 
 ## Closing slide
 
-| Layer | Technology |
+| Act | Takeaway |
 | --- | --- |
-| Contract | Custom elements: attributes, properties, `CustomEvent`s |
-| Styling | Shadow DOM plus CSS custom properties (`--shop-*`) |
-| Loading | Native Federation (Angular), plain ESM `import()` (React, Vue), or an installed package |
-| Safety | `textContent` everywhere, isolated failures per remote, strict CSP with packaged components |
+| 1. Pure Web Components | A component is a class, a tag, attributes in and events out |
+| 2. Frameworks calling each other | Every framework can export and host custom elements; the host owns URL, layout and theme |
+| 3. A package instead of a server | Same components, but installed, reviewed and pinned, under a strict CSP |
