@@ -1,0 +1,64 @@
+<p class="intro">
+  Angular 16 owns the URL and the layout. The list and the detail are the latest Angular, the
+  statistics and the feed are React, the filter and the notes are Vue. They meet only in this page.
+</p>
+
+<ng-container *ngIf="{ orderId: orderId$ | async } as route">
+  <app-remote-gate name="Notes" [load]="loadNotes">
+    <ng-template>
+      <shop-status-filter
+        class="filter"
+        [attr.value]="status"
+        (statusChange)="statusChanged($event)"
+      ></shop-status-filter>
+    </ng-template>
+  </app-remote-gate>
+
+  <div class="layout">
+    <app-remote-gate name="Orders" [load]="loadOrders">
+      <ng-template>
+        <div class="stack">
+          <shop-orders-list
+            [attr.status]="status"
+            page-size="10"
+            (orderSelected)="orderSelected($event)"
+          ></shop-orders-list>
+          <shop-order-detail
+            [attr.order-id]="route.orderId"
+            (orderUpdated)="orderUpdated($event)"
+            (closed)="orderClosed($event)"
+          ></shop-order-detail>
+        </div>
+      </ng-template>
+    </app-remote-gate>
+
+    <div class="stack">
+      <app-remote-gate name="Insights" [load]="loadInsights">
+        <ng-template>
+          <shop-order-stats
+            [attr.refresh-key]="refreshCount"
+            (statusPicked)="statusPicked($event)"
+          ></shop-order-stats>
+        </ng-template>
+      </app-remote-gate>
+
+      <app-remote-gate name="Notes" [load]="loadNotes">
+        <ng-template>
+          <shop-order-notes
+            [attr.order-id]="route.orderId"
+            (noteAdded)="noteAdded($event)"
+          ></shop-order-notes>
+        </ng-template>
+      </app-remote-gate>
+
+      <app-remote-gate name="Insights" [load]="loadInsights">
+        <ng-template>
+          <shop-activity-feed
+            [entries]="entries"
+            (cleared)="clearActivity()"
+          ></shop-activity-feed>
+        </ng-template>
+      </app-remote-gate>
+    </div>
+  </div>
+</ng-container>

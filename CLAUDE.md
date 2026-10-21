@@ -50,7 +50,8 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    can tell an interface from a class (`OrdersService`, `OrdersClient`) at a glance. Type aliases
    (`OrderStatus`) and classes keep plain names.
 9. **Latest stable versions**, except `apps/backoffices/backoffice-angular16`, the shell, which stays on
-   Angular 16 with Zone.js, `*ngIf`, `@Input()` and `standalone: true` on purpose. The Angular
+   Angular 16 with Zone.js, `*ngIf`, `@Input()` and NgModules (`AppModule`, `AppRoutingModule`, no standalone components)
+   on purpose, the way most Angular developers know it. The Angular
    web components it hosts come from `apps/microfrontends/orders`, on the latest Angular.
 10. When a guide's code does not work with the installed version, fix it minimally and update
     the guide in the same change.
@@ -124,6 +125,9 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | Two federation formats | Angular remotes: Native Federation (`remoteEntry.json`). React and Vue remotes: `@module-federation/vite` (`remoteEntry.js`). Shells load each with its own runtime |
 | Do not set `ENV NODE_ENV=development` in a Vite `Dockerfile.dev` | The React guide does not; Vite sets the mode itself |
 | Angular 16: "Module not found" for a URL import | Write `import(/* webpackIgnore: true */ url)`; this is the one allowed comment, webpack needs it |
+| Angular 16: the orchestrator's remote imports break under webpack | Its default `loadModuleFn` only has `@vite-ignore`. Pass `loadModuleFn: (url) => import(/* webpackIgnore: true */ url)` to `initFederation`; the two "Critical dependency" build warnings that remain are about the unused default |
+| Angular 16: `Cannot find module '@softarc/native-federation-orchestrator/options'` | The CLI 16 template uses `"moduleResolution": "node"`, which ignores `exports`. Use `"bundler"` and `"skipLibCheck": true` |
+| Angular 16 shell: should it use `@angular-architects/native-federation`? | No. Its 16.x runtime cannot read Orders' v4 `remoteEntry.json`, and the shell shares nothing with Angular 22. The orchestrator plus `@module-federation/runtime` load all three remotes |
 | Angular 16 CLI refuses to run | Its image must be `node:18`; run its `npm`/`ng` commands in that container, not on the host |
 | Page does not load on `localhost:<port>` | The dev server listens on `127.0.0.1` inside the container. Bind `0.0.0.0` in Docker only (a `docker` configuration or a `start:docker` script), never in the local `npm start` |
 | Edits do not reach the container | Start with `--watch`, and check the service's `develop.watch` paths |

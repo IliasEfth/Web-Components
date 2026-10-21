@@ -156,8 +156,8 @@ The apps are being added one at a time, each through its own pull request.
 | 4 | `insights` (React) | 2 | done |
 | 5 | `backoffice-react` | 2 | done |
 | 6 | `notes` (Vue) and the `apps/` folders | 2 | done |
-| 6b | `backoffice-vue` | 2 | in review |
-| 7 | `backoffice-angular16` | 2 | next |
+| 6b | `backoffice-vue` | 2 | done |
+| 7 | `backoffice-angular16` | 2 | in review |
 | 8 | `@shop/orders-elements` and `backoffice-vanilla` | 3 | planned |
 | 9 | Windows shortcuts | | planned |
 
