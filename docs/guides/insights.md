@@ -71,11 +71,9 @@ does the job in about 90 lines, with no extra package:
 | `styles` | the component's CSS, adopted by the element's shadow root |
 | `wrap` | wraps the component in its provider, here `InsightsProvider` with the host's config |
 
-The two lists are checked against the component's props interface (`IOrderStatsProps`), so the
-compiler stops three mistakes: a misspelled name (`'refreshKy'`), a value prop listed as an output,
-and a prop that is missing from the lists, reported as
-`Property 'missingInputs' is missing … required in type '{ missingInputs: "refreshKey" }'`. The
-interface itself does not exist at runtime, which is why the names are still listed once.
+The two lists are checked against the component's props interface (`IOrderStatsProps`), so a
+misspelled name, a value prop listed as an output, or a prop missing from the lists does not
+compile. The interface itself does not exist at runtime, which is why the names are listed once.
 
 The wrapper renders straight into the shadow root (`createRoot(shadowRoot)`). It also keeps a
 property value that a host set before the element was defined, and unmounts
@@ -137,8 +135,6 @@ federation({
   the app's pages or router.
 - **`shared`** lets a React shell provide its own React; a Vue or Angular shell has none, so the
   remote falls back to its own copy.
-- **`dts: false`** turns off the plugin's type sharing between remotes; the contract types live in
-  [architecture.md](../architecture.md#contracts).
 - **`server.origin`** is set to `http://localhost:4202`, so the files the remote entry points to
   are always loaded from the remote, not from the shell's origin.
 
@@ -165,12 +161,6 @@ const { defineElements } = await import('insights/elements');
 await defineElements({ apiBase: 'http://localhost:3000' });
 ```
 
-**React Fast Refresh and remotes.** In development, `@vitejs/plugin-react` adds Fast Refresh code
-to every component, and that code needs a preamble only the app's own `index.html` installs. A
-Vue or Angular shell does not have it. `vite.config.ts` therefore excludes `src/insights/` from
-Fast Refresh: those components still compile, and an edit there reloads the page instead of
-hot-swapping. Production builds have no Fast Refresh code at all.
-
 **Two federation systems.** Orders uses Native Federation (`remoteEntry.json`), Insights uses
 Module Federation (`remoteEntry.js`). The formats differ, so every shell uses both runtimes: one
 loader per system, the same `defineElements` contract behind each.
@@ -187,20 +177,13 @@ loader per system, the same `defineElements` contract behind each.
 
 ## Run it
 
-The Docker setup follows Docker's official [React.js guide](https://docs.docker.com/guides/reactjs/):
-`Dockerfile.dev` installs with `npm ci --ignore-scripts` and runs `npm run dev -- --host`, so the
-dev server listens on `0.0.0.0` inside the container only. Compose Watch syncs `src/` and
-`index.html`.
-
 ```bash
 docker compose up --build --watch insights    # http://localhost:4202
 ```
 
-## Done when
+## What to try
 
 - `/components` shows three tiles; a click logs `onStatusPicked(...)` in the feed; "Refresh
   statistics" reloads; "Clear" empties the feed.
 - `/web-components` does the same with the custom elements and logs the DOM events.
-- From another origin, `remoteEntry.js` → `get('./elements')` gives `defineElements`, and both
-  tags work.
-- `npm run build` and `npm run lint` pass.
+- `http://localhost:4202/remoteEntry.js` is the container the shells load.

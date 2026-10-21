@@ -1,14 +1,12 @@
 # Architecture
 
-One online shop back office, told in three acts:
+One online shop back office, told in two acts:
 
 1. **Pure Web Components.** How to write a component with nothing but the browser.
-2. **Frameworks calling each other.** Angular, React and Vue ship their features as custom
-   elements, and React, Vue and Angular 16 hosts use them all on one page. No app imports
-   another app's code; they meet only through tags: attributes and properties go down,
-   `CustomEvent`s come up.
-3. **A package instead of a server.** The Angular components are exported as an npm package and
-   installed into a page with no framework at all, so nothing is loaded from the Orders server.
+2. **Micro-frontends calling each other.** Angular, React and Vue ship their features as custom
+   elements, each from its own server, and React, Vue and Angular 16 hosts load them at runtime
+   and use them all on one page. No app imports another app's code; they meet only through tags:
+   attributes and properties go down, `CustomEvent`s come up.
 
 ## The cast
 
@@ -21,8 +19,6 @@ One online shop back office, told in three acts:
 | 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | 4200 | the site |
 | 2 | `apps/backoffices/backoffice-vue` | Host | Vue 3.5 + Vue Router | 4400 | the site |
 | 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | 4500 | the site |
-| 3 | `packages/orders-elements` | `@shop/orders-elements`: the Orders components as an npm package | Angular, bundled | none | `orders-elements.js` |
-| 3 | `apps/backoffices/backoffice-vanilla` | Host that installs the package, with a strict CSP | none | 4600 | the site |
 | all | `tools/mock-api` | Orders REST API | Express, TypeScript | 3000 | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
 
 ```text
@@ -38,8 +34,6 @@ Act 2   remotes                                   hosts
         apps/microfrontends/notes      Vue      :4402  ──┘
           shop-status-filter
           shop-order-notes
-
-Act 3   apps/microfrontends/orders ── npm pack ──► @shop/orders-elements ── npm install ──► backoffice-vanilla :4600
 
 All     tools/mock-api :3000   GET/PATCH /orders · GET/POST /orders/:id/notes
 ```
@@ -107,7 +101,6 @@ Each host sets these on `:root`; every component reads them, with a fallback of 
 | `backoffice-react` | blue `#2563eb` (switchable in Settings) |
 | `backoffice-vue` | green `#16a34a` |
 | `backoffice-angular16` | red `#dc2626` |
-| `backoffice-vanilla` | purple `#7c3aed` |
 
 ## The data
 
@@ -133,15 +126,19 @@ file is missing, and saves every change there. The file lives inside the contain
 `docker compose up -d --force-recreate mock-api` restores the seed after a demo. CORS is open
 (`Content-Type` and `Authorization` headers allowed), so every app can call it from its own port.
 
-## Act 2 or act 3: two ways to ship a remote
+## Remotes are live services
 
-| | Runtime remote (Native or Module Federation) | Installed package |
+Every remote runs on its own server and every shell loads it at runtime:
+
+| Remote | Format | Loaded by the shells with |
 | --- | --- | --- |
-| Used by | `backoffice-react`, `backoffice-vue`, `backoffice-angular16` | `backoffice-vanilla` |
-| A new release reaches users | at the next page load, with no host rebuild | after the host updates the package |
-| Code that runs | whatever the remote server sends | exactly what was installed, pinned by hash in `package-lock.json` |
-| If the remote server is down | that remote shows an error card | nothing changes |
-| Content Security Policy | must allow the remote's origin | `script-src 'self'` |
+| `orders` | Native Federation, `remoteEntry.json` | `@softarc/native-federation-orchestrator` |
+| `insights`, `notes` | Module Federation, `remoteEntry.js` | `@module-federation/vite` (Vite shells), `@module-federation/runtime` (Angular 16) |
 
-Runtime remotes give teams independent deployments. An installed package gives the host
-control: nothing runs that it did not install and review.
+What that gives the teams:
+
+| | |
+| --- | --- |
+| A new release reaches users | at the next page load, in every shell, with no shell rebuild |
+| A remote's server is down | only that remote shows an error card; the rest of the page keeps working |
+| Each team | builds, deploys and upgrades its framework on its own schedule |

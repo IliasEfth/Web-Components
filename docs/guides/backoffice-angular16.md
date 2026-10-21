@@ -11,25 +11,8 @@ Its colour is red (`#dc2626`).
 | `http://localhost:4500/orders` | All six elements, wired together by the shell |
 | `http://localhost:4500/orders/A-1003` | The same page opened with an order (a deep link) |
 
-## Created with the Angular 16 CLI
-
-Angular 16 needs Node 18, so the project was created with nvm's Node 18 and analytics off:
-
-```powershell
-nvm use 18.20.8
-$env:NG_CLI_ANALYTICS = 'false'
-npx -y @angular/cli@16 new backoffice-angular16 --standalone=false --routing --style=css --skip-git --skip-tests
-nvm use 24.22.0
-```
-
-`--standalone=false` gives the classic `AppModule` and `AppRoutingModule`. The image is
-`node:18` as well, so `package-lock.json` and the container agree.
-
-ESLint is added the Angular 16 way, which creates `.eslintrc.json` and the `lint` target:
-
-```powershell
-npx ng add @angular-eslint/schematics@16 --skip-confirmation
-```
+It was created with the Angular 16 CLI (`ng new --standalone=false`), so it has the classic
+`AppModule` and `AppRoutingModule`.
 
 ## The project
 
@@ -51,18 +34,15 @@ src/app/
     remote-gate/              loading text, the content or an error card with Retry
 ```
 
-The template's test setup (Karma, Jasmine, `tsconfig.spec.json`) is removed, and two browser
-runtimes are added:
+Two browser runtimes are added to the template:
 
 | Package | Why |
 | --- | --- |
 | `@softarc/native-federation-orchestrator` | Reads Orders' `remoteEntry.json`, writes the import map for Angular 22, imports `./elements` |
 | `@module-federation/runtime` | Loads Insights' and Notes' `remoteEntry.js`; the runtime underneath `@module-federation/vite` |
 
-**Why not `@angular-architects/native-federation`?** Its Angular 16 version brings a 2023 runtime
-that cannot read the v4 `remoteEntry.json` Orders publishes, and it would replace the webpack
-build. The shell exposes nothing and cannot share Angular 16 with Angular 22, so it needs no
-federation build: only the two runtimes, in the browser.
+The shell exposes nothing and cannot share Angular 16 with Angular 22, so it needs no federation
+build: only the two runtimes, in the browser.
 
 ## Loading three remotes in a webpack app
 
@@ -94,12 +74,9 @@ loadOrders(): Promise<void> {
 }
 ```
 
-- **`webpackIgnore`.** Webpack rewrites every `import()` it sees. The orchestrator's own import
-  is only marked for Vite, so the shell hands it a `loadModuleFn` that webpack leaves alone. It
-  is the one comment allowed in the code. The Module Federation runtime already marks its imports.
+- **`webpackIgnore`.** Webpack would try to bundle `import(url)`. The comment keeps it a real
+  browser import of the remote's URL.
 - **`shared: {}`.** The shell has no React and no Vue to offer, so each remote uses its own copy.
-- **`moduleResolution: "bundler"`.** The CLI 16 template resolves packages the old `node` way,
-  which ignores `exports`; the orchestrator's `/options` entry point needs `bundler`.
 
 ## The page wires everything
 
@@ -142,11 +119,9 @@ document.querySelector('shop-orders-list').getAttribute('ng-version'); // 22.2.3
 docker compose up --build --watch backoffice-angular16    # http://localhost:4500
 ```
 
-`Dockerfile.dev` uses `node:18`, installs with `npm ci --ignore-scripts` and runs
-`npm run start:docker` (`ng serve --host 0.0.0.0`, Docker only). The service waits for the API
-and all three remotes.
+The image uses Node 18, which Angular 16 needs. The API and all three remotes start with it.
 
-## Done when
+## What to try
 
 - Demo act 2.1: the Vue filter drives the Angular list; a React tile drives the Vue filter; a row
   click changes the URL and the detail and the notes follow; a Vue note reaches the React feed;
@@ -154,5 +129,3 @@ and all three remotes.
 - Demo act 2.2: two different `ng-version` values on one page.
 - Demo act 2.4: `docker compose stop orders` leaves only the Orders card failing; Retry recovers it.
 - Everything is red, inside every shadow root too.
-- `npm run build` passes; the only warnings are the two "Critical dependency" ones from the
-  orchestrator. `npm run lint` passes.

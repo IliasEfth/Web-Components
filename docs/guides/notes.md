@@ -37,7 +37,7 @@ src/
 ```
 
 The template adds two packages: `vue-router` for the two routes, and `@module-federation/vite`
-for step 3. `oxlint` is added for `npm run lint`, because the Vue template has no linter.
+for step 3.
 
 **Configuration through a plugin.** Vue's way to provide app-wide services is a plugin, like
 `app.use(router)`. `main.ts` installs it once:
@@ -149,19 +149,13 @@ The notes are stored by `tools/mock-api` next to the orders:
 
 ## Run it
 
-`Dockerfile.dev` follows the same pattern as the React apps: `npm ci --ignore-scripts`, then
-`npm run dev -- --host`.
-
 ```bash
 docker compose up --build --watch notes    # http://localhost:4402
 ```
 
-## Done when
+## What to try
 
 - `/components`: the filter logs `statusChange(...)`; picking an order loads its notes; adding a
   note logs `noteAdded(...)`.
 - `/web-components` does the same with the custom elements and logs the DOM events.
-- From another origin, `remoteEntry.js` → `get('./elements')` gives `defineElements`; both tags
-  work; each event's `detail` is an object, with `bubbles` and `composed`.
 - A note typed as `<img src=x onerror=alert(1)>` shows as text.
-- `npm run build` and `npm run lint` pass.
