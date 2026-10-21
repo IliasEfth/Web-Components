@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+.order-notes {
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+  background: var(--shop-surface, #ffffff);
+  border: 1px solid var(--shop-border, #e5e7eb);
+  border-radius: var(--shop-radius, 8px);
+}
+
+.order-notes__title {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  color: var(--shop-color-primary, #0d9488);
+}
+
+.order-notes__list {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.order-notes__note {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--shop-border, #e5e7eb);
+}
+
+.order-notes__message {
+  color: #6b7280;
+}
+
+.order-notes__message--error {
+  color: #b91c1c;
+}
+
+.order-notes__form {
+  display: flex;
+  gap: 8px;
+}
+
+.order-notes__input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  font: inherit;
+  border: 1px solid var(--shop-border, #e5e7eb);
+  border-radius: var(--shop-radius, 8px);
+}
+
+.order-notes__add {
+  padding: 6px 14px;
+  font: inherit;
+  cursor: pointer;
+  color: var(--shop-color-on-primary, #ffffff);
+  background: var(--shop-color-primary, #0d9488);
+  border: none;
+  border-radius: var(--shop-radius, 8px);
+}
+
+.order-notes__add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

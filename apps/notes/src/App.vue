@@ -1,7 +1,14 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <HelloWorld />
+  <header class="page-header">
+    <h1>Notes</h1>
+    <p>Act 2 · Vue. The same two components, used two ways.</p>
+    <nav class="page-nav">
+      <RouterLink to="/components">Vue components</RouterLink>
+      <RouterLink to="/web-components">Web components</RouterLink>
+    </nav>
+  </header>
+
+  <main>
+    <RouterView />
+  </main>
 </template>

@@ -23,7 +23,7 @@ One online shop back office, told in three acts:
 | 2 | `apps/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | 4500 | the site |
 | 3 | `packages/orders-elements` | `@shop/orders-elements`: the Orders components as an npm package | Angular, bundled | none | `orders-elements.js` |
 | 3 | `apps/backoffice-vanilla` | Host that installs the package, with a strict CSP | none | 4600 | the site |
-| all | `tools/mock-api` | Orders REST API | Express, TypeScript | 3000 | `GET/PATCH /orders` |
+| all | `tools/mock-api` | Orders REST API | Express, TypeScript | 3000 | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
 
 ```text
 Act 1   examples/web-components-basics          user-card · counter-button · todo-list
@@ -41,7 +41,7 @@ Act 2   remotes                                   hosts
 
 Act 3   apps/orders ── npm pack ──► @shop/orders-elements ── npm install ──► backoffice-vanilla :4600
 
-All     tools/mock-api :3000   GET/PATCH /orders
+All     tools/mock-api :3000   GET/PATCH /orders · GET/POST /orders/:id/notes
 ```
 
 ## Rules every app follows
@@ -111,7 +111,7 @@ Each host sets these on `:root`; every component reads them, with a fallback of 
 
 ## The data
 
-`tools/mock-api` serves five orders from `db.seed.json`:
+`tools/mock-api` serves five orders and their notes from `db.seed.json`:
 
 | Request | Result |
 | --- | --- |
@@ -119,12 +119,15 @@ Each host sets these on `:root`; every component reads them, with a fallback of 
 | `GET /orders?status=open` | the 3 open orders (`all`, `open` or `shipped`; anything else is a 400) |
 | `GET /orders/A-1001` | one order, or a 404 |
 | `PATCH /orders/A-1001` `{ "status": "shipped" }` | the updated order (only `status` can change) |
+| `GET /orders/A-1001/notes` | the notes of one order, or a 404 |
+| `POST /orders/A-1001/notes` `{ "text": "Call first" }` | the new note, `201` (1 to 500 characters, or a 400) |
 
 ```json
 { "id": "A-1001", "customer": "Nikos Papadopoulos", "total": 129.9, "status": "open", "createdAt": "2026-10-12" }
+{ "id": 1, "orderId": "A-1001", "text": "Customer asked for gift wrapping.", "createdAt": "2026-10-12T09:30:00.000Z" }
 ```
 
-The server is about 100 lines of Express in `tools/mock-api/src`, run by Node's built-in
+The server is about 150 lines of Express in `tools/mock-api/src`, run by Node's built-in
 TypeScript support with no build step. On start it copies `db.seed.json` to `db.json` if that
 file is missing, and saves every change there. The file lives inside the container, so
 `docker compose up -d --force-recreate mock-api` restores the seed after a demo. CORS is open

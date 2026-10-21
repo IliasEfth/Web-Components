@@ -1,5 +1,6 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { databaseFile, ensureDatabase } from './database.ts';
+import { isNoteText, maxNoteLength } from './note.ts';
 import { isOrderStatus, isOrderStatusFilter } from './order.ts';
 import { OrdersStore } from './orders-store.ts';
 
@@ -48,6 +49,30 @@ app.patch('/orders/:id', async (request, response) => {
   response.json(order);
 });
 
+app.get('/orders/:id/notes', (request, response) => {
+  if (!store.find(request.params.id)) {
+    response.status(404).json({ error: `Order ${request.params.id} not found` });
+    return;
+  }
+
+  response.json(store.listNotes(request.params.id));
+});
+
+app.post('/orders/:id/notes', async (request, response) => {
+  const { text } = (request.body ?? {}) as { text?: unknown };
+  if (!isNoteText(text)) {
+    response.status(400).json({ error: `text must be 1 to ${maxNoteLength} characters` });
+    return;
+  }
+
+  if (!store.find(request.params.id)) {
+    response.status(404).json({ error: `Order ${request.params.id} not found` });
+    return;
+  }
+
+  response.status(201).json(await store.addNote(request.params.id, text));
+});
+
 app.use((_request, response) => {
   response.status(404).json({ error: 'Not found' });
 });
@@ -59,7 +84,7 @@ app.listen(port, () => {
 function allowEveryOrigin(request: Request, response: Response, next: NextFunction): void {
   response.set({
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, PATCH, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   });
 

@@ -81,6 +81,28 @@ services:
         - action: rebuild
           path: apps/insights/vite.config.ts
 
+  notes:
+    build:
+      context: apps/notes
+      dockerfile: Dockerfile.dev
+    ports:
+      - '4402:4402'
+    depends_on:
+      mock-api:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: apps/notes/src
+          target: /app/src
+        - action: sync
+          path: apps/notes/index.html
+          target: /app/index.html
+        - action: rebuild
+          path: apps/notes/package.json
+        - action: rebuild
+          path: apps/notes/vite.config.ts
+
   backoffice-react:
     build:
       context: apps/backoffice-react

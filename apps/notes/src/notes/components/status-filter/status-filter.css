@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.status-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-family: system-ui, sans-serif;
+}
+
+.status-filter__label {
+  color: #6b7280;
+}
+
+.status-filter__option {
+  padding: 6px 14px;
+  font: inherit;
+  text-transform: capitalize;
+  cursor: pointer;
+  color: var(--shop-color-primary, #0d9488);
+  background: var(--shop-surface, #ffffff);
+  border: 1px solid var(--shop-color-primary, #0d9488);
+  border-radius: 999px;
+}
+
+.status-filter__option[aria-pressed='true'] {
+  color: var(--shop-color-on-primary, #ffffff);
+  background: var(--shop-color-primary, #0d9488);
+}
