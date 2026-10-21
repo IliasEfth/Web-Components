@@ -1,2 +1,10 @@
 node_modules
 db.json
+*.log
+
+.vscode
+.git
+.gitignore
+
+Dockerfile.*
+.dockerignore

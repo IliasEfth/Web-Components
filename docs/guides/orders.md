@@ -131,15 +131,88 @@ route renders:
 | Configuration | `provideOrders(...)` in `app.config.ts` | `defineElements({ apiBase })` once |
 | Checked by | the Angular compiler | the contract in [architecture.md](../architecture.md#contracts) |
 
+## Step 3: share it with Native Federation
+
+Steps 1 and 2 run inside this app. To let the React, Vue and Angular 16 shells load the same
+`defineElements` at runtime, the app also publishes it as a federation remote. One dependency is
+added: `@angular-architects/native-federation`.
+
+`federation.config.mjs` names what other apps may load:
+
+```js
+export default withNativeFederation({
+  name: 'orders',
+  exposes: {
+    './elements': './src/app/elements.ts',
+  },
+  shared: fromPackageJson({ singleton: true, strictVersion: true, requiredVersion: 'auto', build: 'package' })
+    .patch(['@angular/*'], { includeSecondaries: { keepAll: true } })
+    .get(),
+  skip: ['@angular/platform-browser/animations', '@angular/platform-browser/animations/async', ...],
+});
+```
+
+- **`exposes`** publishes `elements.ts` and nothing else: the shells get `defineElements`, never
+  the app's pages or routes.
+- **`shared`** lets another Angular remote reuse this app's Angular instead of downloading a
+  second copy. The two animation entry points are skipped because the app does not install
+  `@angular/animations`.
+
+`main.ts` starts federation first, then the unchanged app, now in `bootstrap.ts`:
+
+```ts
+initFederation({}, { hostRemoteEntry: { url: './remoteEntry.json' }, shimMode: false })
+  .then(() => import('./bootstrap'));
+```
+
+Why a separate file: shared packages such as `@angular/core` are not bundled; the browser finds
+them through an import map that `initFederation()` creates. Static `import` lines load before any
+code runs, so `main.ts` must not import Angular directly. The dynamic `import('./bootstrap')`
+loads the app only after the import map exists. This is the usual Native Federation and Module
+Federation convention.
+
+`shimMode: false` (and `esmsInitOptions: { shimMode: false }` in `angular.json`) uses the
+browser's own import maps, so the `es-module-shims` polyfill is not loaded.
+
+The same dev server on port 4201 now serves both the app and the remote:
+
+| URL | What it is |
+| --- | --- |
+| `http://localhost:4201/components`, `/web-components` | the app, exactly as before |
+| `http://localhost:4201/remoteEntry.json` | the manifest: `name: orders`, exposes `./elements` |
+
+A shell loads it like this:
+
+```ts
+await initFederation({ orders: 'http://localhost:4201/remoteEntry.json' });
+const { defineElements } = await loadRemoteModule({ remoteName: 'orders', exposedModule: './elements' });
+await defineElements({ apiBase: 'http://localhost:3000' });
+```
+
 ## Run it
 
+The Docker setup follows Docker's official guide, [Angular language-specific
+guide](https://docs.docker.com/guides/angular/):
+
+| File | What it does |
+| --- | --- |
+| `Dockerfile.dev` | Node image, `npm ci`, the Angular dev server on port 4201; Compose Watch syncs `src/` |
+| `.dockerignore` | keeps `node_modules`, `dist`, `.angular` and secrets out of the image |
+
 ```bash
-docker compose up --build --watch orders
+docker compose up --build --watch orders    # http://localhost:4201
 ```
+
+Differences from the guide: the dev server starts with `npm run start:docker`, which uses the
+`docker` configuration in `angular.json` to listen on `0.0.0.0` inside the container only,
+because the federation builder does not accept `--host`; installs use `npm ci --ignore-scripts`
+to match the reviewed lock file.
 
 ## Done when
 
 - `/components` lists 5 orders; the status select filters them; a click fills the detail; "Mark
   as shipped" updates the list; the event log shows `(orderSelected)`, `(orderUpdated)`, `(closed)`.
 - `/web-components` does the same with the custom elements, and its log shows the DOM events.
-- No `zone.js` is loaded, and `npm run lint` passes.
+- `http://localhost:4201/remoteEntry.json` lists `./elements` and answers with
+  `Access-Control-Allow-Origin: *`.
+- No `zone.js` and no `es-module-shims` are loaded, and `npm run lint` passes.

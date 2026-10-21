@@ -53,8 +53,10 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    web components it hosts come from `apps/orders`, on the latest Angular.
 10. When a guide's code does not work with the installed version, fix it minimally and update
     the guide in the same change.
-11. **Everything runs through Docker.** Each app has its own `Dockerfile` and a service in the
-    root `docker-compose.yml`, added in the stage that builds the app. Run and verify apps only
+11. **Everything runs through Docker**, following Docker's official guides
+    (https://docs.docker.com/guides/angular/ and the equivalents for React and Vue). Each app has
+    a `Dockerfile.dev` (dev server, Compose Watch) and a service in the root `compose.yaml`.
+    No production images or `-prod` services. Run and verify apps only
     with `docker compose`, never with a server started on the host. `npm install` on the host is
     fine: it keeps `package-lock.json` current and gives the editor its types.
 
@@ -81,18 +83,18 @@ docker compose up -d --force-recreate mock-api   # back to the seed data
 ```
 
 Plain JavaScript projects (`examples/`) are served by `nginx:stable-alpine` with no
-npm at runtime; Node projects start with `npm start` inside their image. Dev servers must listen
-on `0.0.0.0`.
+npm at runtime; Node projects start with `npm start` (or `npm run start:docker`) inside their
+image. Dev servers must listen on `0.0.0.0` in Docker only.
 Use Compose Watch (`develop.watch`), not bind mounts, so edits on Windows reach the container.
 
 ## Stages
 
 Each stage is one branch and one pull request, and ends with something that runs in Docker:
-every app arrives with its `Dockerfile` and its `docker-compose.yml` service.
+every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 
 | # | Branch | Adds | Done when |
 | --- | --- | --- | --- |
-| 1 | `feature/foundation` | README, CLAUDE.md, architecture and demo docs, VS Code settings, `tools/mock-api`, `docker-compose.yml` | container is healthy; `/orders` returns 5, `?status=open` returns 3, PATCH works, recreating the container restores the seed |
+| 1 | `feature/foundation` | README, CLAUDE.md, architecture and demo docs, VS Code settings, `tools/mock-api`, `compose.yaml` | container is healthy; `/orders` returns 5, `?status=open` returns 3, PATCH works, recreating the container restores the seed |
 | 2 | `feature/web-components-basics` | act 1: `examples/web-components-basics` | the page works; typed HTML shows as text |
 | 3 | `feature/orders` | `apps/orders` (latest Angular) | dev page lists orders, row click fills the detail, "Mark as shipped" updates the list; `remoteEntry.json` exposes `./elements`; no `zone.js` |
 | 4 | `feature/insights` | `apps/insights` | `insights-elements.js` loads; tiles and feed work on its dev page |
@@ -100,8 +102,7 @@ every app arrives with its `Dockerfile` and its `docker-compose.yml` service.
 | 6 | `feature/notes-and-backoffice-vue` | `apps/notes`, `apps/backoffice-vue` | `notes-elements.js` loads; Vue shell shows Angular + React + Vue |
 | 7 | `feature/backoffice-angular16` | `apps/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
 | 8 | `feature/orders-package-and-vanilla` | act 3: `packages/orders-elements`, `apps/backoffice-vanilla`, package option in `backoffice-react` | demo act 3 passes; only `localhost:4600` scripts; no CSP errors |
-| 9 | `feature/demo-images` | `docker-compose.demo.yml`: production builds served by nginx | the whole demo script passes against the built images |
-| 10 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
+| 9 | `feature/run-scripts` | Windows `.bat` shortcuts in `scripts/` around `docker compose` | `start-all.bat`, `stop-all.bat` and `open-demo.bat` work |
 
 ## Known pitfalls
 
@@ -112,12 +113,15 @@ every app arrives with its `Dockerfile` and its `docker-compose.yml` service.
 | React remote: `process is not defined` | Keep the `define` block for `process.env.NODE_ENV` in the library build |
 | Angular 16: "Module not found" for a URL import | Write `import(/* webpackIgnore: true */ url)`; this is the one allowed comment, webpack needs it |
 | Angular 16 CLI refuses to run | Its image must be `node:18`; run its `npm`/`ng` commands in that container, not on the host |
-| Page does not load on `localhost:<port>` | The dev server listens on `127.0.0.1` inside the container: start it with `--host 0.0.0.0` |
+| Page does not load on `localhost:<port>` | The dev server listens on `127.0.0.1` inside the container. Bind `0.0.0.0` in Docker only (a `docker` configuration or a `start:docker` script), never in the local `npm start` |
 | Edits do not reach the container | Start with `--watch`, and check the service's `develop.watch` paths |
 | `docker compose watch` says "cannot take exclusive lock" | Another `watch` for this project is still running; stop it first |
 | nginx container is "unhealthy" but the page loads | Alpine resolves `localhost` to `::1`: nginx needs `listen [::]:80;` as well as `listen 80;` |
 | `esbuild` or `rollup` binary errors in a container | Host `node_modules` leaked in: keep `node_modules` in every `.dockerignore` |
 | An event never arrives | Event names are case-sensitive, and the listener must be on the element itself |
 | The activity feed does not update | Assign a new array to `entries`; never mutate it |
+| `Unknown argument: host` from `ng serve` | The federation builder has no `host` option. Put `"host": "0.0.0.0"` in a `docker` configuration of the `serve-original` dev server, point the federation `serve` target's `docker` configuration at it, and run `npm run start:docker` in the image. Local `npm start` keeps `localhost` |
+| Federation: `Could not resolve "@angular/animations/browser"` | `keepAll` shares every Angular entry point; add `@angular/platform-browser/animations` and `.../animations/async` to `skip` |
+| `ng add` for federation adds `es-module-shims` and the orchestrator to `package.json` | Both are already dependencies of `@angular-architects/native-federation`; keep only that one. Use native import maps: `shimMode: false` in `initFederation` and `esmsInitOptions` |
 | Native Federation `ng add` fails | On Angular 20 or 21 the package is `@angular-architects/native-federation-v4`; on 22+ it is `@angular-architects/native-federation` |
 | `npm ci` fails with `EINTEGRITY` in `backoffice-vanilla` | The package was rebuilt without a new version: bump it in `packages/orders-elements/package.json`, repack, reinstall |
