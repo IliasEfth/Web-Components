@@ -3,7 +3,7 @@ import ComponentsPage from './pages/ComponentsPage.vue';
 import WebComponentsPage from './pages/WebComponentsPage.vue';
 
 export const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   linkActiveClass: 'active',
   routes: [
     { path: '/', redirect: '/components' },

@@ -15,6 +15,6 @@ COPY apps/microfrontends/insights ./
 EXPOSE 4202
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=20s --retries=10 \
-  CMD wget -qO- http://127.0.0.1:4202/ > /dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1:4202/insights/ > /dev/null || exit 1
 
 CMD ["npm", "run", "dev", "--", "--host"]

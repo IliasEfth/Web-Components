@@ -1,12 +1,26 @@
 name: shop-backoffice
 
 services:
+  gateway:
+    build:
+      context: tools/gateway
+      dockerfile: Dockerfile.dev
+    ports:
+      - '8080:80'
+    networks:
+      - edge
+      - shop-network
+    develop:
+      watch:
+        - action: rebuild
+          path: tools/gateway/nginx.conf
+
   mock-api:
     build:
       context: tools/mock-api
       dockerfile: Dockerfile.dev
-    ports:
-      - '3000:3000'
+    networks:
+      - shop-network
     develop:
       watch:
         - action: sync+restart
@@ -21,8 +35,8 @@ services:
     build:
       context: examples/web-components-basics
       dockerfile: Dockerfile.dev
-    ports:
-      - '4100:80'
+    networks:
+      - shop-network
     develop:
       watch:
         - action: sync
@@ -42,8 +56,8 @@ services:
     build:
       context: .
       dockerfile: apps/microfrontends/orders/Dockerfile.dev
-    ports:
-      - '4201:4201'
+    networks:
+      - shop-network
     depends_on:
       mock-api:
         condition: service_healthy
@@ -67,8 +81,8 @@ services:
     build:
       context: .
       dockerfile: apps/microfrontends/insights/Dockerfile.dev
-    ports:
-      - '4202:4202'
+    networks:
+      - shop-network
     depends_on:
       mock-api:
         condition: service_healthy
@@ -93,8 +107,8 @@ services:
     build:
       context: .
       dockerfile: apps/microfrontends/notes/Dockerfile.dev
-    ports:
-      - '4402:4402'
+    networks:
+      - shop-network
     depends_on:
       mock-api:
         condition: service_healthy
@@ -119,8 +133,8 @@ services:
     build:
       context: .
       dockerfile: apps/backoffices/backoffice-react/Dockerfile.dev
-    ports:
-      - '4200:4200'
+    networks:
+      - shop-network
     depends_on:
       mock-api:
         condition: service_healthy
@@ -153,8 +167,8 @@ services:
     build:
       context: .
       dockerfile: apps/backoffices/backoffice-vue/Dockerfile.dev
-    ports:
-      - '4400:4400'
+    networks:
+      - shop-network
     depends_on:
       mock-api:
         condition: service_healthy
@@ -187,8 +201,8 @@ services:
     build:
       context: .
       dockerfile: apps/backoffices/backoffice-angular16/Dockerfile.dev
-    ports:
-      - '4500:4500'
+    networks:
+      - shop-network
     depends_on:
       mock-api:
         condition: service_healthy
@@ -213,3 +227,10 @@ services:
           path: apps/microfrontends/notes/contract
         - action: rebuild
           path: apps/backoffices/backoffice-angular16/angular.json
+
+networks:
+  edge:
+    name: shop-edge
+  shop-network:
+    name: shop-network
+    internal: true

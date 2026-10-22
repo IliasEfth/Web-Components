@@ -7,10 +7,10 @@ Its colour is red (`#dc2626`).
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:4500/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
-| `http://localhost:4500/orders` | The shell's filter and the five elements, wired together by the shell |
-| `http://localhost:4500/orders/A-1003` | The same page opened with an order (a deep link) |
-| `http://localhost:4500/settings` | The theme switch |
+| `http://localhost:8080/angular16/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
+| `http://localhost:8080/angular16/orders` | The shell's filter and the five elements, wired together by the shell |
+| `http://localhost:8080/angular16/orders/A-1003` | The same page opened with an order (a deep link) |
+| `http://localhost:8080/angular16/settings` | The theme switch |
 
 It has the same pages and layout as [backoffice-react](backoffice-react.md) and
 [backoffice-vue](backoffice-vue.md).
@@ -132,7 +132,7 @@ document.querySelector('shop-orders-list').getAttribute('ng-version'); // 22.2.3
 ## Run it
 
 ```bash
-docker compose up --build --watch backoffice-angular16    # http://localhost:4500
+docker compose up --build --watch gateway backoffice-angular16    # http://localhost:8080/angular16
 ```
 
 The image uses Node 18, which Angular 16 needs. The API and all three remotes start with it.

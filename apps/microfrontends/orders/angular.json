@@ -78,6 +78,7 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
+            "baseHref": "/orders/",
             "tsConfig": "tsconfig.app.json",
             "polyfills": [],
             "styles": [
@@ -112,9 +113,7 @@
           "builder": "@angular/build:dev-server",
           "options": {
             "port": 4201,
-            "headers": {
-              "Access-Control-Allow-Origin": "*"
-            }
+            "servePath": "/orders/"
           },
           "configurations": {
             "production": {

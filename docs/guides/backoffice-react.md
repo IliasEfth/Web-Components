@@ -11,10 +11,10 @@ React 18: the header shows the shell's version, and each Insights element carrie
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:4200/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
-| `http://localhost:4200/orders` | The shell's filter and the five elements, wired together by the shell |
-| `http://localhost:4200/orders/A-1003` | The same page opened with an order (a deep link) |
-| `http://localhost:4200/settings` | The theme switch |
+| `http://localhost:8080/react/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
+| `http://localhost:8080/react/orders` | The shell's filter and the five elements, wired together by the shell |
+| `http://localhost:8080/react/orders/A-1003` | The same page opened with an order (a deep link) |
+| `http://localhost:8080/react/settings` | The theme switch |
 
 The Vue and Angular 16 shells have the same pages and the same layout; only the framework of the
 shell changes.
@@ -171,7 +171,7 @@ and Vue components recolour with the shell.
 ## Run it
 
 ```bash
-docker compose up --build --watch backoffice-react    # http://localhost:4200
+docker compose up --build --watch gateway backoffice-react    # http://localhost:8080/react
 ```
 
 The API and all three remotes start with it.

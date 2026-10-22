@@ -82,20 +82,33 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
 Apps that export custom elements live in `apps/microfrontends/`; the shells that host them live
 in `apps/backoffices/`. A reader should see from the path which side an app is on.
 
-| Act | Folder | What | Port | Compose service |
-| --- | --- | --- | --- | --- |
-| 1 | `examples/web-components-basics` | Three native Web Components | 4100 | `web-components-basics` |
-| 2 | `apps/microfrontends/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | 4201 | `orders` |
-| 2 | `apps/microfrontends/insights` | React 18, exports `shop-order-stats`, `shop-activity-feed` | 4202 | `insights` |
-| 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-order-notes` | 4402 | `notes` |
-| 2 | `apps/backoffices/backoffice-react` | React 19 shell | 4200 | `backoffice-react` |
-| 2 | `apps/backoffices/backoffice-vue` | Vue 3.4 shell | 4400 | `backoffice-vue` |
-| 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | 4500 | `backoffice-angular16` |
-| all | `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | 3000 | `mock-api` |
+Only the gateway publishes a port. Every other service sits only on `shop-network`, an
+`internal: true` Docker network (no access from the host, no internet at runtime), listens on its
+own port inside it, and is reached through the gateway at its path. The gateway is also on the
+normal `edge` network (`shop-edge`). Apps use relative URLs (`/api`, `/orders/remoteEntry.json`),
+so everything is one origin. The gateway answers `/api/` only for `Sec-Fetch-Site: same-origin`
+with `Sec-Fetch-Mode` `cors` or `same-origin` (the pages' own `fetch`), and only `GET`, `POST`,
+`PATCH`; everything else gets `403`. The mock API sends no CORS headers.
+
+| Act | Folder | What | Path on `localhost:8080` | Internal port | Compose service |
+| --- | --- | --- | --- | --- | --- |
+| all | `tools/gateway` | nginx reverse proxy, resolves services by Docker DNS | | 80 (published as 8080) | `gateway` |
+| 1 | `examples/web-components-basics` | Three native Web Components | `/` | 80 | `web-components-basics` |
+| 2 | `apps/microfrontends/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | `/orders/` | 4201 | `orders` |
+| 2 | `apps/microfrontends/insights` | React 18, exports `shop-order-stats`, `shop-activity-feed` | `/insights/` | 4202 | `insights` |
+| 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-order-notes` | `/notes/` | 4402 | `notes` |
+| 2 | `apps/backoffices/backoffice-react` | React 19 shell | `/react/` | 4200 | `backoffice-react` |
+| 2 | `apps/backoffices/backoffice-vue` | Vue 3.4 shell | `/vue/` | 4400 | `backoffice-vue` |
+| 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | `/angular16/` | 4500 | `backoffice-angular16` |
+| all | `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | `/api/` (prefix stripped) | 3000 | `mock-api` |
+
+Each app serves itself under its path: Vite `base`, Angular `baseHref` and `servePath`, and the
+router basename from `import.meta.env.BASE_URL`. A new service needs a `location` in
+`tools/gateway/nginx.conf` and `networks: [shop-network]`, not `ports:`.
 
 ```bash
 docker compose up --build --watch        # everything, edits sync into the containers
-docker compose up --build --watch orders # one service and what it depends on
+docker compose up --build --watch gateway orders # one service, what it depends on, and the gateway
 docker compose down                      # stop everything
 docker compose up -d --force-recreate mock-api   # back to the seed data
 ```
@@ -126,7 +139,11 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 
 | Symptom | Fix |
 | --- | --- |
-| CORS error loading `remoteEntry.json` | Add `Access-Control-Allow-Origin: *` to the `serve` options of `apps/microfrontends/orders` |
+| 404 or `index.html` instead of a remote's file | The app is not serving under its gateway path; check Vite `base` or Angular `baseHref`/`servePath` against the `location` in `tools/gateway/nginx.conf` |
+| `403` from `localhost:8080/api/...` in curl or the address bar | Expected: only the pages' `fetch` passes the gateway's `Sec-Fetch-*` check. To look at the API, use DevTools on a shell page, send `-H "Sec-Fetch-Site: same-origin" -H "Sec-Fetch-Mode: cors"`, or run `docker compose exec mock-api node -e "fetch('http://localhost:3000/orders').then(r=>r.text()).then(console.log)"` |
+| A service needs the internet at runtime (a CDN, an npm download in `npm start`) | `shop-network` is `internal`; install everything in the image at build time, where the network is open |
+| Gateway returns 502 for one path | That service is down or still starting; nginx resolves names at request time (`resolver 127.0.0.11` with a variable in `proxy_pass`), so the other paths keep working |
+| Vite live reload does not connect through the gateway | The gateway must forward `Upgrade`/`Connection` and keep `Host $http_host` |
 | `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `shop-` tags in the Vite Vue plugin |
 | Vue custom element events have an array `detail` and do not bubble | Vue's `defineCustomElement` dispatches `detail: [...args]` without `bubbles`/`composed`. `defineVueElement` in `apps/microfrontends/notes` wraps the component and dispatches the contract `CustomEvent` from `useHost()` instead |
 | Vue build: `Failed to resolve index type into finite keys` | `defineEmits` cannot take a mapped type over a contract's event keys. Write the event names literally (`{ noteAdded: [detail: Events['noteAdded']] }`); `defineProps<Partial<IContract['properties']>>()` works. `elements.ts` checks the names against the contract |
@@ -135,7 +152,7 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | `tsc` passes but `ng build` fails in an Angular app | `tsc` does not check templates. Run `ng build` after changing an `input()` type a template binds to |
 | oxlint reports React hook rules in a Vue project | Use the Vue plugins in `.oxlintrc.json` (`vue`, `typescript`, `oxc`), not the React config |
 | React remote in another page: `@vitejs/plugin-react can't detect preamble` | Exclude the exposed folder from Fast Refresh: `react({ exclude: [/\/node_modules\//, /\/src\/insights\//] })` |
-| Remote files load from the shell's port instead of the remote's | Set `server.origin` to the remote's own URL in `vite.config.ts` |
+| Remote files load from the shell's path instead of the remote's | Set `base` to the remote's gateway path (`/insights/`, `/notes/`) in `vite.config.ts` |
 | A Vite shell downloads every `remoteEntry.js` on its first page | Module Federation's default `shareStrategy: 'version-first'` fetches all remotes up front; set `shareStrategy: 'loaded-first'` in the host |
 | Retry never recovers a Module Federation remote after an outage | The browser caches a failed `import()` of `remoteEntry.js` until the page reloads; reload the page. Native Federation fetches `remoteEntry.json` first, so its Retry works |
 | Two federation formats | Angular remotes: Native Federation (`remoteEntry.json`). React and Vue remotes: `@module-federation/vite` (`remoteEntry.js`). Shells load each with its own runtime |
@@ -145,7 +162,7 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | Angular 16: `Cannot find module '@softarc/native-federation-orchestrator/options'` | The CLI 16 template uses `"moduleResolution": "node"`, which ignores `exports`. Use `"bundler"` and `"skipLibCheck": true` |
 | Angular 16 shell: should it use `@angular-architects/native-federation`? | No. Its 16.x runtime cannot read Orders' v4 `remoteEntry.json`, and the shell shares nothing with Angular 22. The orchestrator plus `@module-federation/runtime` load all three remotes |
 | Angular 16 CLI refuses to run | Its image must be `node:18`; run its `npm`/`ng` commands in that container, not on the host |
-| Page does not load on `localhost:<port>` | The dev server listens on `127.0.0.1` inside the container. Bind `0.0.0.0` in Docker only (a `docker` configuration or a `start:docker` script), never in the local `npm start` |
+| Gateway returns 502 although the service is healthy | The dev server listens on `127.0.0.1` inside the container. Bind `0.0.0.0` in Docker only (a `docker` configuration or a `start:docker` script), never in the local `npm start` |
 | Edits do not reach the container | Start with `--watch`, and check the service's `develop.watch` paths |
 | `docker compose watch` says "cannot take exclusive lock" | Another `watch` for this project is still running; stop it first |
 | nginx container is "unhealthy" but the page loads | Alpine resolves `localhost` to `::1`: nginx needs `listen [::]:80;` as well as `listen 80;` |

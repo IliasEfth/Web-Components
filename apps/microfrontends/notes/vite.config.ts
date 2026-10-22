@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: '/notes/',
   plugins: [
     vue({
       template: {
@@ -19,5 +20,5 @@ export default defineConfig({
       dts: false,
     }),
   ],
-  server: { port: 4402, strictPort: true, origin: 'http://localhost:4402' },
+  server: { port: 4402, strictPort: true },
 });

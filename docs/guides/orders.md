@@ -6,8 +6,8 @@ them. The app shows both side by side:
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:4201/components` | Step 1: the components used by Angular, the normal way |
-| `http://localhost:4201/web-components` | Step 2: the same components as `<shop-orders-list>` and `<shop-order-detail>` |
+| `http://localhost:8080/orders/components` | Step 1: the components used by Angular, the normal way |
+| `http://localhost:8080/orders/web-components` | Step 2: the same components as `<shop-orders-list>` and `<shop-order-detail>` |
 
 ## Step 1: a correct Angular app
 
@@ -38,7 +38,7 @@ src/app/
 like `provideHttpClient()` or `provideRouter()`:
 
 ```ts
-export const ordersConfig: IOrdersConfig = { apiBase: 'http://localhost:3000' };
+export const ordersConfig: IOrdersConfig = { apiBase: '/api' };
 
 export const appConfig: ApplicationConfig = {
   providers: [provideRouter(routes), provideHttpClient(), provideOrders()],
@@ -186,17 +186,17 @@ code runs, so `main.ts` must not import Angular directly. The dynamic `import('.
 loads the app only after the import map exists. This is the usual Native Federation and Module
 Federation convention.
 
-The same dev server on port 4201 now serves both the app and the remote:
+The same dev server now serves both the app and the remote:
 
 | URL | What it is |
 | --- | --- |
-| `http://localhost:4201/components`, `/web-components` | the app, exactly as before |
-| `http://localhost:4201/remoteEntry.json` | the manifest: `name: orders`, exposes `./elements` |
+| `http://localhost:8080/orders/components`, `/web-components` | the app, exactly as before |
+| `http://localhost:8080/orders/remoteEntry.json` | the manifest: `name: orders`, exposes `./elements` |
 
 A shell loads it like this:
 
 ```ts
-await initFederation({ orders: 'http://localhost:4201/remoteEntry.json' });
+await initFederation({ orders: '/orders/remoteEntry.json' });
 const { defineElements } = await loadRemoteModule({ remoteName: 'orders', exposedModule: './elements' });
 await defineElements();
 ```
@@ -204,7 +204,7 @@ await defineElements();
 ## Run it
 
 ```bash
-docker compose up --build --watch orders    # http://localhost:4201
+docker compose up --build --watch gateway orders    # http://localhost:8080/orders
 ```
 
 ## What to try
@@ -212,5 +212,5 @@ docker compose up --build --watch orders    # http://localhost:4201
 - `/components` lists 5 orders; the status select filters them; a click fills the detail; "Mark
   as shipped" updates the list; the event log shows `(orderSelected)`, `(orderUpdated)`, `(closed)`.
 - `/web-components` does the same with the custom elements, and its log shows the DOM events.
-- `http://localhost:4201/remoteEntry.json` lists `./elements`.
+- `http://localhost:8080/orders/remoteEntry.json` lists `./elements`.
 - The Network tab shows no `zone.js`: the app is zoneless.

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  base: '/insights/',
   plugins: [
     react({ exclude: [/\/node_modules\//, /\/src\/insights\//] }),
     federation({
@@ -15,9 +16,5 @@ export default defineConfig({
       dts: false,
     }),
   ],
-  server: {
-    port: 4202,
-    strictPort: true,
-    origin: 'http://localhost:4202',
-  },
+  server: { port: 4202, strictPort: true },
 });

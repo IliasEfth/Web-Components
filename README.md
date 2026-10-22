@@ -130,13 +130,16 @@ after a demo.
 
 | Act | Open | Project |
 | --- | --- | --- |
-| 1 | `http://localhost:4100` | `examples/web-components-basics` |
-| 2 | `http://localhost:4500/orders` | `apps/backoffices/backoffice-angular16` |
-| 2 | `http://localhost:4400/orders` | `apps/backoffices/backoffice-vue` |
-| 2 | `http://localhost:4200/orders` | `apps/backoffices/backoffice-react` |
-| | `http://localhost:3000/orders` | `tools/mock-api` |
+| 1 | `http://localhost:8080` | `examples/web-components-basics` |
+| 2 | `http://localhost:8080/angular16/orders` | `apps/backoffices/backoffice-angular16` |
+| 2 | `http://localhost:8080/vue/orders` | `apps/backoffices/backoffice-vue` |
+| 2 | `http://localhost:8080/react/orders` | `apps/backoffices/backoffice-react` |
 
-The remotes run on 4201 (`orders`), 4202 (`insights`) and 4402 (`notes`).
+Only the gateway publishes a port. Every service runs on `shop-network`, an internal Docker
+network, and the gateway routes each path to it by name: `/orders/`, `/insights/` and
+`/notes/` are the remotes, `/api/` is the API. Everything shares one origin, so the apps use
+relative URLs. `/api/` answers only the pages' own `fetch` calls; opening it in the address bar
+or with curl returns `403`. See [docs/architecture.md](docs/architecture.md#one-origin-one-way-in).
 
 ### Windows shortcuts
 

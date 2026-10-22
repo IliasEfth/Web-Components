@@ -26,10 +26,10 @@ Every component does the same four things:
 ## Run it
 
 ```bash
-docker compose up --build --watch web-components-basics
+docker compose up --build --watch gateway web-components-basics
 ```
 
-Open `http://localhost:4100` and follow act 1 of [the demo script](../showcase.md).
+Open `http://localhost:8080` and follow act 1 of [the demo script](../showcase.md).
 
 ## What to try
 

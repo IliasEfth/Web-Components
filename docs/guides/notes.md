@@ -6,8 +6,8 @@ a custom element without changing a line inside it. The app shows both side by s
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:4402/components` | Step 1: the component used by Vue, the normal way |
-| `http://localhost:4402/web-components` | Step 2: the same component as `<shop-order-notes>` |
+| `http://localhost:8080/notes/components` | Step 1: the component used by Vue, the normal way |
+| `http://localhost:8080/notes/web-components` | Step 2: the same component as `<shop-order-notes>` |
 
 ## Step 1: a correct Vue app
 
@@ -135,8 +135,8 @@ federation({
 }),
 ```
 
-`server.origin` is `http://localhost:4402`, so the files the remote entry points to always load
-from Notes, whichever page imports it.
+`base` is `/notes/`, the remote's path behind the gateway, so the files the remote entry points to
+always load from Notes, whichever page imports it.
 
 ## The API
 
@@ -160,7 +160,7 @@ The notes are stored by `tools/mock-api` next to the orders:
 ## Run it
 
 ```bash
-docker compose up --build --watch notes    # http://localhost:4402
+docker compose up --build --watch gateway notes    # http://localhost:8080/notes
 ```
 
 ## What to try

@@ -18,6 +18,6 @@ COPY apps/backoffices/backoffice-angular16 ./
 EXPOSE 4500
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=60s --retries=10 \
-  CMD wget -qO- http://127.0.0.1:4500/ > /dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1:4500/angular16/ > /dev/null || exit 1
 
 CMD ["npm", "run", "start:docker"]

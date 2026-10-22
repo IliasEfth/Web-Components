@@ -8,7 +8,7 @@ Start everything first with `tools\scripts\start-all.bat` (or `docker compose up
 
 ## Act 1: Pure Web Components
 
-**Open** `http://localhost:4100` (`examples/web-components-basics`).
+**Open** `http://localhost:8080` (`examples/web-components-basics`).
 
 - Type a new name: `<user-card>` updates through an attribute and `attributeChangedCallback`.
 - Click the counter: the page hears the `count-changed` event.
@@ -22,7 +22,7 @@ events come out, and that is the whole contract.
 
 ### 2.1 Any framework hosts any other
 
-**Open** `http://localhost:4500/orders` (`backoffice-angular16`).
+**Open** `http://localhost:8080/angular16/orders` (`backoffice-angular16`).
 
 - Click "Open" in the shell's own filter: the **Angular** list filters, the **React** feed logs it.
 - Click a **React** stat tile: the shell's filter and the **Angular** list follow.
@@ -46,9 +46,9 @@ document.querySelector('shop-order-notes').getAttribute('data-vue-version');    
 
 | Shell | Its own version | Hosts |
 | --- | --- | --- |
-| `http://localhost:4200` | React 19 (newer) | React 18 components from Insights |
-| `http://localhost:4400` | Vue 3.4 (older) | Vue 3.5 components from Notes |
-| `http://localhost:4500` | Angular 16 (older) | Angular 22 components from Orders; `app-root` says `ng-version="16.x"` |
+| `http://localhost:8080/react` | React 19 (newer) | React 18 components from Insights |
+| `http://localhost:8080/vue` | Vue 3.4 (older) | Vue 3.5 components from Notes |
+| `http://localhost:8080/angular16` | Angular 16 (older) | Angular 22 components from Orders; `app-root` says `ng-version="16.x"` |
 
 A remote never uses the shell's copy of its framework when the versions do not match: Insights
 brings React 18 into the React 19 shell, Notes brings Vue 3.5 into the Vue 3.4 shell.
@@ -58,7 +58,7 @@ schedule.
 
 ### 2.3 Same components, different host
 
-**Open** `http://localhost:4400/orders` (`backoffice-vue`) and `http://localhost:4200/orders`
+**Open** `http://localhost:8080/vue/orders` (`backoffice-vue`) and `http://localhost:8080/react/orders`
 (`backoffice-react`).
 
 - The same Angular, React and Vue components, unchanged, with no rebuild.
@@ -69,7 +69,7 @@ schedule.
 
 ### 2.4 Independent and resilient
 
-In Docker Desktop, stop the `orders` container and reload `http://localhost:4500/orders`.
+In Docker Desktop, stop the `orders` container and reload `http://localhost:8080/angular16/orders`.
 
 - Only the Orders card shows an error; the Vue and React parts keep working.
 - Start `orders` again in Docker Desktop and click Retry.
@@ -80,11 +80,11 @@ In Docker Desktop, stop the `orders` container and reload `http://localhost:4500
 
 Open `apps/microfrontends/orders/src/app/orders/components/orders-list/orders-list.html` and
 change the heading `Orders` to `Orders to ship`. Save, then deploy only the Orders team's
-service with `tools\scripts\deploy-mf-orders.bat`. Reload `http://localhost:4200/orders`,
-`http://localhost:4400/orders` and `http://localhost:4500/orders`.
+service with `tools\scripts\deploy-mf-orders.bat`. Reload `http://localhost:8080/react/orders`,
+`http://localhost:8080/vue/orders` and `http://localhost:8080/angular16/orders`.
 
 - All three shells show the new heading. None of them was rebuilt or restarted.
-- DevTools, Network tab: the Angular code comes from `localhost:4201`, the Orders team's server.
+- DevTools, Network tab: the Angular code comes from `/orders/`, the Orders team's server behind the gateway.
 - Change the heading back and deploy again with the same script.
 
 **Message:** each team deploys on its own; a new release reaches every page at the next load.
