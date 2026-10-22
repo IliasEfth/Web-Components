@@ -63,9 +63,11 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
    on purpose, the way most Angular developers know it. The Angular
    web components it hosts come from `apps/microfrontends/orders`, on the latest Angular.
    **Every shell runs a different version of its framework than the remote it hosts**, on purpose:
-   React shell 19 / Insights 18, Vue shell 3.4 / Notes 3.5, Angular 16 shell / Orders 22. Do not
-   "upgrade" Insights or the Vue shell. Pin the Vue shell with `~3.4.x` (not `^`) and keep
-   `vue-router` on 4.5; Insights keeps `react-router` 7 (8 needs React 19). Elements stamp the
+   React shell 19 / Insights 18, Vue shell 3.5.42 / Notes 3.5.44, Angular 16 shell / Orders 22. Do
+   not "upgrade" Insights or the Vue shell. Insights keeps `react-router` 7 (8 needs React 19). The
+   Vue shell is pinned to exactly `3.5.42` (no `^` or `~`, which would install 3.5.44): the oldest
+   release without the `@vue/server-renderer` advisory GHSA-g2v6-rqmx-r4w6, which affects Vue up
+   to 3.5.41. Never hold it below that. Each remote loads its own framework copy. Elements stamp the
    version they run on (`ng-version`, `data-react-version`, `data-vue-version`), and each shell's
    header shows its own.
 10. When a guide's code does not work with the installed version, fix it minimally and update
@@ -107,7 +109,7 @@ the host, no internet at runtime. The edge proxies are the only containers on bo
 | 2 | `apps/microfrontends/insights` | React 18, exports `shop-order-stats`, `shop-activity-feed` | `insights:4202/mf/insights/` | none |
 | 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-order-notes` | `notes:4402/mf/notes/` | none |
 | 2 | `apps/backoffices/backoffice-react` | React 19 shell | `backoffice-react:4200/` | `localhost:4200` through its proxy |
-| 2 | `apps/backoffices/backoffice-vue` | Vue 3.4 shell | `backoffice-vue:4400/` | `localhost:4400` through its proxy |
+| 2 | `apps/backoffices/backoffice-vue` | Vue 3.5.42 shell | `backoffice-vue:4400/` | `localhost:4400` through its proxy |
 | 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | `backoffice-angular16:4500/` | `localhost:4500` through its proxy |
 | all | `apps/services/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | `mock-api:3000` | none |
 | all | `tools/edge` | One nginx proxy per shell: `<shell>.conf` and one `Dockerfile.dev` with `ARG SITE` | | 4200, 4400, 4500 |
@@ -193,7 +195,6 @@ every app arrives with its `Dockerfile.dev` and its Compose service.
 | `esbuild` or `rollup` binary errors in a container | Host `node_modules` leaked in: keep `node_modules` in every `.dockerignore` |
 | An event never arrives | Event names are case-sensitive, and the listener must be on the element itself |
 | React 18 (Insights' own pages): the feed stays empty, events never arrive | React 18 passes everything on a custom element as an attribute (`entries="[object Object]"`) and attaches no `on…` listener. Set properties and add listeners through refs; keep Insights' JSX typings to attributes only |
-| Vue 3.4 (Vue shell): the detail and notes do not follow the URL | Destructured `defineProps` is only reactive from Vue 3.5. Use `const props = defineProps()` and `props.orderId` |
 | React 19: a custom element event never arrives | React keeps the name after `on` exactly as written: `onstatusPicked` listens to `statusPicked`; `onStatusPicked` would listen to `StatusPicked` |
 | The activity feed does not update | Assign a new array to `entries`; never mutate it |
 | `Unknown argument: host` from `ng serve` | The federation builder has no `host` option. Put `"host": "0.0.0.0"` in a `docker` configuration of the `serve-original` dev server, point the federation `serve` target's `docker` configuration at it, and run `npm run start:docker` in the image. Local `npm start` keeps `localhost` |

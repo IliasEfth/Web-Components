@@ -5,10 +5,11 @@ Vue + TypeScript template) that puts the Angular components from Orders, the Rea
 from Insights and the Vue components from Notes on one page. It imports none of them. All three
 are loaded at runtime, the first time `/orders` opens. Its colour is green (`#16a34a`).
 
-The shell runs **Vue 3.4** on purpose, one minor version older than the Notes components it
-hosts (Vue 3.5): the header shows the shell's version, and each Notes element carries
-`data-vue-version="3.5.x"`. `package.json` pins `vue` with `~3.4.38`, so npm cannot move it to
-3.5, and uses `vue-router` 4.5, the last line that supports Vue 3.4.
+The shell runs **Vue 3.5.42** on purpose, older than the Notes components it hosts (Vue 3.5.44):
+the header shows the shell's version, and each Notes element carries `data-vue-version="3.5.44"`.
+`package.json` pins `vue` to exactly `3.5.42`, so npm cannot move it to the newer release. It is
+the oldest Vue without the published `@vue/server-renderer` security advisory, which affects every
+version up to 3.5.41, so the shell stays older without being vulnerable.
 
 | Route | What it shows |
 | --- | --- |
@@ -59,10 +60,8 @@ export const moduleFederation = createInstance({
 
 - **The same loaders as the React shell**, with `@module-federation/runtime`; `vite.config.ts`
   has only the Vue plugin.
-- **`shared: {}`.** The shell's Vue 3.4 is never offered: Notes asks for Vue 3.5, so it loads its
-  own Vue 3.5 next to the shell's, and Insights brings its own React.
-- **Props without destructuring.** `const { orderId } = defineProps()` only stays reactive from
-  Vue 3.5, so the pages read `props.orderId`.
+- **`shared: {}`.** The shell's Vue is never offered, so Notes loads its own Vue next to the
+  shell's, and Insights brings its own React.
 - **Orders** is loaded by the orchestrator, exactly as in the React shell.
 - **`isCustomElement`** for `shop-` tags tells the Vue compiler that they are not Vue components.
 
