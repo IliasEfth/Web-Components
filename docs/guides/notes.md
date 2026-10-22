@@ -86,6 +86,7 @@ bubbles nor crosses the shadow root. The contract needs `detail: { status }` wit
 | `component.emits` | for each declared emit, a handler that dispatches the contract `CustomEvent` from the host element (`useHost()`) |
 | `styles` | the component's CSS, imported with Vite's `?inline` suffix |
 | `configureApp` | here `app.use(notes)`, the same plugin the app uses |
+| `data-vue-version` | the host element carries the Vue it runs on, like Angular's `ng-version`; Notes needs Vue 3.5 or later for `useHost()` |
 
 The emit names come from the compiled component, so nothing is listed twice.
 

@@ -2,7 +2,8 @@
 
 `apps/microfrontends/insights` is a regular React application, created with `npm create vite@latest` (React +
 TypeScript template). The same two components are then turned into custom elements without
-changing a line inside them. The app shows both side by side:
+changing a line inside them. It runs on **React 18** on purpose, so the React 19 shell hosts
+components built with an older React. The app shows both side by side:
 
 | Route | What it shows |
 | --- | --- |
@@ -97,27 +98,37 @@ The components import their CSS normally for step 1; `elements.tsx` imports the 
 Vite's `?inline` suffix, which gives the CSS as a string for the shadow root.
 
 `main.tsx` awaits `defineElements(insightsConfig)` before rendering, so the tags exist before the
-first route. The web components page then uses them like any host would:
+first route. The web components page then uses them like any host would, the React 18 way:
 
 ```tsx
-<shop-order-stats
-  refresh-key={String(refreshCount)}
-  onstatusPicked={(event) => log(`statusPicked { status: ${event.detail.status} }`)}
-/>
-<shop-activity-feed entries={entries} oncleared={clear} />
+<shop-order-stats ref={statsRef} refresh-key={String(refreshCount)} />
+<shop-activity-feed ref={feedRef} />
 ```
 
-React 19 handles custom elements itself, much like an Angular template:
+```tsx
+useEffect(() => {
+  const stats = statsRef.current;
+  stats?.addEventListener('statusPicked', statusPicked);
+  return () => stats?.removeEventListener('statusPicked', statusPicked);
+}, [log]);
 
-- **Data in:** `entries={entries}` is set as a property, because the element defines one with that
-  name; `refresh-key` is set as an attribute.
-- **Events out:** a prop starting with `on` becomes `addEventListener` for the rest of the name,
-  **exactly as written**. `onstatusPicked` listens to `statusPicked`; `onStatusPicked` would
-  listen to `StatusPicked`, which never fires. The handler receives the `CustomEvent`, with the
-  value in `event.detail`.
+useEffect(() => {
+  if (feedRef.current) {
+    feedRef.current.entries = entries;
+  }
+}, [entries]);
+```
 
-`web-components/custom-elements.d.ts` builds the JSX typings for the two tags from the contract:
-attributes, properties, and an `on<event>` prop per event, typed with its `detail`.
+React 18 passes everything on a custom element as an attribute: an array would arrive as
+`entries="[object Object]"`, and an `on…` prop attaches no listener. So the page sets the
+`entries` property and listens to `statusPicked` and `cleared` through refs. React 19 binds
+properties and events in JSX directly; the React shell shows that side.
+
+`web-components/custom-elements.d.ts` builds the JSX typings for the two tags from the contract,
+with attributes only, which is what React 18 can pass.
+
+Each element stamps the React it runs on, like Angular's `ng-version`:
+`<shop-order-stats data-react-version="18.3.1">`.
 
 ## Step 3: share it with Module Federation
 
@@ -138,8 +149,9 @@ federation({
 
 - **`exposes`** publishes `elements.tsx` and nothing else: the shells get `defineElements`, never
   the app's pages or router.
-- **`shared`** lets a React shell provide its own React; a Vue or Angular shell has none, so the
-  remote falls back to its own copy.
+- **`shared`** lets a shell provide React when its version matches what Insights asks for
+  (`^18.3.1`). The React shell offers React 19, the Vue and Angular shells offer none, so in every
+  shell Insights falls back to its own React 18.
 - **`server.origin`** is set to `http://localhost:4202`, so the files the remote entry points to
   are always loaded from the remote, not from the shell's origin.
 

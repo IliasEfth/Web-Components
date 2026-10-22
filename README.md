@@ -37,8 +37,9 @@ its own server:
 Three shells load them at runtime, through Native Federation and Module Federation, and put all
 of them on one page: [`backoffice-react`](apps/backoffices/backoffice-react),
 [`backoffice-vue`](apps/backoffices/backoffice-vue) and
-[`backoffice-angular16`](apps/backoffices/backoffice-angular16). The Angular 16 shell hosts
-components built with the latest Angular, so two Angular versions run side by side. No app
+[`backoffice-angular16`](apps/backoffices/backoffice-angular16). Every shell runs a different version of its
+framework than the micro-frontend it hosts: the React 19 shell hosts React 18 components, the
+Vue 3.4 shell hosts Vue 3.5 components, and the Angular 16 shell hosts the latest Angular. No app
 imports another app's code, and a new release of a remote reaches every shell at the next page
 load. They use the same contract as act 1:
 
@@ -92,13 +93,13 @@ apps/
   microfrontends/           the apps that export custom elements
     orders/                 act 2   latest Angular
       contract/                     @shop/orders-contract
-    insights/               act 2   React 19
+    insights/               act 2   React 18
       contract/                     @shop/insights-contract
     notes/                  act 2   Vue 3.5
       contract/                     @shop/notes-contract
   backoffices/              the shells that host them
-    backoffice-react/       act 2   React
-    backoffice-vue/         act 2   Vue
+    backoffice-react/       act 2   React 19
+    backoffice-vue/         act 2   Vue 3.4
     backoffice-angular16/   act 2   Angular 16
 tools/
   mock-api/                 the orders REST API

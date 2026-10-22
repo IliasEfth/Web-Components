@@ -5,6 +5,10 @@ template) that puts the Angular components from Orders, the React components fro
 the Vue components from Notes on one page. It imports none of them. All three are loaded at
 runtime, the first time `/orders` opens. Its colour is blue (`#2563eb`).
 
+The shell runs **React 19**, the newest React, while the Insights components it hosts run on
+React 18: the header shows the shell's version, and each Insights element carries
+`data-react-version="18.3.1"`.
+
 | Route | What it shows |
 | --- | --- |
 | `http://localhost:4200/dashboard` | Plain React with no remote: counts, revenue, and links to the open orders |
@@ -42,7 +46,7 @@ Three packages are added to the template:
 | --- | --- |
 | `react-router` | The shell owns the URL. The order id in `/orders/:orderId` becomes `order-id` |
 | `@softarc/native-federation-orchestrator` | The Native Federation runtime for any page; loads Orders' `remoteEntry.json` |
-| `@module-federation/vite` (dev) | Loads Insights' and Notes' `remoteEntry.js` and shares the shell's React |
+| `@module-federation/vite` (dev) | Loads Insights' and Notes' `remoteEntry.js` and offers the shell's React to them |
 
 And the four contracts, as dev dependencies installed from their teams' folders:
 `@shop/api-contract`, `@shop/orders-contract`, `@shop/insights-contract` and
@@ -107,15 +111,16 @@ export function loadNotesElements(): Promise<void> {
   }),
   ```
 
-  `shared` gives Insights the shell's React, so one React runs on the page; Notes brings its own
-  Vue. `shareStrategy: 'loaded-first'` keeps the remotes lazy: nothing is fetched before
+  `shared` offers the shell's React 19 to the remotes. Insights asks for React 18, so it does not
+  match and Insights loads its own React 18 next to the shell's React 19; Notes brings its own Vue. `shareStrategy: 'loaded-first'` keeps the remotes lazy: nothing is fetched before
   `/orders` opens.
 - **Retrying.** A failed load resets the cached promise, so Retry starts again.
 
 ## The page wires everything
 
 React 19 binds custom elements like an Angular template: properties and attributes go in, and
-`on` plus the exact event name adds a listener.
+`on` plus the exact event name adds a listener. (Insights' own page, on React 18, needs refs for
+the same elements; see [insights.md](insights.md).)
 
 ```tsx
 <shop-status-filter value={status} onstatusChange={(event) => setStatus(event.detail.status)} />

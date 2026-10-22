@@ -35,14 +35,26 @@ host listens to events and sets attributes. None of them imports another framewo
 
 ### 2.2 Versions don't matter
 
-In the browser console:
+Every shell's header names its own framework version, and every element stamps the version it
+runs on. In the browser console, on any of the three `/orders` pages:
 
 ```js
-document.querySelector('app-root').getAttribute('ng-version');         // 16.x: the host
-document.querySelector('shop-orders-list').getAttribute('ng-version'); // the current Angular
+document.querySelector('shop-orders-list').getAttribute('ng-version');           // 22.x
+document.querySelector('shop-order-stats').getAttribute('data-react-version');   // 18.x
+document.querySelector('shop-status-filter').getAttribute('data-vue-version');   // 3.5.x
 ```
 
-**Message:** Angular 16 and a current Angular run side by side. Teams upgrade on their own schedule.
+| Shell | Its own version | Hosts |
+| --- | --- | --- |
+| `http://localhost:4200` | React 19 (newer) | React 18 components from Insights |
+| `http://localhost:4400` | Vue 3.4 (older) | Vue 3.5 components from Notes |
+| `http://localhost:4500` | Angular 16 (older) | Angular 22 components from Orders; `app-root` says `ng-version="16.x"` |
+
+A remote never uses the shell's copy of its framework when the versions do not match: Insights
+brings React 18 into the React 19 shell, Notes brings Vue 3.5 into the Vue 3.4 shell.
+
+**Message:** versions don't have to match, in either direction. Teams upgrade on their own
+schedule.
 
 ### 2.3 Same components, different host
 
