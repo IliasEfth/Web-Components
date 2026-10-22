@@ -4,7 +4,6 @@ FROM node:${NODE_VERSION} AS dev
 
 WORKDIR /repo/apps/backoffices/backoffice-react
 
-COPY tools/mock-api/contract /repo/tools/mock-api/contract
 COPY apps/microfrontends/insights/contract /repo/apps/microfrontends/insights/contract
 COPY apps/microfrontends/notes/contract /repo/apps/microfrontends/notes/contract
 COPY apps/microfrontends/orders/contract /repo/apps/microfrontends/orders/contract

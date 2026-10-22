@@ -1,40 +1,22 @@
 <p class="intro">
-  A plain Angular 16 page: no remote is loaded here. Open an order to jump into the latest
-  Angular detail through the URL.
+  The shell never calls the API: the statistics come from Insights, the open orders from Orders.
+  Open an order to see its detail.
 </p>
 
-<section *ngIf="loadFailed" class="card remote-card remote-card--failed" role="alert">
-  <h2>The orders could not load</h2>
-</section>
+<div class="stack">
+  <app-remote-gate name="Insights" [load]="loadInsights">
+    <ng-template>
+      <shop-order-stats></shop-order-stats>
+    </ng-template>
+  </app-remote-gate>
 
-<ng-container *ngIf="dashboard$ | async as dashboard; else loading">
-  <div class="tiles">
-    <section class="card tile">
-      <span class="tile__label">Open orders</span>
-      <span class="tile__value">{{ dashboard.openOrders.length }}</span>
-    </section>
-    <section class="card tile">
-      <span class="tile__label">Shipped orders</span>
-      <span class="tile__value">{{ dashboard.shippedCount }}</span>
-    </section>
-    <section class="card tile">
-      <span class="tile__label">Revenue</span>
-      <span class="tile__value">{{ dashboard.revenue | currency: 'EUR' }}</span>
-    </section>
-  </div>
-
-  <section class="card">
-    <h2>Waiting to ship</h2>
-    <ul class="order-links">
-      <li *ngFor="let order of dashboard.openOrders">
-        <a [routerLink]="['/orders', order.id]">{{ order.id }}</a>
-        <span>{{ order.customer }}</span>
-        <span>{{ order.total | currency: 'EUR' }}</span>
-      </li>
-    </ul>
-  </section>
-</ng-container>
-
-<ng-template #loading>
-  <section *ngIf="!loadFailed" class="card remote-card">Loading the orders…</section>
-</ng-template>
+  <app-remote-gate name="Orders" [load]="loadOrders">
+    <ng-template>
+      <shop-orders-list
+        status="open"
+        page-size="5"
+        (orderSelected)="orderSelected($event)"
+      ></shop-orders-list>
+    </ng-template>
+  </app-remote-gate>
+</div>

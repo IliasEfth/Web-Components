@@ -41,11 +41,11 @@ All     tools/mock-api :3000   GET/PATCH /orders · GET/POST /orders/:id/notes
 
 | Concern | Rule | Why |
 | --- | --- | --- |
-| Configuration | Passed once to `defineElements({ apiBase, getAuthToken })`, never as attributes | The same as dependency injection inside a framework app; tokens never appear in the DOM |
+| Configuration | Each remote knows its own API endpoint; the host passes none | Elements are standalone: a host only loads them and places them |
 | Host to element | Strings and numbers as kebab-case attributes; objects and arrays as properties | Attributes show in DevTools and work from plain HTML |
 | Element to host | `CustomEvent` with `bubbles: true, composed: true` and an object `detail` | Crosses Shadow DOM and works in every framework |
 | Element to element | Always through the host | Each element stays usable and understandable on its own |
-| Loading a remote | Each remote exports one idempotent `defineElements(config): Promise<void>` | Safe to call from every page and every host; the first call's configuration wins |
+| Loading a remote | Each remote exports one idempotent `defineElements(): Promise<void>` | Safe to call from every page and every host |
 | Routing | The host owns the URL and passes state down as inputs | Deep links (`/orders/A-1003`) set `order-id` |
 | Styling | Each component styles itself inside its Shadow DOM and reads the host's `--shop-*` custom properties | Custom properties cross the shadow boundary; nothing else leaks, so the host decides the colours |
 | Rendering data | `textContent` only: never `innerHTML`, `dangerouslySetInnerHTML`, `v-html` or `[innerHTML]` | Customer data cannot run code |
@@ -78,7 +78,9 @@ export interface IOrdersListContract {
 }
 ```
 
-Every app writes its own HTTP client for the operations it calls, and declares which ones:
+Only the micro-frontends call the API, each with the endpoint it knows; the shells never do and
+pass no configuration. Every micro-frontend writes its own HTTP client for the operations it calls, and
+declares which ones:
 
 ```ts
 export class OrdersClient implements Pick<IOrdersApi, 'listOrders'> {
@@ -103,19 +105,13 @@ the contract packages catch at build time.
 `status` is one of `all`, `open`, `shipped`. Event names are case-sensitive: `orderSelected`,
 never `orderselected`.
 
-Every remote that calls the API is configured once, before its tags are used:
+A host defines a remote's tags once, before it uses them, with no arguments:
 
 ```ts
-interface IRemoteConfig {
-  apiBase: string;
-  getAuthToken?: () => string | undefined;
-}
-
-await defineElements({ apiBase: 'http://localhost:3000' });
+await defineElements();
 ```
 
-`getAuthToken` is a function, so a host can hand over a token that changes after login without
-redefining anything.
+Each remote reads its API address from its own configuration, the same one its own pages use.
 
 ### Theme tokens
 

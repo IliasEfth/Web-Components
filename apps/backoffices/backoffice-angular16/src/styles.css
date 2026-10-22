@@ -81,47 +81,6 @@ h2 {
   background: var(--shop-color-primary);
 }
 
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.tile {
-  display: grid;
-  gap: 4px;
-}
-
-.tile__label {
-  color: #6b7280;
-}
-
-.tile__value {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--shop-color-primary);
-}
-
-.order-links {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.order-links li {
-  display: grid;
-  grid-template-columns: 100px 1fr auto;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--shop-border);
-}
-
-.order-links a {
-  font-weight: 600;
-  color: var(--shop-color-primary);
-}
-
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
@@ -132,10 +91,6 @@ h2 {
 .stack {
   display: grid;
   gap: 16px;
-}
-
-.filter {
-  margin: 16px 0;
 }
 
 .remote-card {
@@ -157,8 +112,7 @@ h2 {
 }
 
 @media (max-width: 720px) {
-  .layout,
-  .tiles {
+  .layout {
     grid-template-columns: 1fr;
   }
 }

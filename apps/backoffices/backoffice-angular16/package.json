@@ -35,7 +35,6 @@
     "@angular-eslint/template-parser": "16.3.1",
     "@angular/cli": "^16.2.16",
     "@angular/compiler-cli": "^16.2.0",
-    "@shop/api-contract": "file:../../../tools/mock-api/contract",
     "@shop/insights-contract": "file:../../microfrontends/insights/contract",
     "@shop/notes-contract": "file:../../microfrontends/notes/contract",
     "@shop/orders-contract": "file:../../microfrontends/orders/contract",

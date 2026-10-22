@@ -6,7 +6,6 @@ ENV NG_CLI_ANALYTICS=false
 
 WORKDIR /repo/apps/backoffices/backoffice-angular16
 
-COPY tools/mock-api/contract /repo/tools/mock-api/contract
 COPY apps/microfrontends/insights/contract /repo/apps/microfrontends/insights/contract
 COPY apps/microfrontends/notes/contract /repo/apps/microfrontends/notes/contract
 COPY apps/microfrontends/orders/contract /repo/apps/microfrontends/orders/contract

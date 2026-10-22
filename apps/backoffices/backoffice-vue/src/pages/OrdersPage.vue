@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { OrderStatusFilter } from '@shop/api-contract';
 import type { IStatusPickedDetail } from '@shop/insights-contract';
 import type { INoteAddedDetail } from '@shop/notes-contract';
 import type {
   IOrderClosedDetail,
   IOrderSelectedDetail,
   IOrderUpdatedDetail,
+  OrderStatusFilter,
 } from '@shop/orders-contract';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';

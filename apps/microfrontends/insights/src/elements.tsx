@@ -2,7 +2,6 @@ import type {
   IActivityFeedContract,
   IInsightsRemote,
   IOrderStatsContract,
-  IRemoteConfig,
 } from '@shop/insights-contract';
 import type { ReactNode } from 'react';
 import { ActivityFeed } from './insights/components/activity-feed/ActivityFeed';
@@ -10,18 +9,19 @@ import activityFeedStyles from './insights/components/activity-feed/activity-fee
 import { OrderStats } from './insights/components/order-stats/OrderStats';
 import orderStatsStyles from './insights/components/order-stats/order-stats.css?inline';
 import { InsightsProvider } from './insights/config/InsightsProvider';
+import { insightsConfig } from './insights/config/insights-config';
 import { defineReactElement } from './web-components/define-react-element';
 
 let elementsDefined: Promise<void> | undefined;
 
-export const defineElements: IInsightsRemote['defineElements'] = (config) => {
-  elementsDefined ??= Promise.resolve().then(() => registerElements(config));
+export const defineElements: IInsightsRemote['defineElements'] = () => {
+  elementsDefined ??= Promise.resolve().then(() => registerElements());
   return elementsDefined;
 };
 
-function registerElements(config: IRemoteConfig): void {
+function registerElements(): void {
   const withInsights = (element: ReactNode) => (
-    <InsightsProvider config={config}>{element}</InsightsProvider>
+    <InsightsProvider config={insightsConfig}>{element}</InsightsProvider>
   );
 
   defineReactElement('shop-order-stats' satisfies IOrderStatsContract['tagName'], OrderStats, {

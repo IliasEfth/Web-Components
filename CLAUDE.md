@@ -48,7 +48,8 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    `@shop/<name>-contract`). Consumers install it as a `devDependency` with `npm install <folder>`
    (a `file:` link); nothing is published to a registry (`"private": true`). No app keeps a copy
    of a shared type: models, parameters, event details and `defineElements` come from the
-   contracts. Each app writes its own HTTP client for the operations it calls and declares them
+   contracts. Only micro-frontends call the API, each with its own endpoint; `defineElements()`
+   takes no configuration, and shells pass none. Each micro-frontend writes its own HTTP client for the operations it calls and declares them
    (`implements Pick<IOrdersApi, '…'>`); each remote's elements are checked against their contract.
 7. **Strict TypeScript** (`"strict": true`) in every TypeScript project. Plain JavaScript only
    where the point is "no build": `examples/`.

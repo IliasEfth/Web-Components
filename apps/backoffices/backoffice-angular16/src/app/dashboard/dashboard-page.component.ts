@@ -1,36 +1,23 @@
 import { Component } from '@angular/core';
-import type { IOrder } from '@shop/api-contract';
-import { EMPTY, Observable, catchError, map } from 'rxjs';
-import { OrdersClientService } from '../services/orders-client.service';
-
-interface IDashboard {
-  openOrders: IOrder[];
-  shippedCount: number;
-  revenue: number;
-}
+import { Router } from '@angular/router';
+import type { IOrderSelectedDetail } from '@shop/orders-contract';
+import { RemoteElementsService } from '../services/remote-elements.service';
 
 @Component({
   selector: 'app-dashboard-page',
   templateUrl: './dashboard-page.component.html',
 })
 export class DashboardPageComponent {
-  readonly dashboard$: Observable<IDashboard>;
-  loadFailed = false;
+  readonly loadOrders = () => this.remoteElements.loadOrders();
+  readonly loadInsights = () => this.remoteElements.loadInsights();
 
-  constructor(ordersClient: OrdersClientService) {
-    this.dashboard$ = ordersClient.listOrders().pipe(
-      map((orders) => {
-        const openOrders = orders.filter((order) => order.status === 'open');
-        return {
-          openOrders,
-          shippedCount: orders.length - openOrders.length,
-          revenue: orders.reduce((sum, order) => sum + order.total, 0),
-        };
-      }),
-      catchError(() => {
-        this.loadFailed = true;
-        return EMPTY;
-      }),
-    );
+  constructor(
+    private readonly router: Router,
+    private readonly remoteElements: RemoteElementsService,
+  ) {}
+
+  orderSelected(event: Event): void {
+    const { id } = (event as CustomEvent<IOrderSelectedDetail>).detail;
+    this.router.navigate(['/orders', id]);
   }
 }

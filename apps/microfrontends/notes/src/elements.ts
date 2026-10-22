@@ -1,7 +1,8 @@
-import type { INotesRemote, IRemoteConfig, NotesContracts } from '@shop/notes-contract';
+import type { INotesRemote, NotesContracts } from '@shop/notes-contract';
 import OrderNotes from './notes/components/order-notes/OrderNotes.vue';
 import orderNotesStyles from './notes/components/order-notes/order-notes.css?inline';
 import { createNotes } from './notes/config/create-notes';
+import { notesConfig } from './notes/config/notes-config';
 import {
   type IVueElementOptions,
   type VueComponent,
@@ -35,13 +36,13 @@ type ImplementsContract<TComponent, TContract extends NotesContracts> = [
 
 let elementsDefined: Promise<void> | undefined;
 
-export const defineElements: INotesRemote['defineElements'] = (config) => {
-  elementsDefined ??= Promise.resolve().then(() => registerElements(config));
+export const defineElements: INotesRemote['defineElements'] = () => {
+  elementsDefined ??= Promise.resolve().then(() => registerElements());
   return elementsDefined;
 };
 
-function registerElements(config: IRemoteConfig): void {
-  const notes = createNotes(config);
+function registerElements(): void {
+  const notes = createNotes(notesConfig);
 
   defineNotesElement('shop-order-notes', OrderNotes, {
     styles: [orderNotesStyles],

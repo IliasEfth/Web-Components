@@ -1,4 +1,4 @@
-import type { OrderStatusFilter } from '@shop/api-contract';
+import type { OrderStatusFilter } from '@shop/orders-contract';
 
 const statuses: OrderStatusFilter[] = ['all', 'open', 'shipped'];
 

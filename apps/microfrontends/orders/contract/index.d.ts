@@ -2,13 +2,8 @@ export type OrderStatus = 'open' | 'shipped';
 
 export type OrderStatusFilter = OrderStatus | 'all';
 
-export interface IRemoteConfig {
-  apiBase: string;
-  getAuthToken?: () => string | undefined;
-}
-
 export interface IOrdersRemote {
-  defineElements(config: IRemoteConfig): Promise<void>;
+  defineElements(): Promise<void>;
 }
 
 export interface IOrderSelectedDetail {

@@ -24,6 +24,7 @@ src/
     services/
       order-stats-service.ts      OrderStatsService: what the components use; calls the client
     config/
+      insights-config.ts          IInsightsConfig and the API address
       InsightsProvider.tsx        creates the client and the service, provides them through context
       useOrderStatsService.ts     the hook components use to get the service
     components/
@@ -32,8 +33,8 @@ src/
   pages/                          one page per route
   shared/useActivityLog.ts
   web-components/                 the transformation (step 2)
-  elements.tsx                     defineElements(config)
-  main.tsx  App.tsx  router.tsx  app-config.ts
+  elements.tsx                     defineElements()
+  main.tsx  App.tsx  router.tsx
 ```
 
 **Configuration through context.** React's equivalent of Angular's providers is a context
@@ -97,7 +98,7 @@ export const defineElements: IInsightsRemote['defineElements'] = (config) => {
 The components import their CSS normally for step 1; `elements.tsx` imports the same files with
 Vite's `?inline` suffix, which gives the CSS as a string for the shadow root.
 
-`main.tsx` awaits `defineElements(insightsConfig)` before rendering, so the tags exist before the
+`main.tsx` awaits `defineElements()` before rendering, so the tags exist before the
 first route. The web components page then uses them like any host would, the React 18 way:
 
 ```tsx
@@ -175,7 +176,7 @@ federation({
 });
 
 const { defineElements } = await import('insights/elements');
-await defineElements({ apiBase: 'http://localhost:3000' });
+await defineElements();
 ```
 
 **Two federation systems.** Orders uses Native Federation (`remoteEntry.json`), Insights uses
@@ -190,7 +191,7 @@ loader per system, the same `defineElements` contract behind each.
 | Usable from | this React app only | any page: Angular, Vue, Angular 16, plain HTML |
 | Data in | props, typed | attribute `refresh-key`, property `entries` |
 | Events out | `onStatusPicked(detail)` | `CustomEvent('statusPicked')`, value in `event.detail` |
-| Configuration | `<InsightsProvider config>` | `defineElements({ apiBase })` once |
+| Configuration | `<InsightsProvider config>` | none: `defineElements()` once, the element knows its API |
 
 ## Run it
 
