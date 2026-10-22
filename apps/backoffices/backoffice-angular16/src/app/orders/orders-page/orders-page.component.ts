@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { OrderStatusFilter } from '@shop/api-contract';
 import type { IActivityEntry, IStatusPickedDetail } from '@shop/insights-contract';
-import type { INoteAddedDetail, IStatusChangeDetail } from '@shop/notes-contract';
+import type { INoteAddedDetail } from '@shop/notes-contract';
 import type {
   IOrderClosedDetail,
   IOrderSelectedDetail,
@@ -34,10 +34,9 @@ export class OrdersPageComponent {
     this.orderId$ = route.paramMap.pipe(map((params) => params.get('orderId')));
   }
 
-  statusChanged(event: Event): void {
-    const { status } = (event as CustomEvent<IStatusChangeDetail>).detail;
+  filterChanged(status: OrderStatusFilter): void {
     this.status = status;
-    this.log(`statusChange { status: ${status} }`);
+    this.log(`filter: status ${status}`);
   }
 
   statusPicked(event: Event): void {

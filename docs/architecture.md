@@ -15,7 +15,7 @@ One online shop back office, told in two acts:
 | 1 | `examples/web-components-basics` | Three native components | none | 4100 | static files |
 | 2 | `apps/microfrontends/orders` | Remote: order list and order detail | current Angular, zoneless | 4201 | `remoteEntry.json` (Native Federation) |
 | 2 | `apps/microfrontends/insights` | Remote: order statistics and activity feed | React 18 | 4202 | `remoteEntry.js` (Module Federation) |
-| 2 | `apps/microfrontends/notes` | Remote: status filter and order notes | Vue 3.5 | 4402 | `remoteEntry.js` (Module Federation) |
+| 2 | `apps/microfrontends/notes` | Remote: order notes | Vue 3.5 | 4402 | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | 4200 | the site |
 | 2 | `apps/backoffices/backoffice-vue` | Host, on an older Vue | Vue 3.4 + Vue Router | 4400 | the site |
 | 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | 4500 | the site |
@@ -32,7 +32,6 @@ Act 2   remotes                                   hosts
           shop-order-stats                 │
           shop-activity-feed               │
         apps/microfrontends/notes      Vue      :4402  ──┘
-          shop-status-filter
           shop-order-notes
 
 All     tools/mock-api :3000   GET/PATCH /orders · GET/POST /orders/:id/notes
@@ -65,7 +64,7 @@ stops the build of the owner and of every app that uses it.
 | `@shop/api-contract` | `tools/mock-api/contract` | the models, the parameters and `IOrdersApi`: one documented method per HTTP operation |
 | `@shop/orders-contract` | `apps/microfrontends/orders/contract` | `shop-orders-list`, `shop-order-detail` and `defineElements` |
 | `@shop/insights-contract` | `apps/microfrontends/insights/contract` | `shop-order-stats`, `shop-activity-feed` and `defineElements` |
-| `@shop/notes-contract` | `apps/microfrontends/notes/contract` | `shop-status-filter`, `shop-order-notes` and `defineElements` |
+| `@shop/notes-contract` | `apps/microfrontends/notes/contract` | `shop-order-notes` and `defineElements` |
 
 Each element contract has the same shape, so a host can turn any of them into typings for its
 own framework with one generic type:
@@ -99,7 +98,6 @@ the contract packages catch at build time.
 | `shop-order-detail` | `apps/microfrontends/orders` | `order-id` | `orderUpdated` `{ id, status }`, `closed` `{ id }` |
 | `shop-order-stats` | `apps/microfrontends/insights` | `refresh-key` | `statusPicked` `{ status }` |
 | `shop-activity-feed` | `apps/microfrontends/insights` | property `entries` (assign a new array to update) | `cleared` |
-| `shop-status-filter` | `apps/microfrontends/notes` | `value` | `statusChange` `{ status }` |
 | `shop-order-notes` | `apps/microfrontends/notes` | `order-id` | `noteAdded` `{ orderId, text }` |
 
 `status` is one of `all`, `open`, `shipped`. Event names are case-sensitive: `orderSelected`,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { OrderStatusFilter } from '@shop/api-contract';
 import type { IStatusPickedDetail } from '@shop/insights-contract';
-import type { INoteAddedDetail, IStatusChangeDetail } from '@shop/notes-contract';
+import type { INoteAddedDetail } from '@shop/notes-contract';
 import type {
   IOrderClosedDetail,
   IOrderSelectedDetail,
@@ -9,6 +9,7 @@ import type {
 } from '@shop/orders-contract';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import StatusFilter from '../components/StatusFilter.vue';
 import { loadInsightsElements } from '../remotes/insights-remote';
 import { loadNotesElements } from '../remotes/notes-remote';
 import { loadOrdersElements } from '../remotes/orders-remote';
@@ -22,9 +23,8 @@ const status = ref<OrderStatusFilter>('all');
 const refreshCount = ref(0);
 const { entries, log, clear } = useActivityLog();
 
-function statusChanged(event: CustomEvent<IStatusChangeDetail>): void {
-  status.value = event.detail.status;
-  log(`statusChange { status: ${event.detail.status} }`);
+function filterChanged(next: OrderStatusFilter): void {
+  log(`filter: status ${next}`);
 }
 
 function statusPicked(event: CustomEvent<IStatusPickedDetail>): void {
@@ -54,13 +54,11 @@ function noteAdded(event: CustomEvent<INoteAddedDetail>): void {
 
 <template>
   <p class="intro">
-    Vue owns the URL and the layout. The filter and the notes are Vue, the list and the detail
-    are Angular, the statistics and the feed are React. They meet only in this page.
+    Vue owns the URL, the filter and the layout. The list and the detail are Angular, the
+    statistics and the feed are React, the notes are Vue. They meet only in this page.
   </p>
 
-  <RemoteGate name="Notes" :load="loadNotesElements">
-    <shop-status-filter class="filter" :value="status" @statusChange="statusChanged" />
-  </RemoteGate>
+  <StatusFilter v-model="status" @update:model-value="filterChanged" />
 
   <div class="layout">
     <RemoteGate name="Orders" :load="loadOrdersElements">
