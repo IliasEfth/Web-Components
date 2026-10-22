@@ -1,4 +1,4 @@
-import { type ComponentType, type ReactNode, createElement } from 'react';
+import { type ComponentType, type ReactNode, createElement, version } from 'react';
 import { type Root, createRoot } from 'react-dom/client';
 
 type CallbackProp<TProps> = {
@@ -71,6 +71,7 @@ export function defineReactElement<
     }
 
     connectedCallback(): void {
+      this.dataset['reactVersion'] = version;
       this.#root ??= createRoot(this.#shadow);
       this.#render();
     }

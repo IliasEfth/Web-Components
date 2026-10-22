@@ -6,20 +6,20 @@ type RemoteState =
   | { status: 'ready' }
   | { status: 'failed'; message: string };
 
-const { name, load } = defineProps<{ name: string; load: () => Promise<void> }>();
+const props = defineProps<{ name: string; load: () => Promise<void> }>();
 
 const state = ref<RemoteState>({ status: 'loading' });
 const attempt = ref(0);
 
 watch(
-  [() => load, attempt],
+  [() => props.load, attempt],
   (_values, _previous, onCleanup) => {
     let active = true;
     onCleanup(() => {
       active = false;
     });
     state.value = { status: 'loading' };
-    load().then(
+    props.load().then(
       () => {
         if (active) state.value = { status: 'ready' };
       },
