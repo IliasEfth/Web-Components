@@ -77,5 +77,5 @@ app.use((_request, response) => {
 });
 
 app.listen(port, () => {
-  console.log(`Mock API ready on http://localhost:${port}/orders`);
+  console.log('Mock API ready');
 });
