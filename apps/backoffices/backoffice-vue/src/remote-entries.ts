@@ -1,5 +1,5 @@
 export const remoteEntries = {
-  orders: '/orders/remoteEntry.json',
-  insights: '/insights/remoteEntry.js',
-  notes: '/notes/remoteEntry.js',
+  orders: '/mf/orders/remoteEntry.json',
+  insights: '/mf/insights/remoteEntry.js',
+  notes: '/mf/notes/remoteEntry.js',
 };

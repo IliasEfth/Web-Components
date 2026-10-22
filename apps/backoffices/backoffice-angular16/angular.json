@@ -45,7 +45,6 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/backoffice-angular16",
-            "baseHref": "/angular16/",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -91,8 +90,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "port": 4500,
-            "servePath": "/angular16/"
+            "port": 4500
           },
           "configurations": {
             "production": {

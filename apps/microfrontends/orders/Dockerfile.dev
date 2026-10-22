@@ -18,6 +18,6 @@ COPY apps/microfrontends/orders ./
 EXPOSE 4201
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=30s --retries=10 \
-  CMD wget -qO- http://127.0.0.1:4201/orders/ > /dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1:4201/mf/orders/ > /dev/null || exit 1
 
 CMD ["npm", "run", "start:docker"]

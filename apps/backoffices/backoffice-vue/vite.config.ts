@@ -4,7 +4,6 @@ import { defineConfig } from 'vite';
 import { remoteEntries } from './src/remote-entries.ts';
 
 export default defineConfig({
-  base: '/vue/',
   plugins: [
     vue({
       template: {

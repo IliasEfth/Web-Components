@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/insights/',
+  base: '/mf/insights/',
   plugins: [
     react({ exclude: [/\/node_modules\//, /\/src\/insights\//] }),
     federation({
