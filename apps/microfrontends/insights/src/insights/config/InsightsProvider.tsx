@@ -15,5 +15,9 @@ export function InsightsProvider({ config, children }: IInsightsProviderProps) {
     [config],
   );
 
-  return <OrderStatsServiceContext value={orderStatsService}>{children}</OrderStatsServiceContext>;
+  return (
+    <OrderStatsServiceContext.Provider value={orderStatsService}>
+      {children}
+    </OrderStatsServiceContext.Provider>
+  );
 }

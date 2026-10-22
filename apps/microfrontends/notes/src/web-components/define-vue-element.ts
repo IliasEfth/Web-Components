@@ -6,6 +6,7 @@ import {
   h,
   toHandlerKey,
   useHost,
+  version,
 } from 'vue';
 
 export type VueComponent = Component & {
@@ -37,6 +38,7 @@ export function defineVueElement(
       styles,
       setup(props) {
         const host = useHost();
+        host?.setAttribute('data-vue-version', version);
         const dispatchers = Object.fromEntries(
           eventNames.map((eventName) => [
             toHandlerKey(eventName),

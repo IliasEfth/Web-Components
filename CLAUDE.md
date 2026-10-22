@@ -64,6 +64,12 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    Angular 16 with Zone.js, `*ngIf`, `@Input()` and NgModules (`AppModule`, `AppRoutingModule`, no standalone components)
    on purpose, the way most Angular developers know it. The Angular
    web components it hosts come from `apps/microfrontends/orders`, on the latest Angular.
+   **Every shell runs a different version of its framework than the remote it hosts**, on purpose:
+   React shell 19 / Insights 18, Vue shell 3.4 / Notes 3.5, Angular 16 shell / Orders 22. Do not
+   "upgrade" Insights or the Vue shell. Pin the Vue shell with `~3.4.x` (not `^`) and keep
+   `vue-router` on 4.5; Insights keeps `react-router` 7 (8 needs React 19). Elements stamp the
+   version they run on (`ng-version`, `data-react-version`, `data-vue-version`), and each shell's
+   header shows its own.
 10. When a guide's code does not work with the installed version, fix it minimally and update
     the guide in the same change.
 11. **Everything runs through Docker**, following Docker's official guides
@@ -82,10 +88,10 @@ in `apps/backoffices/`. A reader should see from the path which side an app is o
 | --- | --- | --- | --- | --- |
 | 1 | `examples/web-components-basics` | Three native Web Components | 4100 | `web-components-basics` |
 | 2 | `apps/microfrontends/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | 4201 | `orders` |
-| 2 | `apps/microfrontends/insights` | React, exports `shop-order-stats`, `shop-activity-feed` | 4202 | `insights` |
-| 2 | `apps/microfrontends/notes` | Vue, exports `shop-status-filter`, `shop-order-notes` | 4402 | `notes` |
-| 2 | `apps/backoffices/backoffice-react` | React shell | 4200 | `backoffice-react` |
-| 2 | `apps/backoffices/backoffice-vue` | Vue shell | 4400 | `backoffice-vue` |
+| 2 | `apps/microfrontends/insights` | React 18, exports `shop-order-stats`, `shop-activity-feed` | 4202 | `insights` |
+| 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-status-filter`, `shop-order-notes` | 4402 | `notes` |
+| 2 | `apps/backoffices/backoffice-react` | React 19 shell | 4200 | `backoffice-react` |
+| 2 | `apps/backoffices/backoffice-vue` | Vue 3.4 shell | 4400 | `backoffice-vue` |
 | 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | 4500 | `backoffice-angular16` |
 | all | `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | 3000 | `mock-api` |
 
@@ -147,6 +153,8 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | nginx container is "unhealthy" but the page loads | Alpine resolves `localhost` to `::1`: nginx needs `listen [::]:80;` as well as `listen 80;` |
 | `esbuild` or `rollup` binary errors in a container | Host `node_modules` leaked in: keep `node_modules` in every `.dockerignore` |
 | An event never arrives | Event names are case-sensitive, and the listener must be on the element itself |
+| React 18 (Insights' own pages): the feed stays empty, events never arrive | React 18 passes everything on a custom element as an attribute (`entries="[object Object]"`) and attaches no `on…` listener. Set properties and add listeners through refs; keep Insights' JSX typings to attributes only |
+| Vue 3.4 (Vue shell): the detail and notes do not follow the URL | Destructured `defineProps` is only reactive from Vue 3.5. Use `const props = defineProps()` and `props.orderId` |
 | React 19: a custom element event never arrives | React keeps the name after `on` exactly as written: `onstatusPicked` listens to `statusPicked`; `onStatusPicked` would listen to `StatusPicked` |
 | The activity feed does not update | Assign a new array to `entries`; never mutate it |
 | `Unknown argument: host` from `ng serve` | The federation builder has no `host` option. Put `"host": "0.0.0.0"` in a `docker` configuration of the `serve-original` dev server, point the federation `serve` target's `docker` configuration at it, and run `npm run start:docker` in the image. Local `npm start` keeps `localhost` |

@@ -14,10 +14,10 @@ One online shop back office, told in two acts:
 | --- | --- | --- | --- | --- | --- |
 | 1 | `examples/web-components-basics` | Three native components | none | 4100 | static files |
 | 2 | `apps/microfrontends/orders` | Remote: order list and order detail | current Angular, zoneless | 4201 | `remoteEntry.json` (Native Federation) |
-| 2 | `apps/microfrontends/insights` | Remote: order statistics and activity feed | React 19 | 4202 | `remoteEntry.js` (Module Federation) |
+| 2 | `apps/microfrontends/insights` | Remote: order statistics and activity feed | React 18 | 4202 | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/microfrontends/notes` | Remote: status filter and order notes | Vue 3.5 | 4402 | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | 4200 | the site |
-| 2 | `apps/backoffices/backoffice-vue` | Host | Vue 3.5 + Vue Router | 4400 | the site |
+| 2 | `apps/backoffices/backoffice-vue` | Host, on an older Vue | Vue 3.4 + Vue Router | 4400 | the site |
 | 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | 4500 | the site |
 | all | `tools/mock-api` | Orders REST API | Express, TypeScript | 3000 | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
 

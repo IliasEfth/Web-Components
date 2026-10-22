@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, version } from 'react';
 import { NavLink, Outlet } from 'react-router';
 import { themes, type IThemeContext, type ThemeName } from './theme/themes';
 
@@ -13,7 +13,7 @@ export function App() {
     <>
       <header className="page-header">
         <h1>Shop Back Office</h1>
-        <p>Act 2 · the React host. Angular, React and Vue components, loaded at runtime.</p>
+        <p>Act 2 · the React {version} host. Angular, React and Vue components, loaded at runtime.</p>
         <nav className="page-nav">
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/orders">Orders</NavLink>

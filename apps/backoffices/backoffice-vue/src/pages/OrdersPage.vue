@@ -15,7 +15,7 @@ import { loadOrdersElements } from '../remotes/orders-remote';
 import RemoteGate from '../remotes/RemoteGate.vue';
 import { useActivityLog } from '../shared/use-activity-log';
 
-const { orderId } = defineProps<{ orderId?: string }>();
+const props = defineProps<{ orderId?: string }>();
 
 const router = useRouter();
 const status = ref<OrderStatusFilter>('all');
@@ -67,7 +67,7 @@ function noteAdded(event: CustomEvent<INoteAddedDetail>): void {
       <div class="stack">
         <shop-orders-list :status="status" page-size="10" @orderSelected="orderSelected" />
         <shop-order-detail
-          :order-id="orderId"
+          :order-id="props.orderId"
           @orderUpdated="orderUpdated"
           @closed="orderClosed"
         />
@@ -79,7 +79,7 @@ function noteAdded(event: CustomEvent<INoteAddedDetail>): void {
         <shop-order-stats :refresh-key="String(refreshCount)" @statusPicked="statusPicked" />
       </RemoteGate>
       <RemoteGate name="Notes" :load="loadNotesElements">
-        <shop-order-notes :order-id="orderId" @noteAdded="noteAdded" />
+        <shop-order-notes :order-id="props.orderId" @noteAdded="noteAdded" />
       </RemoteGate>
       <RemoteGate name="Insights" :load="loadInsightsElements">
         <shop-activity-feed :entries="entries" @cleared="clear" />

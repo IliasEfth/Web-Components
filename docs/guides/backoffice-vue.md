@@ -5,6 +5,11 @@ Vue + TypeScript template) that puts the Angular components from Orders, the Rea
 from Insights and the Vue components from Notes on one page. It imports none of them. All three
 are loaded at runtime, the first time `/orders` opens. Its colour is green (`#16a34a`).
 
+The shell runs **Vue 3.4** on purpose, one minor version older than the Notes components it
+hosts (Vue 3.5): the header shows the shell's version, and each Notes element carries
+`data-vue-version="3.5.x"`. `package.json` pins `vue` with `~3.4.38`, so npm cannot move it to
+3.5, and uses `vue-router` 4.5, the last line that supports Vue 3.4.
+
 | Route | What it shows |
 | --- | --- |
 | `http://localhost:4400/dashboard` | Plain Vue with no remote: counts, revenue, and links to the open orders |
@@ -54,8 +59,11 @@ federation({
 }),
 ```
 
-- **`shared: ['vue']`** gives Notes the shell's Vue, so one Vue runs on the page. Insights
-  shares React, which this shell does not have, so Insights falls back to its own copy.
+- **`shared: ['vue']`** offers the shell's Vue 3.4. Notes asks for Vue 3.5, so it does not match
+  and Notes loads its own Vue 3.5 next to the shell's. Insights shares React, which this shell
+  does not have, so Insights falls back to its own copy too.
+- **Props without destructuring.** `const { orderId } = defineProps()` only stays reactive from
+  Vue 3.5, so the pages read `props.orderId`.
 - **Orders** is loaded by the orchestrator, exactly as in the React shell.
 - **`isCustomElement`** for `shop-` tags tells the Vue compiler that they are not Vue components.
 
@@ -65,10 +73,10 @@ federation({
 <shop-status-filter :value="status" @statusChange="statusChanged" />
 
 <shop-orders-list :status="status" page-size="10" @orderSelected="orderSelected" />
-<shop-order-detail :order-id="orderId" @orderUpdated="orderUpdated" @closed="orderClosed" />
+<shop-order-detail :order-id="props.orderId" @orderUpdated="orderUpdated" @closed="orderClosed" />
 
 <shop-order-stats :refresh-key="String(refreshCount)" @statusPicked="statusPicked" />
-<shop-order-notes :order-id="orderId" @noteAdded="noteAdded" />
+<shop-order-notes :order-id="props.orderId" @noteAdded="noteAdded" />
 <shop-activity-feed :entries="entries" @cleared="clear" />
 ```
 
