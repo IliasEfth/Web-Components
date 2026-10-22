@@ -56,36 +56,42 @@ list.addEventListener('orderSelected', (event) => {
 
 ## How it fits together
 
-Every app is its own server on an internal Docker network. The browser reaches them only through
-the gateway, one address with one path per app:
+Every app is its own server. Only the back offices are published, each behind its own proxy
+on its own port. The micro-frontends and the API live on an internal Docker network: the browser
+never reaches them directly. Each proxy serves its shell at `/` and fetches the remotes and the
+API by their Docker DNS names, so everything a page loads comes from that site and from our own
+servers:
 
 ```mermaid
 flowchart LR
-  browser([Browser<br/>localhost:8080]) --> gateway[gateway · nginx<br/>the only published port]
+  browser([Browser])
+  basics[web-components-basics · act 1<br/>localhost:4100]
 
-  subgraph net[shop-network · internal Docker network]
-    direction LR
-    subgraph remotes[micro-frontends: export custom elements]
-      orders[orders · latest Angular · /orders/<br/>shop-orders-list<br/>shop-order-detail]
-      insights[insights · React 18 · /insights/<br/>shop-order-stats<br/>shop-activity-feed]
-      notes[notes · Vue 3.5 · /notes/<br/>shop-order-notes]
-    end
-    subgraph shells[shells: host them on one page]
-      react[backoffice-react · React 19 · /react/]
-      vue[backoffice-vue · Vue 3.4 · /vue/]
-      ng16[backoffice-angular16 · Angular 16 · /angular16/]
-    end
-    api[(mock-api · /api/)]
-    basics[web-components-basics · act 1 · /]
+  subgraph sites[back offices · published · one proxy each]
+    direction TB
+    rp[backoffice-react-proxy<br/>localhost:4200] --> react[backoffice-react · React 19]
+    vp[backoffice-vue-proxy<br/>localhost:4400] --> vue[backoffice-vue · Vue 3.4]
+    ap[backoffice-angular16-proxy<br/>localhost:4500] --> ng16[backoffice-angular16 · Angular 16]
   end
 
-  gateway --> shells
-  gateway --> remotes
-  gateway --> api
-  gateway --> basics
-  remotes -. "remoteEntry loaded at runtime<br/>(Native / Module Federation)" .-> shells
-  remotes -- "each element fetches /api itself" --> api
+  subgraph net[shop-network · internal · not reachable from your computer]
+    direction TB
+    orders[orders:4201 · latest Angular<br/>shop-orders-list · shop-order-detail]
+    insights[insights:4202 · React 18<br/>shop-order-stats · shop-activity-feed]
+    notes[notes:4402 · Vue 3.5<br/>shop-order-notes]
+    api[(mock-api:3000)]
+  end
+
+  browser --> basics
+  browser --> sites
+  sites -- "/mf/orders/" --> orders
+  sites -- "/mf/insights/" --> insights
+  sites -- "/mf/notes/" --> notes
+  sites -- "/api/" --> api
 ```
+
+The shell loads each remote's `remoteEntry` from its own site (`/mf/orders/remoteEntry.json`),
+and the elements call `/api` on the same site. The proxy forwards both inside the network.
 
 On the page, a shell and its elements talk only through the custom element contract: the shell
 sets attributes and properties, the elements answer with `CustomEvent`s. Elements never talk to
@@ -99,9 +105,9 @@ sequenceDiagram
   participant Notes as shop-order-notes (Notes)
   participant Stats as shop-order-stats (Insights)
   participant Feed as shop-activity-feed (Insights)
-  participant API as /api
+  participant API as /api (through the shell's proxy)
 
-  Shell->>Shell: load remoteEntry, await defineElements()
+  Shell->>Shell: load /mf/*/remoteEntry, await defineElements()
   Shell->>List: status="open"
   List->>API: GET /orders?status=open
   List-->>Shell: orderSelected { id }
@@ -135,8 +141,11 @@ apps/
       contract/                     @shop/notes-contract
   backoffices/              the shells that host them
     backoffice-react/       act 2   React 19
+      proxy/                        nginx: serves the site, forwards /mf/ and /api/
     backoffice-vue/         act 2   Vue 3.4
+      proxy/
     backoffice-angular16/   act 2   Angular 16
+      proxy/
 tools/
   mock-api/                 the orders REST API
     contract/                       @shop/api-contract
@@ -166,16 +175,15 @@ after a demo.
 
 | Act | Open | Project |
 | --- | --- | --- |
-| 1 | `http://localhost:8080` | `examples/web-components-basics` |
-| 2 | `http://localhost:8080/angular16/orders` | `apps/backoffices/backoffice-angular16` |
-| 2 | `http://localhost:8080/vue/orders` | `apps/backoffices/backoffice-vue` |
-| 2 | `http://localhost:8080/react/orders` | `apps/backoffices/backoffice-react` |
+| 1 | `http://localhost:4100` | `examples/web-components-basics` |
+| 2 | `http://localhost:4500/orders` | `apps/backoffices/backoffice-angular16` |
+| 2 | `http://localhost:4400/orders` | `apps/backoffices/backoffice-vue` |
+| 2 | `http://localhost:4200/orders` | `apps/backoffices/backoffice-react` |
 
-Only the gateway publishes a port. Every service runs on `shop-network`, an internal Docker
-network, and the gateway routes each path to it by name: `/orders/`, `/insights/` and
-`/notes/` are the remotes, `/api/` is the API. Everything shares one origin, so the apps use
-relative URLs. `/api/` answers only the pages' own `fetch` calls; opening it in the address bar
-or with curl returns `403`. See [docs/architecture.md](docs/architecture.md#one-origin-one-way-in).
+Only these four ports are published: the act 1 examples and the three back-office proxies. The
+micro-frontends (`orders`, `insights`, `notes`) and `mock-api` have no port on your computer;
+each proxy reaches them by name on the internal `shop-network`. `/api/` answers only the pages'
+own `fetch` calls; opening it in the address bar or with curl returns `403`.
 
 ### Windows shortcuts
 
