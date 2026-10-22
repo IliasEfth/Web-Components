@@ -33,18 +33,19 @@ src/app/
   app.config.ts                the providers of the whole app
 ```
 
-**Configuration through dependency injection.** The components never receive a URL or a token.
-`app.config.ts` provides them once, like `provideHttpClient()` or `provideRouter()`:
+**Configuration through dependency injection.** The components never receive a URL.
+`orders/config/orders-config.ts` holds the API address, and `provideOrders()` provides it once,
+like `provideHttpClient()` or `provideRouter()`:
 
 ```ts
-const ordersConfig: IRemoteConfig = { apiBase: 'http://localhost:3000' };
+export const ordersConfig: IOrdersConfig = { apiBase: 'http://localhost:3000' };
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideHttpClient(), provideOrders(ordersConfig)],
+  providers: [provideRouter(routes), provideHttpClient(), provideOrders()],
 };
 ```
 
-**Two layers, both injected.** `OrdersClient` only talks HTTP: URLs, headers and `HttpClient`.
+**Two layers, both injected.** `OrdersClient` only talks HTTP: URLs and `HttpClient`.
 It implements the three operations of the API team's contract that this app calls, with
 `Observable`s instead of `Promise`s:
 
@@ -95,14 +96,14 @@ anyway:
 Everything else lives in one file, `elements.ts`:
 
 ```ts
-export const defineElements: IOrdersRemote['defineElements'] = (config) => {
-  elementsDefined ??= registerElements(config);
+export const defineElements: IOrdersRemote['defineElements'] = () => {
+  elementsDefined ??= registerElements();
   return elementsDefined;
 };
 
-async function registerElements(config: IRemoteConfig): Promise<void> {
+async function registerElements(): Promise<void> {
   const application = await createApplication({
-    providers: [provideZonelessChangeDetection(), provideHttpClient(), provideOrders(config)],
+    providers: [provideZonelessChangeDetection(), provideHttpClient(), provideOrders()],
   });
   defineElement<IOrdersListContract>('shop-orders-list', OrdersList, application.injector);
   defineElement<IOrderDetailContract>('shop-order-detail', OrderDetail, application.injector);
@@ -118,9 +119,8 @@ What each line does:
 
 - **`createApplication`** starts Angular without a root component: only an injector. It gets the
   same providers as `app.config.ts`, so the components find `OrdersService` exactly as before.
-- **`provideOrders(config)`**: the host passes the configuration to `defineElements`, the custom
-  element version of dependency injection. Tokens are passed as a `getAuthToken` function, so
-  they never appear in the DOM.
+- **`provideOrders()`**: the elements get the same API address as the app's own pages. The host
+  passes nothing: the elements are standalone and call the endpoint they know.
 - **`provideZonelessChangeDetection()`** is explicit on purpose. A host such as Angular 16 loads
   Zone.js; the elements must not depend on it.
 - **One injector for both tags**, so the list and the detail share one `OrdersService`, as in
@@ -129,7 +129,7 @@ What each line does:
   `defineElements` safe to call from every page and every host.
 
 The host then uses tags, attributes and DOM events. In this app, `app.config.ts` calls
-`defineElements(ordersConfig)` through `provideAppInitializer`, so the tags exist before the first
+`defineElements()` through `provideAppInitializer`, so the tags exist before the first
 route renders:
 
 ```html
@@ -145,7 +145,7 @@ route renders:
 | Usable from | this Angular app only | any page: React, Vue, Angular 16, plain HTML |
 | Data in | `[status]="…"`, typed | attribute `status="open"` or property `list.status = 'open'` |
 | Events out | `(orderSelected)`, typed value | `CustomEvent`, value in `event.detail` |
-| Configuration | `provideOrders(...)` in `app.config.ts` | `defineElements({ apiBase })` once |
+| Configuration | `provideOrders()` in `app.config.ts` | none: `defineElements()` once, the element knows its API |
 | Checked by | the Angular compiler | the contract in [architecture.md](../architecture.md#contracts) |
 
 ## Step 3: share it with Native Federation
@@ -198,7 +198,7 @@ A shell loads it like this:
 ```ts
 await initFederation({ orders: 'http://localhost:4201/remoteEntry.json' });
 const { defineElements } = await loadRemoteModule({ remoteName: 'orders', exposedModule: './elements' });
-await defineElements({ apiBase: 'http://localhost:3000' });
+await defineElements();
 ```
 
 ## Run it

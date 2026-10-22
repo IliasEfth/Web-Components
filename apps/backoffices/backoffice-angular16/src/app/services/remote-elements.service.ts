@@ -1,11 +1,10 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { createInstance } from '@module-federation/runtime';
 import type { IInsightsRemote } from '@shop/insights-contract';
 import type { INotesRemote } from '@shop/notes-contract';
-import type { IOrdersRemote, IRemoteConfig } from '@shop/orders-contract';
+import type { IOrdersRemote } from '@shop/orders-contract';
 import { initFederation } from '@softarc/native-federation-orchestrator';
 import { useDefaultImportMap } from '@softarc/native-federation-orchestrator/options';
-import { REMOTE_CONFIG } from '../models/remote-config';
 import { remoteEntries } from '../remote-entries';
 
 @Injectable({ providedIn: 'root' })
@@ -21,8 +20,6 @@ export class RemoteElementsService {
   });
 
   private readonly loading = new Map<string, Promise<void>>();
-
-  constructor(@Inject(REMOTE_CONFIG) private readonly config: IRemoteConfig) {}
 
   loadOrders(): Promise<void> {
     return this.loadOnce('orders', async () => {
@@ -59,7 +56,7 @@ export class RemoteElementsService {
         if (!elements) {
           throw new Error(`${remoteName} exposes no elements`);
         }
-        return elements.defineElements(this.config);
+        return elements.defineElements();
       });
       ready.catch(() => this.loading.delete(remoteName));
       this.loading.set(remoteName, ready);

@@ -21,24 +21,18 @@ export class OrdersClient
   listOrders(params: IListOrdersParams = {}): Observable<IOrder[]> {
     return this.#http.get<IOrder[]>(`${this.#config.apiBase}/orders`, {
       params: params.status ? { status: params.status } : {},
-      headers: this.#headers(),
     });
   }
 
   getOrder({ id }: IOrderParams): Observable<IOrder> {
-    return this.#http.get<IOrder>(this.#orderUrl(id), { headers: this.#headers() });
+    return this.#http.get<IOrder>(this.#orderUrl(id));
   }
 
   updateOrderStatus({ id, status }: IUpdateOrderStatusParams): Observable<IOrder> {
-    return this.#http.patch<IOrder>(this.#orderUrl(id), { status }, { headers: this.#headers() });
+    return this.#http.patch<IOrder>(this.#orderUrl(id), { status });
   }
 
   #orderUrl(id: string): string {
     return `${this.#config.apiBase}/orders/${encodeURIComponent(id)}`;
-  }
-
-  #headers(): Record<string, string> {
-    const authToken = this.#config.getAuthToken?.();
-    return authToken ? { Authorization: `Bearer ${authToken}` } : {};
   }
 }

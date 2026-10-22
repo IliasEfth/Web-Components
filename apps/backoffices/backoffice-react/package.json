@@ -18,7 +18,6 @@
   },
   "devDependencies": {
     "@module-federation/vite": "^1.23.5",
-    "@shop/api-contract": "file:../../../tools/mock-api/contract",
     "@shop/insights-contract": "file:../../microfrontends/insights/contract",
     "@shop/notes-contract": "file:../../microfrontends/notes/contract",
     "@shop/orders-contract": "file:../../microfrontends/orders/contract",

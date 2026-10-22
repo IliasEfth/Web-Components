@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OrderStatusFilter } from '@shop/api-contract';
+import type { OrderStatusFilter } from '@shop/orders-contract';
 
 const status = defineModel<OrderStatusFilter>({ required: true });
 

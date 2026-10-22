@@ -48,7 +48,7 @@ load. They use the same contract as act 1:
 ```
 
 ```js
-await defineElements({ apiBase: 'http://localhost:3000' });
+await defineElements();
 list.addEventListener('orderSelected', (event) => {
   detail.setAttribute('order-id', event.detail.id);
 });

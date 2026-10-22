@@ -11,7 +11,6 @@ import type {
   IOrderDetailContract,
   IOrdersListContract,
   IOrdersRemote,
-  IRemoteConfig,
   OrdersContracts,
 } from '@shop/orders-contract';
 import { OrderDetail } from './orders/components/order-detail/order-detail';
@@ -26,14 +25,14 @@ type ComponentImplementing<TContract extends OrdersContracts> = {
 
 let elementsDefined: Promise<void> | undefined;
 
-export const defineElements: IOrdersRemote['defineElements'] = (config) => {
-  elementsDefined ??= registerElements(config);
+export const defineElements: IOrdersRemote['defineElements'] = () => {
+  elementsDefined ??= registerElements();
   return elementsDefined;
 };
 
-async function registerElements(config: IRemoteConfig): Promise<void> {
+async function registerElements(): Promise<void> {
   const application = await createApplication({
-    providers: [provideZonelessChangeDetection(), provideHttpClient(), provideOrders(config)],
+    providers: [provideZonelessChangeDetection(), provideHttpClient(), provideOrders()],
   });
 
   defineElement<IOrdersListContract>('shop-orders-list', OrdersList, application.injector);

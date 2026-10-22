@@ -141,8 +141,6 @@ services:
         - action: rebuild
           path: apps/backoffices/backoffice-react/package.json
         - action: rebuild
-          path: tools/mock-api/contract
-        - action: rebuild
           path: apps/microfrontends/orders/contract
         - action: rebuild
           path: apps/microfrontends/insights/contract
@@ -177,8 +175,6 @@ services:
         - action: rebuild
           path: apps/backoffices/backoffice-vue/package.json
         - action: rebuild
-          path: tools/mock-api/contract
-        - action: rebuild
           path: apps/microfrontends/orders/contract
         - action: rebuild
           path: apps/microfrontends/insights/contract
@@ -209,8 +205,6 @@ services:
           target: /repo/apps/backoffices/backoffice-angular16/src
         - action: rebuild
           path: apps/backoffices/backoffice-angular16/package.json
-        - action: rebuild
-          path: tools/mock-api/contract
         - action: rebuild
           path: apps/microfrontends/orders/contract
         - action: rebuild

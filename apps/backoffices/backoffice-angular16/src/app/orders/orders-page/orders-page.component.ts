@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import type { OrderStatusFilter } from '@shop/api-contract';
 import type { IActivityEntry, IStatusPickedDetail } from '@shop/insights-contract';
 import type { INoteAddedDetail } from '@shop/notes-contract';
 import type {
   IOrderClosedDetail,
   IOrderSelectedDetail,
   IOrderUpdatedDetail,
+  OrderStatusFilter,
 } from '@shop/orders-contract';
 import { Observable, map } from 'rxjs';
 import { RemoteElementsService } from '../../services/remote-elements.service';

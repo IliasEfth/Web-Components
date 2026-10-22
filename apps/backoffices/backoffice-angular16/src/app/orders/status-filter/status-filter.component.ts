@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import type { OrderStatusFilter } from '@shop/api-contract';
+import type { OrderStatusFilter } from '@shop/orders-contract';
 
 @Component({
   selector: 'app-status-filter',

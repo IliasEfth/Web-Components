@@ -11,7 +11,7 @@ React 18: the header shows the shell's version, and each Insights element carrie
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:4200/dashboard` | Plain React with no remote: counts, revenue, and links to the open orders |
+| `http://localhost:4200/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
 | `http://localhost:4200/orders` | The shell's filter and the five elements, wired together by the shell |
 | `http://localhost:4200/orders/A-1003` | The same page opened with an order (a deep link) |
 | `http://localhost:4200/settings` | The theme switch |
@@ -24,7 +24,6 @@ shell changes.
 ```text
 src/
   remote-entries.ts          where each remote lives (also read by vite.config.ts)
-  app-config.ts              the configuration every remote receives: { apiBase }
   remotes/
     orders-remote.ts         Native Federation
     insights-remote.ts       Module Federation
@@ -33,9 +32,8 @@ src/
     remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
   web-components/
     custom-elements.d.ts     JSX typings for the five shop- tags, built from the three contracts
-  clients/orders-client.ts   implements listOrders from @shop/api-contract, for the dashboard
   components/StatusFilter.tsx the shell's own All / Open / Shipped filter
-  pages/                     DashboardPage, OrdersPage, SettingsPage, ErrorPage
+  pages/                     DashboardPage, OrdersPage, SettingsPage
   theme/themes.ts
   shared/useActivityLog.ts
   App.tsx  router.tsx  main.tsx  styles.css
@@ -49,10 +47,10 @@ Three packages are added to the template:
 | `@softarc/native-federation-orchestrator` | The Native Federation runtime for any page; loads Orders' `remoteEntry.json` |
 | `@module-federation/vite` (dev) | Loads Insights' and Notes' `remoteEntry.js` and offers the shell's React to them |
 
-And the four contracts, as dev dependencies installed from their teams' folders:
-`@shop/api-contract`, `@shop/orders-contract`, `@shop/insights-contract` and
-`@shop/notes-contract`. The shell has no copy of any shared type: the models, the event details,
-`IRemoteConfig` and the type of each remote's `defineElements` all come from them.
+And the three element contracts, as dev dependencies installed from their teams' folders:
+`@shop/orders-contract`, `@shop/insights-contract` and `@shop/notes-contract`. The shell never
+calls the API, so it does not need `@shop/api-contract`. The shell has no copy of any shared type: the models, the event details,
+and the type of each remote's `defineElements` all come from them.
 
 ```ts
 declare module 'react' {
@@ -70,13 +68,13 @@ renames stops compiling here.
 ## Three remotes, two runtimes, one contract
 
 Orders is built with Native Federation, Insights and Notes with Module Federation, so there are
-two loaders. Behind each is the same call: `defineElements(config)`.
+two loaders. Behind each is the same call, with no configuration: `defineElements()`.
 
 ```ts
 export function loadOrdersElements(): Promise<void> {
   ordersReady ??= initFederation({ orders: remoteEntries.orders })
     .then(({ loadRemoteModule }) => loadRemoteModule<IOrdersRemote>('orders', './elements'))
-    .then(({ defineElements }) => defineElements(remoteConfig))
+    .then(({ defineElements }) => defineElements())
     .catch((error: unknown) => {
       ordersReady = undefined;
       throw error;
@@ -88,7 +86,7 @@ export function loadOrdersElements(): Promise<void> {
 ```ts
 export function loadNotesElements(): Promise<void> {
   notesReady ??= import('notes/elements')
-    .then(({ defineElements }) => defineElements(remoteConfig))
+    .then(({ defineElements }) => defineElements())
     .catch(/* the same reset */);
   return notesReady;
 }
@@ -162,7 +160,7 @@ because the selected order lives only in the URL.
 Each element group sits in its own `RemoteGate`. If a remote's server is down, only its card
 turns into "Orders is unavailable" with a Retry button. The other remotes, the dashboard and the
 navigation keep working. Orders comes back with Retry; after an Insights or Notes outage, reload
-the page. The dashboard has a route `errorElement` for when the API itself is down.
+the page.
 
 ## Theme
 
@@ -180,8 +178,8 @@ The API and all three remotes start with it.
 
 ## What to try
 
-- `/dashboard` shows the counts and the open orders; the Network tab shows no request to 4201,
-  4202 or 4402.
+- `/dashboard` shows the Insights tiles and the open orders from Orders. Every API call comes from
+  those two elements; the shell itself makes none.
 - An order link opens `/orders/<id>` with that order in the Angular detail and the Vue notes.
 - The shell's filter changes the Angular list; a React tile changes the filter and the list.
 - A row click changes the URL; the detail and the notes follow. Back and forward restore it.

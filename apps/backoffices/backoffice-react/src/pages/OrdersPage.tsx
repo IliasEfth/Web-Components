@@ -1,4 +1,4 @@
-import type { OrderStatusFilter } from '@shop/api-contract';
+import type { OrderStatusFilter } from '@shop/orders-contract';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { StatusFilter } from '../components/StatusFilter';

@@ -7,7 +7,7 @@ Its colour is red (`#dc2626`).
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:4500/dashboard` | Plain Angular 16 with no remote: counts, revenue, and links to the open orders |
+| `http://localhost:4500/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
 | `http://localhost:4500/orders` | The shell's filter and the five elements, wired together by the shell |
 | `http://localhost:4500/orders/A-1003` | The same page opened with an order (a deep link) |
 | `http://localhost:4500/settings` | The theme switch |
@@ -22,22 +22,20 @@ It was created with the Angular 16 CLI (`ng new --standalone=false`), so it has 
 
 ```text
 src/app/
-  app.module.ts               AppModule: BrowserModule, HttpClientModule, routing, REMOTE_CONFIG
+  app.module.ts               AppModule: BrowserModule, routing, SharedModule
   app-routing.module.ts       /dashboard, and /orders as a lazy OrdersModule
   app.component.*             header and navigation
   remote-entries.ts           where each remote lives
-  models/remote-config.ts     the REMOTE_CONFIG injection token
   services/
     remote-elements.service.ts   loads the three remotes, once each
-    orders-client.service.ts     HttpClient for the dashboard
-  dashboard/                  DashboardPageComponent (async pipe, *ngIf, *ngFor)
+  shared/                     SharedModule: the RemoteGateComponent, for the dashboard and Orders
+  dashboard/                  DashboardPageComponent: the Insights and Orders elements
   settings/                   SettingsPageComponent, uses ThemeService
   services/theme.service.ts   the three themes; apply() sets --shop-color-primary
   orders/
-    orders.module.ts          declares the page and the gate, CUSTOM_ELEMENTS_SCHEMA
+    orders.module.ts          declares the page and the filter, imports SharedModule
     orders-routing.module.ts  one route for /orders and /orders/:orderId
     orders-page/              the page that wires the five elements
-    remote-gate/              loading text, the content or an error card with Retry
     status-filter/            the shell's own All / Open / Shipped filter (@Input / @Output)
 ```
 
@@ -51,8 +49,8 @@ Two browser runtimes are added to the template:
 The shell exposes nothing and cannot share Angular 16 with Angular 22, so it needs no federation
 build: only the two runtimes, in the browser.
 
-The four contracts are dev dependencies, installed from their teams' folders. The dashboard's
-`OrdersClientService` implements `listOrders` from `@shop/api-contract` with Observables, the
+The three element contracts are dev dependencies, installed from their teams' folders. The shell
+never calls the API, so it has no HTTP client and no `HttpClientModule`; the
 remote loader is typed with each remote's `defineElements`, and the Orders page's handlers take
 their `detail` types from the element contracts.
 

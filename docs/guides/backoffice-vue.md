@@ -12,7 +12,7 @@ hosts (Vue 3.5): the header shows the shell's version, and each Notes element ca
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:4400/dashboard` | Plain Vue with no remote: counts, revenue, and links to the open orders |
+| `http://localhost:4400/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
 | `http://localhost:4400/orders` | The shell's filter and the five elements, wired together by the shell |
 | `http://localhost:4400/orders/A-1003` | The same page opened with an order (a deep link) |
 | `http://localhost:4400/settings` | The theme switch |
@@ -25,14 +25,12 @@ what is different.
 ```text
 src/
   remote-entries.ts          where each remote lives (also read by vite.config.ts)
-  app-config.ts              the configuration every remote receives: { apiBase }
   remotes/
     orders-remote.ts         Native Federation
     insights-remote.ts       Module Federation
     notes-remote.ts          Module Federation
     RemoteGate.vue           loading text, then the slot or an error card with Retry
     remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
-  clients/orders-client.ts   implements listOrders from @shop/api-contract, for the dashboard
   components/StatusFilter.vue the shell's own All / Open / Shipped filter (defineModel)
   pages/                     DashboardPage.vue, OrdersPage.vue, SettingsPage.vue
   theme/themes.ts            the three themes and the injection key
@@ -41,7 +39,7 @@ src/
 ```
 
 The same packages as the React shell, in their Vue versions: `vue-router`,
-`@softarc/native-federation-orchestrator` and `@module-federation/vite`, plus the four contracts
+`@softarc/native-federation-orchestrator` and `@module-federation/vite`, plus the three element contracts
 as dev dependencies. The event handlers on the Orders page take their `detail` types from the
 contracts, for example `(event: CustomEvent<IOrderSelectedDetail>)` from `@shop/orders-contract`.
 
@@ -119,8 +117,8 @@ The API and all three remotes start with it.
 
 ## What to try
 
-- `/dashboard` shows the counts and the open orders; the Network tab shows no request to 4201,
-  4202 or 4402.
+- `/dashboard` shows the Insights tiles and the open orders from Orders. Every API call comes from
+  those two elements; the shell itself makes none.
 - An order link opens `/orders/<id>` with that order in the Angular detail and the Vue notes.
 - The shell's filter changes the Angular list; a React tile changes the filter and the list.
 - A row click changes the URL; the detail and the notes follow.

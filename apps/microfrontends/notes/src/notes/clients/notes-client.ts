@@ -1,15 +1,15 @@
 import type { IAddOrderNoteParams, INote, IOrderParams, IOrdersApi } from '@shop/api-contract';
-import type { IRemoteConfig } from '@shop/notes-contract';
+import type { INotesConfig } from '../config/notes-config';
 
 export class NotesClient implements Pick<IOrdersApi, 'listOrderNotes' | 'addOrderNote'> {
-  readonly #config: IRemoteConfig;
+  readonly #config: INotesConfig;
 
-  constructor(config: IRemoteConfig) {
+  constructor(config: INotesConfig) {
     this.#config = config;
   }
 
   async listOrderNotes({ id }: IOrderParams, signal?: AbortSignal): Promise<INote[]> {
-    const response = await fetch(this.#notesUrl(id), { headers: this.#headers(), signal });
+    const response = await fetch(this.#notesUrl(id), { signal });
     if (!response.ok) {
       throw new Error(`GET /orders/${id}/notes failed with ${response.status}`);
     }
@@ -19,7 +19,7 @@ export class NotesClient implements Pick<IOrdersApi, 'listOrderNotes' | 'addOrde
   async addOrderNote({ id, text }: IAddOrderNoteParams): Promise<INote> {
     const response = await fetch(this.#notesUrl(id), {
       method: 'POST',
-      headers: { ...this.#headers(), 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
     });
     if (!response.ok) {
@@ -30,10 +30,5 @@ export class NotesClient implements Pick<IOrdersApi, 'listOrderNotes' | 'addOrde
 
   #notesUrl(orderId: string): string {
     return `${this.#config.apiBase}/orders/${encodeURIComponent(orderId)}/notes`;
-  }
-
-  #headers(): Record<string, string> {
-    const authToken = this.#config.getAuthToken?.();
-    return authToken ? { Authorization: `Bearer ${authToken}` } : {};
   }
 }

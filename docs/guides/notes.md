@@ -20,6 +20,7 @@ src/
     services/
       notes-service.ts            NotesService: what the component uses; calls the client
     config/
+      notes-config.ts             INotesConfig and the API address
       create-notes.ts             createNotes(config): a Vue plugin that provides the service
       use-notes-service.ts        inject() for components
     components/
@@ -27,8 +28,8 @@ src/
   pages/                          one page per route
   shared/                         EventLog, OrderPicker, useEventLog
   web-components/                 the transformation (step 2)
-  elements.ts                     defineElements(config)
-  main.ts  App.vue  router.ts  app-config.ts
+  elements.ts                     defineElements()
+  main.ts  App.vue  router.ts
 ```
 
 The template adds two packages: `vue-router` for the two routes, and `@module-federation/vite`
@@ -92,8 +93,8 @@ The emit names come from the compiled component, so nothing is listed twice.
 checks the component against it:
 
 ```ts
-function registerElements(config: IRemoteConfig): void {
-  const notes = createNotes(config);
+function registerElements(): void {
+  const notes = createNotes(notesConfig);
 
   defineNotesElement('shop-order-notes', OrderNotes, {
     styles: [orderNotesStyles],
@@ -105,7 +106,7 @@ function registerElements(config: IRemoteConfig): void {
 A component is accepted only if it has every property of the contract and an `on…` handler for
 every event, with the contract's types. Rename the `noteAdded` emit and the build stops.
 
-`main.ts` awaits `defineElements(notesConfig)` before mounting, and the web components page uses
+`main.ts` awaits `defineElements()` before mounting, and the web components page uses
 the tag like any host would:
 
 ```vue
@@ -154,7 +155,7 @@ The notes are stored by `tools/mock-api` next to the orders:
 | Usable from | this Vue app only | any page: Angular, React, Angular 16, plain HTML |
 | Data in | props, typed | attribute `order-id` |
 | Events out | `emit('noteAdded', detail)` | `CustomEvent('noteAdded')`, value in `event.detail` |
-| Configuration | `app.use(createNotes(config))` | `defineElements({ apiBase })` once |
+| Configuration | `app.use(createNotes(config))` | none: `defineElements()` once, the element knows its API |
 
 ## Run it
 

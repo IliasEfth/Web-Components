@@ -1,4 +1,9 @@
 import { InjectionToken } from '@angular/core';
-import type { IRemoteConfig } from '@shop/orders-contract';
 
-export const ORDERS_CONFIG = new InjectionToken<IRemoteConfig>('ORDERS_CONFIG');
+export interface IOrdersConfig {
+  apiBase: string;
+}
+
+export const ordersConfig: IOrdersConfig = { apiBase: 'http://localhost:3000' };
+
+export const ORDERS_CONFIG = new InjectionToken<IOrdersConfig>('ORDERS_CONFIG');
