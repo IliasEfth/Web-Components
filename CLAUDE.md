@@ -89,7 +89,7 @@ in `apps/backoffices/`. A reader should see from the path which side an app is o
 | 1 | `examples/web-components-basics` | Three native Web Components | 4100 | `web-components-basics` |
 | 2 | `apps/microfrontends/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | 4201 | `orders` |
 | 2 | `apps/microfrontends/insights` | React 18, exports `shop-order-stats`, `shop-activity-feed` | 4202 | `insights` |
-| 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-status-filter`, `shop-order-notes` | 4402 | `notes` |
+| 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-order-notes` | 4402 | `notes` |
 | 2 | `apps/backoffices/backoffice-react` | React 19 shell | 4200 | `backoffice-react` |
 | 2 | `apps/backoffices/backoffice-vue` | Vue 3.4 shell | 4400 | `backoffice-vue` |
 | 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | 4500 | `backoffice-angular16` |
@@ -131,7 +131,7 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | CORS error loading `remoteEntry.json` | Add `Access-Control-Allow-Origin: *` to the `serve` options of `apps/microfrontends/orders` |
 | `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `shop-` tags in the Vite Vue plugin |
 | Vue custom element events have an array `detail` and do not bubble | Vue's `defineCustomElement` dispatches `detail: [...args]` without `bubbles`/`composed`. `defineVueElement` in `apps/microfrontends/notes` wraps the component and dispatches the contract `CustomEvent` from `useHost()` instead |
-| Vue build: `Failed to resolve index type into finite keys` | `defineEmits` cannot take a mapped type over a contract's event keys. Write the event names literally (`{ statusChange: [detail: Events['statusChange']] }`); `defineProps<Partial<IContract['properties']>>()` works. `elements.ts` checks the names against the contract |
+| Vue build: `Failed to resolve index type into finite keys` | `defineEmits` cannot take a mapped type over a contract's event keys. Write the event names literally (`{ noteAdded: [detail: Events['noteAdded']] }`); `defineProps<Partial<IContract['properties']>>()` works. `elements.ts` checks the names against the contract |
 | `npm ci` in a Docker build fails on a `file:` contract | The contract folder is not in the image. App images build from the repo root (`context: .`) and `COPY` each contract folder to the same relative path under `/repo` before `npm ci` |
 | Native Federation warns `No meta data found for shared lib @shop/...` | A contract is in `dependencies`; it holds only types. Keep contracts in `devDependencies` |
 | `tsc` passes but `ng build` fails in an Angular app | `tsc` does not check templates. Run `ng build` after changing an `input()` type a template binds to |

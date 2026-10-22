@@ -1,13 +1,13 @@
-# Act 2: Notes, from a Vue app to web components
+# Act 2: Notes, from a Vue app to a web component
 
 `apps/microfrontends/notes` is a regular Vue application, created with `npm create vite@latest` (Vue +
-TypeScript template). The same two components are then turned into custom elements without
-changing a line inside them. The app shows both side by side:
+TypeScript template). It owns one thing, the notes of an order. Its component is then turned into
+a custom element without changing a line inside it. The app shows both side by side:
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:4402/components` | Step 1: the components used by Vue, the normal way |
-| `http://localhost:4402/web-components` | Step 2: the same components as `<shop-status-filter>` and `<shop-order-notes>` |
+| `http://localhost:4402/components` | Step 1: the component used by Vue, the normal way |
+| `http://localhost:4402/web-components` | Step 2: the same component as `<shop-order-notes>` |
 
 ## Step 1: a correct Vue app
 
@@ -18,12 +18,11 @@ src/
     clients/
       notes-client.ts             NotesClient: implements listOrderNotes and addOrderNote
     services/
-      notes-service.ts            NotesService: what the components use; calls the client
+      notes-service.ts            NotesService: what the component uses; calls the client
     config/
       create-notes.ts             createNotes(config): a Vue plugin that provides the service
       use-notes-service.ts        inject() for components
     components/
-      status-filter/              StatusFilter.vue + status-filter.css
       order-notes/                OrderNotes.vue + order-notes.css
   pages/                          one page per route
   shared/                         EventLog, OrderPicker, useEventLog
@@ -43,21 +42,20 @@ createApp(App).use(router).use(createNotes(notesConfig)).mount('#app');
 ```
 
 `createNotes` builds `NotesClient` and `NotesService` from the config and `provide`s the service.
-Components get it with `useNotesService()`, which is `inject` underneath. No component receives a
-URL or a token.
+The component gets it with `useNotesService()`, which is `inject` underneath. No component
+receives a URL or a token.
 
-**Components are plain Vue.** Props go in, emits come out:
+**The component is plain Vue.** Props go in, emits come out:
 
 ```vue
-<StatusFilter :value="status" @status-change="changeStatus" />
 <OrderNotes :order-id="orderId" @note-added="noteAdded" />
 ```
 
-Their props and event details come from the element contract the team publishes:
+Its props and event details come from the element contract the team publishes:
 
 ```ts
-const { value = 'all' } = defineProps<Partial<IStatusFilterContract['properties']>>();
-const emit = defineEmits<{ statusChange: [detail: Events['statusChange']] }>();
+const { orderId } = defineProps<Partial<IOrderNotesContract['properties']>>();
+const emit = defineEmits<{ noteAdded: [detail: Events['noteAdded']] }>();
 ```
 
 The event name is written out because Vue's compiler needs the literal key to generate the
@@ -66,23 +64,23 @@ runtime emits; `elements.ts` checks it against the contract (step 2).
 `NotesClient` implements the two API operations the app calls, from the API team's contract:
 `class NotesClient implements Pick<IOrdersApi, 'listOrderNotes' | 'addOrderNote'>`.
 
-Their CSS lives in a file next to them (`<style src="./status-filter.css">`), with class names
-that carry the component name, so the same file works on the page and inside a shadow root.
+Its CSS lives in a file next to it (`<style src="./order-notes.css">`), with class names that
+carry the component name, so the same file works on the page and inside a shadow root.
 
-## Step 2: the transformation to web components
+## Step 2: the transformation to a web component
 
 Vue ships `defineCustomElement`, so most of the work is built in: props become attributes and
 properties, the styles go into a shadow root, and `configureApp` installs plugins on the
 element's own app. Only the events need help. Vue dispatches an emit as
 `new CustomEvent(name, { detail: [...args] })`: the detail is an array, and the event neither
-bubbles nor crosses the shadow root. The contract needs `detail: { status }` with `bubbles` and
-`composed`.
+bubbles nor crosses the shadow root. The contract needs `detail: { orderId, text }` with `bubbles`
+and `composed`.
 
 `web-components/define-vue-element.ts` therefore wraps the component in about 50 lines:
 
 | Part | What it does |
 | --- | --- |
-| `props: component.props` | the element gets exactly the component's props: `value`, `order-id` / `orderId` |
+| `props: component.props` | the element gets exactly the component's props: `order-id` / `orderId` |
 | `component.emits` | for each declared emit, a handler that dispatches the contract `CustomEvent` from the host element (`useHost()`) |
 | `styles` | the component's CSS, imported with Vite's `?inline` suffix |
 | `configureApp` | here `app.use(notes)`, the same plugin the app uses |
@@ -90,14 +88,13 @@ bubbles nor crosses the shadow root. The contract needs `detail: { status }` wit
 
 The emit names come from the compiled component, so nothing is listed twice.
 
-`elements.ts` uses it for both tags, through `defineNotesElement`, which finds the contract by the
-tag name and checks the component against it:
+`elements.ts` uses it through `defineNotesElement`, which finds the contract by the tag name and
+checks the component against it:
 
 ```ts
 function registerElements(config: IRemoteConfig): void {
   const notes = createNotes(config);
 
-  defineNotesElement('shop-status-filter', StatusFilter, { styles: [statusFilterStyles] });
   defineNotesElement('shop-order-notes', OrderNotes, {
     styles: [orderNotesStyles],
     configureApp: (app) => app.use(notes),
@@ -106,22 +103,20 @@ function registerElements(config: IRemoteConfig): void {
 ```
 
 A component is accepted only if it has every property of the contract and an `on…` handler for
-every event, with the contract's types. Rename the `statusChange` emit and the build stops.
+every event, with the contract's types. Rename the `noteAdded` emit and the build stops.
 
 `main.ts` awaits `defineElements(notesConfig)` before mounting, and the web components page uses
-the tags like any host would:
+the tag like any host would:
 
 ```vue
-<shop-status-filter :value="status" @statusChange="changeStatus" />
 <shop-order-notes :order-id="orderId" @noteAdded="noteAdded" />
 ```
 
 - **`isCustomElement`** in `vite.config.ts` tells the Vue compiler that `shop-` tags are custom
   elements, not Vue components.
-- **Data in:** Vue sets `:value` as a property, because the element defines one, and `:order-id`
-  as an attribute.
-- **Events out:** on a plain element, `@statusChange` listens to `statusChange` exactly as
-  written. The handler receives the `CustomEvent`, with the value in `event.detail`.
+- **Data in:** `:order-id` is set as an attribute.
+- **Events out:** on a plain element, `@noteAdded` listens to `noteAdded` exactly as written.
+  The handler receives the `CustomEvent`, with the value in `event.detail`.
 
 ## Step 3: share it with Module Federation
 
@@ -155,10 +150,10 @@ The notes are stored by `tools/mock-api` next to the orders:
 
 | | Vue component (step 1) | Custom element (step 2) |
 | --- | --- | --- |
-| Tag | `<StatusFilter>` | `<shop-status-filter>` |
+| Tag | `<OrderNotes>` | `<shop-order-notes>` |
 | Usable from | this Vue app only | any page: Angular, React, Angular 16, plain HTML |
-| Data in | props, typed | attributes `value`, `order-id` |
-| Events out | `emit('statusChange', detail)` | `CustomEvent('statusChange')`, value in `event.detail` |
+| Data in | props, typed | attribute `order-id` |
+| Events out | `emit('noteAdded', detail)` | `CustomEvent('noteAdded')`, value in `event.detail` |
 | Configuration | `app.use(createNotes(config))` | `defineElements({ apiBase })` once |
 
 ## Run it
@@ -169,7 +164,6 @@ docker compose up --build --watch notes    # http://localhost:4402
 
 ## What to try
 
-- `/components`: the filter logs `statusChange(...)`; picking an order loads its notes; adding a
-  note logs `noteAdded(...)`.
-- `/web-components` does the same with the custom elements and logs the DOM events.
+- `/components`: picking an order loads its notes; adding a note logs `noteAdded(...)`.
+- `/web-components` does the same with the custom element and logs the DOM event.
 - A note typed as `<img src=x onerror=alert(1)>` shows as text.

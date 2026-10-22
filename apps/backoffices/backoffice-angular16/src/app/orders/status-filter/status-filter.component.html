@@ -1,0 +1,11 @@
+<div class="toolbar" role="group" aria-label="Order status">
+  <button
+    *ngFor="let status of statuses"
+    type="button"
+    class="button"
+    [attr.aria-pressed]="status === value"
+    (click)="valueChange.emit(status)"
+  >
+    {{ status }}
+  </button>
+</div>

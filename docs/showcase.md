@@ -24,8 +24,8 @@ events come out, and that is the whole contract.
 
 **Open** `http://localhost:4500/orders` (`backoffice-angular16`).
 
-- Click "Open" in the **Vue** status filter: the **Angular** list filters, the **React** feed logs it.
-- Click a **React** stat tile: the **Vue** filter follows.
+- Click "Open" in the shell's own filter: the **Angular** list filters, the **React** feed logs it.
+- Click a **React** stat tile: the shell's filter and the **Angular** list follow.
 - Click an order in the **Angular** list: the URL changes, the detail and the **Vue** notes load.
 - Add a note in **Vue**: it appears in the **React** feed.
 - Mark the order as shipped in **Angular**: the **React** counts update.
@@ -41,7 +41,7 @@ runs on. In the browser console, on any of the three `/orders` pages:
 ```js
 document.querySelector('shop-orders-list').getAttribute('ng-version');           // 22.x
 document.querySelector('shop-order-stats').getAttribute('data-react-version');   // 18.x
-document.querySelector('shop-status-filter').getAttribute('data-vue-version');   // 3.5.x
+document.querySelector('shop-order-notes').getAttribute('data-vue-version');     // 3.5.x
 ```
 
 | Shell | Its own version | Hosts |

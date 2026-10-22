@@ -32,7 +32,7 @@ its own server:
 | --- | --- | --- |
 | [`apps/microfrontends/orders`](apps/microfrontends/orders) | latest Angular | `<shop-orders-list>`, `<shop-order-detail>` |
 | [`apps/microfrontends/insights`](apps/microfrontends/insights) | React | `<shop-order-stats>`, `<shop-activity-feed>` |
-| [`apps/microfrontends/notes`](apps/microfrontends/notes) | Vue | `<shop-status-filter>`, `<shop-order-notes>` |
+| [`apps/microfrontends/notes`](apps/microfrontends/notes) | Vue | `<shop-order-notes>` |
 
 Three shells load them at runtime, through Native Federation and Module Federation, and put all
 of them on one page: [`backoffice-react`](apps/backoffices/backoffice-react),
@@ -67,7 +67,7 @@ flowchart LR
     subgraph remotes[export custom elements, each on its own server]
       orders[orders · latest Angular<br/>shop-orders-list<br/>shop-order-detail]
       insights[insights · React<br/>shop-order-stats<br/>shop-activity-feed]
-      notes[notes · Vue<br/>shop-status-filter<br/>shop-order-notes]
+      notes[notes · Vue<br/>shop-order-notes]
     end
     subgraph shells[host them on one page]
       react[backoffice-react]

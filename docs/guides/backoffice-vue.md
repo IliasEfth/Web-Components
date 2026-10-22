@@ -13,7 +13,7 @@ hosts (Vue 3.5): the header shows the shell's version, and each Notes element ca
 | Route | What it shows |
 | --- | --- |
 | `http://localhost:4400/dashboard` | Plain Vue with no remote: counts, revenue, and links to the open orders |
-| `http://localhost:4400/orders` | All six elements, wired together by the shell |
+| `http://localhost:4400/orders` | The shell's filter and the five elements, wired together by the shell |
 | `http://localhost:4400/orders/A-1003` | The same page opened with an order (a deep link) |
 | `http://localhost:4400/settings` | The theme switch |
 
@@ -33,6 +33,7 @@ src/
     RemoteGate.vue           loading text, then the slot or an error card with Retry
     remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
   clients/orders-client.ts   implements listOrders from @shop/api-contract, for the dashboard
+  components/StatusFilter.vue the shell's own All / Open / Shipped filter (defineModel)
   pages/                     DashboardPage.vue, OrdersPage.vue, SettingsPage.vue
   theme/themes.ts            the three themes and the injection key
   shared/use-activity-log.ts
@@ -70,7 +71,7 @@ federation({
 ## The page wires everything
 
 ```vue
-<shop-status-filter :value="status" @statusChange="statusChanged" />
+<StatusFilter v-model="status" @update:model-value="filterChanged" />
 
 <shop-orders-list :status="status" page-size="10" @orderSelected="orderSelected" />
 <shop-order-detail :order-id="props.orderId" @orderUpdated="orderUpdated" @closed="orderClosed" />
@@ -85,20 +86,20 @@ it like any other input and hands it to two elements from two frameworks.
 
 | Who | Does what | How the others learn |
 | --- | --- | --- |
-| Vue filter (Notes) | `statusChange` | `status` on the Angular list |
-| React stat tile (Insights) | `statusPicked` | the Vue filter and the Angular list follow |
+| The shell's own filter (Vue) | picks a status | `status` on the Angular list |
+| React stat tile (Insights) | `statusPicked` | the shell's filter and the Angular list follow |
 | Angular list (Orders) | `orderSelected` | the URL changes; the Angular detail and the Vue notes follow it |
 | Vue notes (Notes) | `noteAdded` | the React feed logs it |
 | Angular detail (Orders) | `orderUpdated` | `refresh-key` changes; the React counts reload |
 | Angular detail (Orders) | `closed` | back to `/orders` |
 
-On a plain element, Vue keeps the event name exactly as written, so `@statusChange` listens to
-`statusChange`. The handlers receive the `CustomEvent` and read `event.detail`.
+On a plain element, Vue keeps the event name exactly as written, so `@orderSelected` listens to
+`orderSelected`. The handlers receive the `CustomEvent` and read `event.detail`.
 
 ## Failure stays local
 
 Each element group sits in a `RemoteGate`. With `docker compose stop orders`, only the Orders card
-shows "Orders is unavailable"; the Vue filter, the notes and the React statistics keep working,
+shows "Orders is unavailable"; the filter, the notes and the React statistics keep working,
 and Retry recovers after `docker compose start orders`. As in the React shell, a Module
 Federation remote that was down recovers on a page reload.
 
@@ -121,7 +122,7 @@ The API and all three remotes start with it.
 - `/dashboard` shows the counts and the open orders; the Network tab shows no request to 4201,
   4202 or 4402.
 - An order link opens `/orders/<id>` with that order in the Angular detail and the Vue notes.
-- The Vue filter changes the Angular list; a React tile changes the Vue filter and the list.
+- The shell's filter changes the Angular list; a React tile changes the filter and the list.
 - A row click changes the URL; the detail and the notes follow.
 - A Vue note appears in the React feed; "Mark as shipped" changes the React counts.
 - Everything is green, inside every shadow root too; in Settings, Orange recolours every component.

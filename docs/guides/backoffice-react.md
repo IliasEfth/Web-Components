@@ -12,7 +12,7 @@ React 18: the header shows the shell's version, and each Insights element carrie
 | Route | What it shows |
 | --- | --- |
 | `http://localhost:4200/dashboard` | Plain React with no remote: counts, revenue, and links to the open orders |
-| `http://localhost:4200/orders` | All six elements, wired together by the shell |
+| `http://localhost:4200/orders` | The shell's filter and the five elements, wired together by the shell |
 | `http://localhost:4200/orders/A-1003` | The same page opened with an order (a deep link) |
 | `http://localhost:4200/settings` | The theme switch |
 
@@ -32,8 +32,9 @@ src/
     RemoteGate.tsx           loading text, then the elements or an error card with Retry
     remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
   web-components/
-    custom-elements.d.ts     JSX typings for the six shop- tags, built from the three contracts
+    custom-elements.d.ts     JSX typings for the five shop- tags, built from the three contracts
   clients/orders-client.ts   implements listOrders from @shop/api-contract, for the dashboard
+  components/StatusFilter.tsx the shell's own All / Open / Shipped filter
   pages/                     DashboardPage, OrdersPage, SettingsPage, ErrorPage
   theme/themes.ts
   shared/useActivityLog.ts
@@ -123,7 +124,7 @@ React 19 binds custom elements like an Angular template: properties and attribut
 the same elements; see [insights.md](insights.md).)
 
 ```tsx
-<shop-status-filter value={status} onstatusChange={(event) => setStatus(event.detail.status)} />
+<StatusFilter value={status} onChange={setStatus} />
 
 <shop-orders-list
   status={status}
@@ -146,8 +147,8 @@ the same elements; see [insights.md](insights.md).)
 
 | Who | Does what | How the others learn |
 | --- | --- | --- |
-| Vue filter (Notes) | `statusChange` | `status` on the Angular list |
-| React stat tile (Insights) | `statusPicked` | the Vue filter and the Angular list follow |
+| The shell's own filter (React) | picks a status | `status` on the Angular list |
+| React stat tile (Insights) | `statusPicked` | the shell's filter and the Angular list follow |
 | Angular list (Orders) | `orderSelected` | the URL changes; the Angular detail and the Vue notes follow it |
 | Vue notes (Notes) | `noteAdded` | the React feed logs it |
 | Angular detail (Orders) | `orderUpdated` | `refresh-key` changes; the React counts reload |
@@ -182,7 +183,7 @@ The API and all three remotes start with it.
 - `/dashboard` shows the counts and the open orders; the Network tab shows no request to 4201,
   4202 or 4402.
 - An order link opens `/orders/<id>` with that order in the Angular detail and the Vue notes.
-- The Vue filter changes the Angular list; a React tile changes the Vue filter and the list.
+- The shell's filter changes the Angular list; a React tile changes the filter and the list.
 - A row click changes the URL; the detail and the notes follow. Back and forward restore it.
 - A Vue note appears in the React feed; "Mark as shipped" changes the React counts.
 - In Settings, Orange recolours every component.

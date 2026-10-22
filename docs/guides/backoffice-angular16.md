@@ -8,7 +8,7 @@ Its colour is red (`#dc2626`).
 | Route | What it shows |
 | --- | --- |
 | `http://localhost:4500/dashboard` | Plain Angular 16 with no remote: counts, revenue, and links to the open orders |
-| `http://localhost:4500/orders` | All six elements, wired together by the shell |
+| `http://localhost:4500/orders` | The shell's filter and the five elements, wired together by the shell |
 | `http://localhost:4500/orders/A-1003` | The same page opened with an order (a deep link) |
 | `http://localhost:4500/settings` | The theme switch |
 
@@ -36,8 +36,9 @@ src/app/
   orders/
     orders.module.ts          declares the page and the gate, CUSTOM_ELEMENTS_SCHEMA
     orders-routing.module.ts  one route for /orders and /orders/:orderId
-    orders-page/              the page that wires the six elements
+    orders-page/              the page that wires the five elements
     remote-gate/              loading text, the content or an error card with Retry
+    status-filter/            the shell's own All / Open / Shipped filter (@Input / @Output)
 ```
 
 Two browser runtimes are added to the template:
@@ -110,7 +111,7 @@ the same page and its activity feed. The order id comes from `route.paramMap` th
   defined them, through `*ngTemplateOutlet`.
 - **`[attr.…]` for strings, `[entries]` for the array.** Exactly the contract: attributes for
   strings, a property for the feed.
-- **`(statusChange)`, `(orderSelected)`, …** Angular listens to the DOM events by their exact
+- **`(orderSelected)`, `(statusPicked)`, …** Angular listens to the DOM events by their exact
   names; the handlers read `(event as CustomEvent<…>).detail`.
 - **`CUSTOM_ELEMENTS_SCHEMA`** on `OrdersModule` lets the template use the `shop-` tags.
 
@@ -140,7 +141,7 @@ The image uses Node 18, which Angular 16 needs. The API and all three remotes st
 
 ## What to try
 
-- Demo act 2.1: the Vue filter drives the Angular list; a React tile drives the Vue filter; a row
+- Demo act 2.1: the shell's filter drives the Angular list; a React tile drives the filter; a row
   click changes the URL and the detail and the notes follow; a Vue note reaches the React feed;
   "Mark as shipped" changes the React counts.
 - Demo act 2.2: two different `ng-version` values on one page.

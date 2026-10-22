@@ -1,6 +1,7 @@
 import type { OrderStatusFilter } from '@shop/api-contract';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { StatusFilter } from '../components/StatusFilter';
 import { loadInsightsElements } from '../remotes/insights-remote';
 import { loadNotesElements } from '../remotes/notes-remote';
 import { loadOrdersElements } from '../remotes/orders-remote';
@@ -17,20 +18,17 @@ export function OrdersPage() {
   return (
     <>
       <p className="intro">
-        React owns the URL and the layout. The filter and the notes are Vue, the list and the
-        detail are Angular, the statistics and the feed are React. They meet only in this page.
+        React owns the URL, the filter and the layout. The list and the detail are Angular, the
+        statistics and the feed are React, the notes are Vue. They meet only in this page.
       </p>
 
-      <RemoteGate name="Notes" load={loadNotesElements}>
-        <shop-status-filter
-          className="filter"
-          value={status}
-          onstatusChange={(event) => {
-            setStatus(event.detail.status);
-            log(`statusChange { status: ${event.detail.status} }`);
-          }}
-        />
-      </RemoteGate>
+      <StatusFilter
+        value={status}
+        onChange={(next) => {
+          setStatus(next);
+          log(`filter: status ${next}`);
+        }}
+      />
 
       <div className="layout">
         <RemoteGate name="Orders" load={loadOrdersElements}>

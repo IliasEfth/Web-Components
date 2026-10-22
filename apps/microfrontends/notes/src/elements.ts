@@ -1,8 +1,6 @@
 import type { INotesRemote, IRemoteConfig, NotesContracts } from '@shop/notes-contract';
 import OrderNotes from './notes/components/order-notes/OrderNotes.vue';
 import orderNotesStyles from './notes/components/order-notes/order-notes.css?inline';
-import StatusFilter from './notes/components/status-filter/StatusFilter.vue';
-import statusFilterStyles from './notes/components/status-filter/status-filter.css?inline';
 import { createNotes } from './notes/config/create-notes';
 import {
   type IVueElementOptions,
@@ -45,7 +43,6 @@ export const defineElements: INotesRemote['defineElements'] = (config) => {
 function registerElements(config: IRemoteConfig): void {
   const notes = createNotes(config);
 
-  defineNotesElement('shop-status-filter', StatusFilter, { styles: [statusFilterStyles] });
   defineNotesElement('shop-order-notes', OrderNotes, {
     styles: [orderNotesStyles],
     configureApp: (app) => app.use(notes),
