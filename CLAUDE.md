@@ -20,9 +20,6 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
 - [docs/showcase.md](docs/showcase.md): the live demo script.
 - `docs/guides/<app>.md`: how each app is built, added in the stage that builds it.
 
-The parent folder (`../`, the original `acme-*` / `corvane` prototype and its `docs/`) is
-reference material only. Read it for ideas, never edit it, and never copy its old names in here.
-
 ## Rules
 
 1. **Never change a contract.** Tag, attribute, property and event names, `detail` shapes,
