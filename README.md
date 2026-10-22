@@ -56,39 +56,60 @@ list.addEventListener('orderSelected', (event) => {
 
 ## How it fits together
 
-Every app is its own server. Only the back offices are published, each behind its own proxy
-on its own port. The micro-frontends and the API live on an internal Docker network: the browser
-never reaches them directly. Each proxy serves its shell at `/` and fetches the remotes and the
-API by their Docker DNS names, so everything a page loads comes from that site and from our own
-servers:
+Every app is its own server, and the servers form five groups, one Docker Compose project each,
+the way separate teams would own them. Only the edge is published: one proxy per back office, on
+its own port. Everything else lives on `shop-network`, an internal Docker network the browser
+never reaches. Each proxy serves its shell at `/` and fetches the remotes and the API by their
+Docker DNS names, so everything a page loads comes from that site and from our own servers:
 
 ```mermaid
 flowchart LR
   browser([Browser])
-  basics[web-components-basics · act 1<br/>localhost:4100]
 
-  subgraph sites[back offices · published · one proxy each]
+  subgraph basics[shop-basics · published]
+    wcb[web-components-basics · act 1<br/>localhost:4100]
+  end
+
+  subgraph edge[shop-edge · published · the only way in]
     direction TB
-    rp[backoffice-react-proxy<br/>localhost:4200] --> react[backoffice-react · React 19]
-    vp[backoffice-vue-proxy<br/>localhost:4400] --> vue[backoffice-vue · Vue 3.4]
-    ap[backoffice-angular16-proxy<br/>localhost:4500] --> ng16[backoffice-angular16 · Angular 16]
+    rp[backoffice-react-proxy<br/>localhost:4200]
+    vp[backoffice-vue-proxy<br/>localhost:4400]
+    ap[backoffice-angular16-proxy<br/>localhost:4500]
   end
 
   subgraph net[shop-network · internal · not reachable from your computer]
     direction TB
-    orders[orders:4201 · latest Angular<br/>shop-orders-list · shop-order-detail]
-    insights[insights:4202 · React 18<br/>shop-order-stats · shop-activity-feed]
-    notes[notes:4402 · Vue 3.5<br/>shop-order-notes]
-    api[(mock-api:3000)]
+    subgraph backoffices[shop-backoffices]
+      react[backoffice-react:4200 · React 19]
+      vue[backoffice-vue:4400 · Vue 3.4]
+      ng16[backoffice-angular16:4500 · Angular 16]
+    end
+    subgraph mfs[shop-microfrontends]
+      orders[orders:4201 · latest Angular<br/>shop-orders-list · shop-order-detail]
+      insights[insights:4202 · React 18<br/>shop-order-stats · shop-activity-feed]
+      notes[notes:4402 · Vue 3.5<br/>shop-order-notes]
+    end
+    subgraph services[shop-services]
+      api[(mock-api:3000)]
+    end
   end
 
-  browser --> basics
-  browser --> sites
-  sites -- "/mf/orders/" --> orders
-  sites -- "/mf/insights/" --> insights
-  sites -- "/mf/notes/" --> notes
-  sites -- "/api/" --> api
+  browser --> wcb
+  browser --> edge
+  rp -- "/" --> react
+  vp -- "/" --> vue
+  ap -- "/" --> ng16
+  edge -- "/mf/orders/ · /mf/insights/ · /mf/notes/" --> mfs
+  edge -- "/api/" --> services
 ```
+
+| Group | Compose file | Contains | Published |
+| --- | --- | --- | --- |
+| `shop-services` | `compose.services.yaml` | `mock-api`; creates `shop-network` | nothing |
+| `shop-microfrontends` | `compose.microfrontends.yaml` | `orders`, `insights`, `notes` | nothing |
+| `shop-backoffices` | `compose.backoffices.yaml` | the three shells | nothing |
+| `shop-edge` | `compose.edge.yaml` | one nginx proxy per shell, from `tools/edge` | 4200, 4400, 4500 |
+| `shop-basics` | `compose.basics.yaml` | the act 1 page, on its own | 4100 |
 
 The shell loads each remote's `remoteEntry` from its own site (`/mf/orders/remoteEntry.json`),
 and the elements call `/api` on the same site. The proxy forwards both inside the network.
@@ -141,12 +162,10 @@ apps/
       contract/                     @shop/notes-contract
   backoffices/              the shells that host them
     backoffice-react/       act 2   React 19
-      proxy/                        nginx: serves the site, forwards /mf/ and /api/
     backoffice-vue/         act 2   Vue 3.4
-      proxy/
     backoffice-angular16/   act 2   Angular 16
-      proxy/
 tools/
+  edge/                     one nginx proxy per back office: serves the site, forwards /mf/ and /api/
   mock-api/                 the orders REST API
     contract/                       @shop/api-contract
   scripts/                  Windows shortcuts around docker compose
@@ -164,14 +183,20 @@ You only need [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 no Angular CLI, no version manager: every app builds and runs in its own container, and the
 Angular 16 shell simply uses a Node 18 image.
 
+Start the groups in this order; `shop-services` creates the network the others join:
+
 ```bash
-docker compose up --build --watch
+docker compose -f compose.services.yaml up --build --detach --wait
+docker compose -f compose.microfrontends.yaml up --build --detach --wait
+docker compose -f compose.backoffices.yaml up --build --detach --wait
+docker compose -f compose.edge.yaml up --build --detach --wait
+docker compose -f compose.basics.yaml up --build --detach --wait
 ```
 
-`--watch` copies every edit into the running containers, so the code on screen and the page
-in the browser stay in step. `docker compose down` stops everything, and
-`docker compose up -d --force-recreate mock-api` puts the orders back to their starting state
-after a demo.
+Docker Desktop shows each group on its own. Stopping one group stops only that team's part:
+stop `shop-microfrontends` and the back offices stay up and show an error card per remote.
+`docker compose -f compose.services.yaml up -d --force-recreate mock-api` puts the orders back to
+their starting state after a demo.
 
 | Act | Open | Project |
 | --- | --- | --- |
@@ -180,23 +205,23 @@ after a demo.
 | 2 | `http://localhost:4400/orders` | `apps/backoffices/backoffice-vue` |
 | 2 | `http://localhost:4200/orders` | `apps/backoffices/backoffice-react` |
 
-Only these four ports are published: the act 1 examples and the three back-office proxies. The
-micro-frontends (`orders`, `insights`, `notes`) and `mock-api` have no port on your computer;
-each proxy reaches them by name on the internal `shop-network`. `/api/` answers only the pages'
-own `fetch` calls; opening it in the address bar or with curl returns `403`.
+Only these four ports are published: the act 1 page and the three edge proxies. The
+micro-frontends, the shells and `mock-api` have no port on your computer; each proxy reaches them
+by name on the internal `shop-network`. `/api/` answers only the pages' own `fetch` calls;
+opening it in the address bar or with curl returns `403`.
 
 ### Windows shortcuts
 
-Double-click a script in `tools/scripts`. Each one runs a single `docker compose` command.
+Double-click a script in `tools/scripts`. Each one runs the `docker compose` commands for you.
 
 | Script | What it does |
 | --- | --- |
-| `start-all.bat` | Builds and starts every service and waits until all are healthy |
-| `live-all.bat` | Starts everything with Compose Watch: saved edits reach the containers at once |
-| `deploy-mf-orders.bat`, `deploy-mf-insights.bat`, `deploy-mf-notes.bat` | Rebuilds and restarts one micro-frontend from the current source; everything else keeps running |
-| `deploy-backoffice-react.bat`, `deploy-backoffice-vue.bat`, `deploy-backoffice-angular16.bat` | The same for one back office |
-| `deploy-mock-api.bat` | The same for the API; the orders and notes go back to the seed data |
-| `deploy-web-components-basics.bat` | The same for the act 1 page |
+| `start-all.bat` | Builds and starts the five groups in order and waits until all are healthy |
+| `live-all.bat` | Starts every group with Compose Watch, one window per group: saved edits reach the containers at once |
+| `microfrontends/deploy-mf-orders.bat`, `deploy-mf-insights.bat`, `deploy-mf-notes.bat` | Rebuilds and restarts one micro-frontend from the current source; everything else keeps running |
+| `backoffices/deploy-backoffice-react.bat`, `deploy-backoffice-vue.bat`, `deploy-backoffice-angular16.bat` | The same for one back office |
+| `services/deploy-mock-api.bat` | The same for the API; the orders and notes go back to the seed data |
+| `basics/deploy-web-components-basics.bat` | The same for the act 1 page |
 
 Stop and start single containers, or all of them, from Docker Desktop.
 

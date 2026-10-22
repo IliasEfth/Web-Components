@@ -11,10 +11,10 @@ React 18: the header shows the shell's version, and each Insights element carrie
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:8080/react/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
-| `http://localhost:8080/react/orders` | The shell's filter and the five elements, wired together by the shell |
-| `http://localhost:8080/react/orders/A-1003` | The same page opened with an order (a deep link) |
-| `http://localhost:8080/react/settings` | The theme switch |
+| `http://localhost:4200/dashboard` | The Insights statistics and the Orders list of open orders; a click opens the order |
+| `http://localhost:4200/orders` | The shell's filter and the five elements, wired together by the shell |
+| `http://localhost:4200/orders/A-1003` | The same page opened with an order (a deep link) |
+| `http://localhost:4200/settings` | The theme switch |
 
 The Vue and Angular 16 shells have the same pages and the same layout; only the framework of the
 shell changes.
@@ -168,13 +168,30 @@ the page.
 through the router's outlet context. Custom properties cross shadow roots, so the Angular, React
 and Vue components recolour with the shell.
 
+## Reaching the remotes and the API
+
+The shell has no published port. Its proxy in `shop-edge`, `tools/edge/backoffice-react.conf`, is
+published on `localhost:4200`. It serves the shell at `/` and reaches everything else by
+Docker DNS name on the internal `shop-network`:
+
+| Path on `localhost:4200` | Forwarded to |
+| --- | --- |
+| `/` | `http://backoffice-react:4200`, the shell |
+| `/mf/orders/` | `http://orders:4201` |
+| `/mf/insights/` | `http://insights:4202` |
+| `/mf/notes/` | `http://notes:4402` |
+| `/api/` | `http://mock-api:3000`, without the `/api` prefix; only for the page's own `fetch` |
+
+So `remote-entries.ts` holds paths on this site (`/mf/orders/remoteEntry.json`), and the
+elements' `fetch('/api/orders')` goes through the same proxy.
+
 ## Run it
 
 ```bash
-docker compose up --build --watch gateway backoffice-react    # http://localhost:8080/react
+docker compose -f compose.backoffices.yaml up --build --watch backoffice-react
 ```
 
-The API and all three remotes start with it.
+The shell needs the other groups running: start everything once with `tools\scripts\start-all.bat`, then this command rebuilds the shell and watches its files. The site opens through its proxy in `shop-edge`.
 
 ## What to try
 

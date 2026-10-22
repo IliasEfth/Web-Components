@@ -1,0 +1,75 @@
+name: shop-microfrontends
+
+services:
+  orders:
+    build:
+      context: .
+      dockerfile: apps/microfrontends/orders/Dockerfile.dev
+    networks:
+      - shop-network
+    develop:
+      watch:
+        - action: sync
+          path: apps/microfrontends/orders/src
+          target: /repo/apps/microfrontends/orders/src
+        - action: rebuild
+          path: apps/microfrontends/orders/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/orders/contract
+        - action: rebuild
+          path: apps/microfrontends/orders/angular.json
+        - action: rebuild
+          path: apps/microfrontends/orders/federation.config.mjs
+
+  insights:
+    build:
+      context: .
+      dockerfile: apps/microfrontends/insights/Dockerfile.dev
+    networks:
+      - shop-network
+    develop:
+      watch:
+        - action: sync
+          path: apps/microfrontends/insights/src
+          target: /repo/apps/microfrontends/insights/src
+        - action: sync
+          path: apps/microfrontends/insights/index.html
+          target: /repo/apps/microfrontends/insights/index.html
+        - action: rebuild
+          path: apps/microfrontends/insights/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/vite.config.ts
+
+  notes:
+    build:
+      context: .
+      dockerfile: apps/microfrontends/notes/Dockerfile.dev
+    networks:
+      - shop-network
+    develop:
+      watch:
+        - action: sync
+          path: apps/microfrontends/notes/src
+          target: /repo/apps/microfrontends/notes/src
+        - action: sync
+          path: apps/microfrontends/notes/index.html
+          target: /repo/apps/microfrontends/notes/index.html
+        - action: rebuild
+          path: apps/microfrontends/notes/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/vite.config.ts
+
+networks:
+  shop-network:
+    name: shop-network
+    external: true

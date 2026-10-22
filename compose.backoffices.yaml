@@ -1,0 +1,79 @@
+name: shop-backoffices
+
+services:
+  backoffice-react:
+    build:
+      context: .
+      dockerfile: apps/backoffices/backoffice-react/Dockerfile.dev
+    networks:
+      - shop-network
+    develop:
+      watch:
+        - action: sync
+          path: apps/backoffices/backoffice-react/src
+          target: /repo/apps/backoffices/backoffice-react/src
+        - action: sync
+          path: apps/backoffices/backoffice-react/index.html
+          target: /repo/apps/backoffices/backoffice-react/index.html
+        - action: rebuild
+          path: apps/backoffices/backoffice-react/package.json
+        - action: rebuild
+          path: apps/microfrontends/orders/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/contract
+        - action: rebuild
+          path: apps/backoffices/backoffice-react/vite.config.ts
+
+  backoffice-vue:
+    build:
+      context: .
+      dockerfile: apps/backoffices/backoffice-vue/Dockerfile.dev
+    networks:
+      - shop-network
+    develop:
+      watch:
+        - action: sync
+          path: apps/backoffices/backoffice-vue/src
+          target: /repo/apps/backoffices/backoffice-vue/src
+        - action: sync
+          path: apps/backoffices/backoffice-vue/index.html
+          target: /repo/apps/backoffices/backoffice-vue/index.html
+        - action: rebuild
+          path: apps/backoffices/backoffice-vue/package.json
+        - action: rebuild
+          path: apps/microfrontends/orders/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/contract
+        - action: rebuild
+          path: apps/backoffices/backoffice-vue/vite.config.ts
+
+  backoffice-angular16:
+    build:
+      context: .
+      dockerfile: apps/backoffices/backoffice-angular16/Dockerfile.dev
+    networks:
+      - shop-network
+    develop:
+      watch:
+        - action: sync
+          path: apps/backoffices/backoffice-angular16/src
+          target: /repo/apps/backoffices/backoffice-angular16/src
+        - action: rebuild
+          path: apps/backoffices/backoffice-angular16/package.json
+        - action: rebuild
+          path: apps/microfrontends/orders/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/contract
+        - action: rebuild
+          path: apps/backoffices/backoffice-angular16/angular.json
+
+networks:
+  shop-network:
+    name: shop-network
+    external: true

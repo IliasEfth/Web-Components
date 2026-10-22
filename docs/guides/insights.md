@@ -7,8 +7,8 @@ components built with an older React. The app shows both side by side:
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:8080/insights/components` | Step 1: the components used by React, the normal way |
-| `http://localhost:8080/insights/web-components` | Step 2: the same components as `<shop-order-stats>` and `<shop-activity-feed>` |
+| `http://localhost:4200/mf/insights/components` | Step 1: the components used by React, the normal way |
+| `http://localhost:4200/mf/insights/web-components` | Step 2: the same components as `<shop-order-stats>` and `<shop-activity-feed>` |
 
 ## Step 1: a correct React app
 
@@ -153,15 +153,15 @@ federation({
 - **`shared`** lets a shell provide React when its version matches what Insights asks for
   (`^18.3.1`). The React shell offers React 19, the Vue and Angular shells offer none, so in every
   shell Insights falls back to its own React 18.
-- **`base`** is `/insights/`, the remote's path behind the gateway, so the files the remote entry
+- **`base`** is `/mf/insights/`, the path every edge proxy forwards to Insights, so the files the remote entry
   points to always load from Insights, not from the shell's path.
 
 The same dev server serves the app and the remote:
 
 | URL | What it is |
 | --- | --- |
-| `http://localhost:8080/insights/components`, `/web-components` | the app, exactly as before |
-| `http://localhost:8080/insights/remoteEntry.js` | the Module Federation container, exposing `./elements` |
+| `http://localhost:4200/mf/insights/components`, `/web-components` | the app, exactly as before |
+| `http://localhost:4200/mf/insights/remoteEntry.js` | the Module Federation container, exposing `./elements` |
 
 A shell built with Vite lists it as a remote of the same plugin and imports it like a module;
 [backoffice-react.md](backoffice-react.md) shows the whole host:
@@ -170,7 +170,7 @@ A shell built with Vite lists it as a remote of the same plugin and imports it l
 federation({
   name: 'backoffice',
   remotes: {
-    insights: { type: 'module', name: 'insights', entry: '/insights/remoteEntry.js' },
+    insights: { type: 'module', name: 'insights', entry: '/mf/insights/remoteEntry.js' },
   },
   shared: ['react', 'react-dom'],
 });
@@ -196,12 +196,14 @@ loader per system, the same `defineElements` contract behind each.
 ## Run it
 
 ```bash
-docker compose up --build --watch gateway insights    # http://localhost:8080/insights
+docker compose -f compose.microfrontends.yaml up --build --watch insights
 ```
+
+The remote is internal; the shells load it through their proxies. Start everything once with `tools\scripts\start-all.bat`, then this command rebuilds the remote and watches its files.
 
 ## What to try
 
 - `/components` shows three tiles; a click logs `onStatusPicked(...)` in the feed; "Refresh
   statistics" reloads; "Clear" empties the feed.
 - `/web-components` does the same with the custom elements and logs the DOM events.
-- `http://localhost:8080/insights/remoteEntry.js` is the container the shells load.
+- `http://localhost:4200/mf/insights/remoteEntry.js` is the container the shells load.
