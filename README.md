@@ -56,29 +56,65 @@ list.addEventListener('orderSelected', (event) => {
 
 ## How it fits together
 
+Every app is its own server on an internal Docker network. The browser reaches them only through
+the gateway, one address with one path per app:
+
 ```mermaid
 flowchart LR
-  subgraph act1[Act 1: pure]
-    basics[web-components-basics<br/>user-card · counter-button · todo-list]
-  end
+  browser([Browser<br/>localhost:8080]) --> gateway[gateway · nginx<br/>the only published port]
 
-  subgraph act2[Act 2: micro-frontends calling each other]
+  subgraph net[shop-network · internal Docker network]
     direction LR
-    subgraph remotes[export custom elements, each on its own server]
-      orders[orders · latest Angular<br/>shop-orders-list<br/>shop-order-detail]
-      insights[insights · React<br/>shop-order-stats<br/>shop-activity-feed]
-      notes[notes · Vue<br/>shop-order-notes]
+    subgraph remotes[micro-frontends: export custom elements]
+      orders[orders · latest Angular · /orders/<br/>shop-orders-list<br/>shop-order-detail]
+      insights[insights · React 18 · /insights/<br/>shop-order-stats<br/>shop-activity-feed]
+      notes[notes · Vue 3.5 · /notes/<br/>shop-order-notes]
     end
-    subgraph shells[host them on one page]
-      react[backoffice-react]
-      vue[backoffice-vue]
-      ng16[backoffice-angular16]
+    subgraph shells[shells: host them on one page]
+      react[backoffice-react · React 19 · /react/]
+      vue[backoffice-vue · Vue 3.4 · /vue/]
+      ng16[backoffice-angular16 · Angular 16 · /angular16/]
     end
-    remotes -- "loaded at runtime (Native / Module Federation)" --> shells
+    api[(mock-api · /api/)]
+    basics[web-components-basics · act 1 · /]
   end
 
-  api[(mock-api<br/>/orders)]
-  remotes -- fetch --> api
+  gateway --> shells
+  gateway --> remotes
+  gateway --> api
+  gateway --> basics
+  remotes -. "remoteEntry loaded at runtime<br/>(Native / Module Federation)" .-> shells
+  remotes -- "each element fetches /api itself" --> api
+```
+
+On the page, a shell and its elements talk only through the custom element contract: the shell
+sets attributes and properties, the elements answer with `CustomEvent`s. Elements never talk to
+each other directly; the shell listens and passes the news on:
+
+```mermaid
+sequenceDiagram
+  participant Shell as Shell (React, Vue or Angular 16)
+  participant List as shop-orders-list (Orders)
+  participant Detail as shop-order-detail (Orders)
+  participant Notes as shop-order-notes (Notes)
+  participant Stats as shop-order-stats (Insights)
+  participant Feed as shop-activity-feed (Insights)
+  participant API as /api
+
+  Shell->>Shell: load remoteEntry, await defineElements()
+  Shell->>List: status="open"
+  List->>API: GET /orders?status=open
+  List-->>Shell: orderSelected { id }
+  Shell->>Detail: order-id="A-1003"
+  Shell->>Notes: order-id="A-1003"
+  Detail->>API: PATCH /orders/A-1003
+  Detail-->>Shell: orderUpdated { id, status }
+  Shell->>Stats: refresh-key (new value)
+  Notes->>API: POST /orders/A-1003/notes
+  Notes-->>Shell: noteAdded { orderId, text }
+  Shell->>Feed: entries = [...entries, entry]
+  Stats-->>Shell: statusPicked { status }
+  Shell->>List: status="shipped"
 ```
 
 The full contract (tags, attributes, events, theme tokens) is in
