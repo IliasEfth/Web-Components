@@ -96,9 +96,9 @@ On a plain element, Vue keeps the event name exactly as written, so `@orderSelec
 
 ## Failure stays local
 
-Each element group sits in a `RemoteGate`. With `docker compose stop orders`, only the Orders card
+Each element group sits in a `RemoteGate`. With `docker compose -f compose.microfrontends.yaml stop orders`, only the Orders card
 shows "Orders is unavailable"; the filter, the notes and the React statistics keep working,
-and Retry recovers after `docker compose start orders`. As in the React shell, a Module
+and Retry recovers after `docker compose -f compose.microfrontends.yaml start orders`. As in the React shell, a Module
 Federation remote that was down recovers on a page reload.
 
 ## Theme
@@ -107,13 +107,30 @@ Federation remote that was down recovers on a page reload.
 `watchEffect`, and `provide`s the ref. `SettingsPage.vue` `inject`s it and changes it. Custom
 properties cross shadow roots, so every component recolours with the shell.
 
+## Reaching the remotes and the API
+
+The shell has no published port. Its proxy in `shop-edge`, `tools/edge/backoffice-vue.conf`, is
+published on `localhost:4400`. It serves the shell at `/` and reaches everything else by
+Docker DNS name on the internal `shop-network`:
+
+| Path on `localhost:4400` | Forwarded to |
+| --- | --- |
+| `/` | `http://backoffice-vue:4400`, the shell |
+| `/mf/orders/` | `http://orders:4201` |
+| `/mf/insights/` | `http://insights:4202` |
+| `/mf/notes/` | `http://notes:4402` |
+| `/api/` | `http://mock-api:3000`, without the `/api` prefix; only for the page's own `fetch` |
+
+So `remote-entries.ts` holds paths on this site (`/mf/orders/remoteEntry.json`), and the
+elements' `fetch('/api/orders')` goes through the same proxy.
+
 ## Run it
 
 ```bash
-docker compose up --build --watch backoffice-vue    # http://localhost:4400
+docker compose -f compose.backoffices.yaml up --build --watch backoffice-vue
 ```
 
-The API and all three remotes start with it.
+The shell needs the other groups running: start everything once with `tools\scripts\start-all.bat`, then this command rebuilds the shell and watches its files. The site opens through its proxy in `shop-edge`.
 
 ## What to try
 
@@ -124,4 +141,4 @@ The API and all three remotes start with it.
 - A row click changes the URL; the detail and the notes follow.
 - A Vue note appears in the React feed; "Mark as shipped" changes the React counts.
 - Everything is green, inside every shadow root too; in Settings, Orange recolours every component.
-- `docker compose stop orders`: only the Orders card fails; Retry recovers it.
+- `docker compose -f compose.microfrontends.yaml stop orders`: only the Orders card fails; Retry recovers it.

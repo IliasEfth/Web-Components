@@ -129,13 +129,30 @@ document.querySelector('app-root').getAttribute('ng-version');         // 16.2.1
 document.querySelector('shop-orders-list').getAttribute('ng-version'); // 22.2.3
 ```
 
+## Reaching the remotes and the API
+
+The shell has no published port. Its proxy in `shop-edge`, `tools/edge/backoffice-angular16.conf`, is
+published on `localhost:4500`. It serves the shell at `/` and reaches everything else by
+Docker DNS name on the internal `shop-network`:
+
+| Path on `localhost:4500` | Forwarded to |
+| --- | --- |
+| `/` | `http://backoffice-angular16:4500`, the shell |
+| `/mf/orders/` | `http://orders:4201` |
+| `/mf/insights/` | `http://insights:4202` |
+| `/mf/notes/` | `http://notes:4402` |
+| `/api/` | `http://mock-api:3000`, without the `/api` prefix; only for the page's own `fetch` |
+
+So `remote-entries.ts` holds paths on this site (`/mf/orders/remoteEntry.json`), and the
+elements' `fetch('/api/orders')` goes through the same proxy.
+
 ## Run it
 
 ```bash
-docker compose up --build --watch backoffice-angular16    # http://localhost:4500
+docker compose -f compose.backoffices.yaml up --build --watch backoffice-angular16
 ```
 
-The image uses Node 18, which Angular 16 needs. The API and all three remotes start with it.
+The image uses Node 18, which Angular 16 needs. The shell needs the other groups running: start everything once with `tools\scripts\start-all.bat`, then this command rebuilds the shell and watches its files. The site opens through its proxy in `shop-edge`.
 
 ## What to try
 
@@ -143,5 +160,5 @@ The image uses Node 18, which Angular 16 needs. The API and all three remotes st
   click changes the URL and the detail and the notes follow; a Vue note reaches the React feed;
   "Mark as shipped" changes the React counts.
 - Demo act 2.2: two different `ng-version` values on one page.
-- Demo act 2.4: `docker compose stop orders` leaves only the Orders card failing; Retry recovers it.
+- Demo act 2.4: `docker compose -f compose.microfrontends.yaml stop orders` leaves only the Orders card failing; Retry recovers it.
 - Everything is red, inside every shadow root too; in Settings, Orange recolours every component.

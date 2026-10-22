@@ -2,4 +2,4 @@ export interface IInsightsConfig {
   apiBase: string;
 }
 
-export const insightsConfig: IInsightsConfig = { apiBase: 'http://localhost:3000' };
+export const insightsConfig: IInsightsConfig = { apiBase: '/api' };

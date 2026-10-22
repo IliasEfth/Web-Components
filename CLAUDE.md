@@ -3,7 +3,7 @@
 This repository is a conference demo: one online shop back office, told in two acts.
 The audience reads the code on screen, so the code must be clean and obvious.
 
-1. **Pure Web Components:** `examples/web-components-basics`, the native API with no framework.
+1. **Pure Web Components:** `apps/basics/web-components-basics`, the native API with no framework.
 2. **Micro-frontends calling each other:** the latest Angular (`apps/microfrontends/orders`),
    React (`apps/microfrontends/insights`) and Vue (`apps/microfrontends/notes`) export custom
    elements, each from its own live server; the React, Vue and Angular 16 shells load them at
@@ -41,7 +41,7 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
    `ng new`), on the host and in containers. Give the exact command and folder, then wait.
    Docker image builds that run `npm ci` from a reviewed `package-lock.json` are fine.
    **Contracts are local packages.** Each team publishes a types-only contract in its own folder
-   (`tools/mock-api/contract` → `@shop/api-contract`, `apps/microfrontends/<name>/contract` →
+   (`apps/services/mock-api/contract` → `@shop/api-contract`, `apps/microfrontends/<name>/contract` →
    `@shop/<name>-contract`). Consumers install it as a `devDependency` with `npm install <folder>`
    (a `file:` link); nothing is published to a registry (`"private": true`). No app keeps a copy
    of a shared type: models, parameters, event details and `defineElements` come from the
@@ -49,7 +49,7 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
    takes no configuration, and shells pass none. Each micro-frontend writes its own HTTP client for the operations it calls and declares them
    (`implements Pick<IOrdersApi, '…'>`); each remote's elements are checked against their contract.
 7. **Strict TypeScript** (`"strict": true`) in every TypeScript project. Plain JavaScript only
-   where the point is "no build": `examples/`.
+   where the point is "no build": `apps/basics/`.
 8. **Each framework's default linter** behind `npm run lint`: ESLint with angular-eslint for
    Angular and the plain projects, oxlint (what `npm create vite` generates) for React and Vue.
    **No Prettier.** Formatting is VS Code's built-in formatters, set in the committed
@@ -72,7 +72,7 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
     the guide in the same change.
 11. **Everything runs through Docker**, following Docker's official guides
     (https://docs.docker.com/guides/angular/ and the equivalents for React and Vue). Each app has
-    a `Dockerfile.dev` (dev server, Compose Watch) and a service in the root `compose.yaml`.
+    a `Dockerfile.dev` (dev server, Compose Watch) and a service in its group's `compose.<group>.yaml`.
     No production images or `-prod` services. Run and verify apps only
     with `docker compose`, never with a server started on the host. `npm install` on the host is
     fine: it keeps `package-lock.json` current and gives the editor its types.
@@ -80,27 +80,63 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
 ## Layout and ports
 
 Apps that export custom elements live in `apps/microfrontends/`; the shells that host them live
-in `apps/backoffices/`. A reader should see from the path which side an app is on.
+in `apps/backoffices/`; the back-end services they call live in `apps/services/`; the act 1 page
+lives in `apps/basics/`. A reader should see from the path which side an app is on, and each
+folder matches a Compose group. `tools/` holds only what runs around the apps: the edge proxies
+and the scripts.
 
-| Act | Folder | What | Port | Compose service |
+The apps form five Docker Compose projects, one per group, each with its own file in the repo
+root. Docker Desktop shows each group on its own; `depends_on` never crosses groups.
+
+| Group | File | Services | Networks | Published |
 | --- | --- | --- | --- | --- |
-| 1 | `examples/web-components-basics` | Three native Web Components | 4100 | `web-components-basics` |
-| 2 | `apps/microfrontends/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | 4201 | `orders` |
-| 2 | `apps/microfrontends/insights` | React 18, exports `shop-order-stats`, `shop-activity-feed` | 4202 | `insights` |
-| 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-order-notes` | 4402 | `notes` |
-| 2 | `apps/backoffices/backoffice-react` | React 19 shell | 4200 | `backoffice-react` |
-| 2 | `apps/backoffices/backoffice-vue` | Vue 3.4 shell | 4400 | `backoffice-vue` |
-| 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | 4500 | `backoffice-angular16` |
-| all | `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | 3000 | `mock-api` |
+| `shop-services` | `compose.services.yaml` | `mock-api` | creates `shop-network` (`internal: true`) | nothing |
+| `shop-microfrontends` | `compose.microfrontends.yaml` | `orders`, `insights`, `notes` | `shop-network` (`external: true`) | nothing |
+| `shop-backoffices` | `compose.backoffices.yaml` | `backoffice-react`, `backoffice-vue`, `backoffice-angular16` | `shop-network` (`external: true`) | nothing |
+| `shop-edge` | `compose.edge.yaml` | `backoffice-react-proxy`, `backoffice-vue-proxy`, `backoffice-angular16-proxy` | `shop-network` and `shop-public` | 4200, 4400, 4500 |
+| `shop-basics` | `compose.basics.yaml` | `web-components-basics` | its own default network | 4100 |
+
+`shop-services` starts first because it creates `shop-network`; a group that joins it before it
+exists fails with "network shop-network not found". `shop-network` is internal: no access from
+the host, no internet at runtime. The edge proxies are the only containers on both networks.
+
+| Act | Folder | What | Internal address | Public address |
+| --- | --- | --- | --- | --- |
+| 1 | `apps/basics/web-components-basics` | Three native Web Components | | `localhost:4100` |
+| 2 | `apps/microfrontends/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | `orders:4201/mf/orders/` | none |
+| 2 | `apps/microfrontends/insights` | React 18, exports `shop-order-stats`, `shop-activity-feed` | `insights:4202/mf/insights/` | none |
+| 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-order-notes` | `notes:4402/mf/notes/` | none |
+| 2 | `apps/backoffices/backoffice-react` | React 19 shell | `backoffice-react:4200/` | `localhost:4200` through its proxy |
+| 2 | `apps/backoffices/backoffice-vue` | Vue 3.4 shell | `backoffice-vue:4400/` | `localhost:4400` through its proxy |
+| 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | `backoffice-angular16:4500/` | `localhost:4500` through its proxy |
+| all | `apps/services/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | `mock-api:3000` | none |
+| all | `tools/edge` | One nginx proxy per shell: `<shell>.conf` and one `Dockerfile.dev` with `ARG SITE` | | 4200, 4400, 4500 |
+
+Each proxy serves its shell at `/` and forwards `/mf/orders/`, `/mf/insights/`, `/mf/notes/` and
+`/api/` (prefix stripped) by Docker DNS name. The remotes serve under the same `/mf/<name>/`
+(Vite `base`, Angular `baseHref` and `servePath`), so their absolute file paths resolve inside
+every site; the `/mf/` prefix keeps them clear of the shells' own routes like `/orders/A-1003`.
+Shells and remote entries use these relative paths only. A proxy answers `/api/` only for
+`Sec-Fetch-Site: same-origin` with `Sec-Fetch-Mode` `cors` or `same-origin`, and only `GET`,
+`POST`, `PATCH`; everything else gets `403`. The mock API sends no CORS headers.
+
+A new remote needs a `location` in every `tools/edge/*.conf`, never a `ports:` line. A new site
+needs its own `.conf` and a proxy service in `compose.edge.yaml`.
 
 ```bash
-docker compose up --build --watch        # everything, edits sync into the containers
-docker compose up --build --watch orders # one service and what it depends on
-docker compose down                      # stop everything
-docker compose up -d --force-recreate mock-api   # back to the seed data
+docker compose -f compose.services.yaml up --build --detach --wait          # first: creates shop-network
+docker compose -f compose.microfrontends.yaml up --build --detach --wait
+docker compose -f compose.backoffices.yaml up --build --detach --wait
+docker compose -f compose.edge.yaml up --build --detach --wait
+docker compose -f compose.basics.yaml up --build --detach --wait
+docker compose -f compose.microfrontends.yaml watch                         # live edits, one group per terminal
+docker compose -f compose.services.yaml up -d --force-recreate mock-api     # back to the seed data
 ```
 
-Plain JavaScript projects (`examples/`) are served by `nginx:stable-alpine` with no
+`tools/scripts/start-all.bat` and `live-all.bat` run the groups in this order; the `deploy-*.bat`
+scripts sit in one folder per group.
+
+Plain JavaScript projects (`apps/basics/`) are served by `nginx:stable-alpine` with no
 npm at runtime; Node projects start with `npm start` (or `npm run start:docker`) inside their
 image. Dev servers must listen on `0.0.0.0` in Docker only.
 Use Compose Watch (`develop.watch`), not bind mounts, so edits on Windows reach the container.
@@ -108,7 +144,7 @@ Use Compose Watch (`develop.watch`), not bind mounts, so edits on Windows reach 
 ## Stages
 
 Each stage is one branch and one pull request, and ends with something that runs in Docker:
-every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
+every app arrives with its `Dockerfile.dev` and its Compose service.
 
 | # | Branch | Adds | Done when |
 | --- | --- | --- | --- |
@@ -126,7 +162,11 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 
 | Symptom | Fix |
 | --- | --- |
-| CORS error loading `remoteEntry.json` | Add `Access-Control-Allow-Origin: *` to the `serve` options of `apps/microfrontends/orders` |
+| 404 or `index.html` instead of a remote's file | The remote is not serving under `/mf/<name>/`, or a proxy lacks its `location`; check the remote's Vite `base` or Angular `baseHref`/`servePath` against `tools/edge/*.conf` |
+| `403` from `localhost:4200/api/...` in curl or the address bar | Expected: only the pages' `fetch` passes the proxy's `Sec-Fetch-*` check. To look at the API, use DevTools on a shell page, send `-H "Sec-Fetch-Site: same-origin" -H "Sec-Fetch-Mode: cors"`, or run `docker compose -f compose.services.yaml exec mock-api node -e "fetch('http://localhost:3000/orders').then(r=>r.text()).then(console.log)"` |
+| A service needs the internet at runtime (a CDN, an npm download in `npm start`) | `shop-network` is `internal`; install everything in the image at build time, where the network is open |
+| A proxy returns 502 for one path | That service is down or still starting; nginx resolves names at request time (`resolver 127.0.0.11` with a variable in `proxy_pass`), so the other paths keep working |
+| Vite live reload does not connect through a proxy | The proxy must forward `Upgrade`/`Connection` and keep `Host $http_host` |
 | `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `shop-` tags in the Vite Vue plugin |
 | Vue custom element events have an array `detail` and do not bubble | Vue's `defineCustomElement` dispatches `detail: [...args]` without `bubbles`/`composed`. `defineVueElement` in `apps/microfrontends/notes` wraps the component and dispatches the contract `CustomEvent` from `useHost()` instead |
 | Vue build: `Failed to resolve index type into finite keys` | `defineEmits` cannot take a mapped type over a contract's event keys. Write the event names literally (`{ noteAdded: [detail: Events['noteAdded']] }`); `defineProps<Partial<IContract['properties']>>()` works. `elements.ts` checks the names against the contract |
@@ -135,7 +175,7 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | `tsc` passes but `ng build` fails in an Angular app | `tsc` does not check templates. Run `ng build` after changing an `input()` type a template binds to |
 | oxlint reports React hook rules in a Vue project | Use the Vue plugins in `.oxlintrc.json` (`vue`, `typescript`, `oxc`), not the React config |
 | React remote in another page: `@vitejs/plugin-react can't detect preamble` | Exclude the exposed folder from Fast Refresh: `react({ exclude: [/\/node_modules\//, /\/src\/insights\//] })` |
-| Remote files load from the shell's port instead of the remote's | Set `server.origin` to the remote's own URL in `vite.config.ts` |
+| Remote files load from the shell's own files instead of the remote's | Set `base` to the remote's proxied path (`/mf/insights/`, `/mf/notes/`) in `vite.config.ts` |
 | A Vite shell downloads every `remoteEntry.js` on its first page | Module Federation's default `shareStrategy: 'version-first'` fetches all remotes up front; set `shareStrategy: 'loaded-first'` in the host |
 | Retry never recovers a Module Federation remote after an outage | The browser caches a failed `import()` of `remoteEntry.js` until the page reloads; reload the page. Native Federation fetches `remoteEntry.json` first, so its Retry works |
 | Two federation formats | Angular remotes: Native Federation (`remoteEntry.json`). React and Vue remotes: `@module-federation/vite` (`remoteEntry.js`). Shells load each with its own runtime |
@@ -145,9 +185,9 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | Angular 16: `Cannot find module '@softarc/native-federation-orchestrator/options'` | The CLI 16 template uses `"moduleResolution": "node"`, which ignores `exports`. Use `"bundler"` and `"skipLibCheck": true` |
 | Angular 16 shell: should it use `@angular-architects/native-federation`? | No. Its 16.x runtime cannot read Orders' v4 `remoteEntry.json`, and the shell shares nothing with Angular 22. The orchestrator plus `@module-federation/runtime` load all three remotes |
 | Angular 16 CLI refuses to run | Its image must be `node:18`; run its `npm`/`ng` commands in that container, not on the host |
-| Page does not load on `localhost:<port>` | The dev server listens on `127.0.0.1` inside the container. Bind `0.0.0.0` in Docker only (a `docker` configuration or a `start:docker` script), never in the local `npm start` |
+| A proxy returns 502 although the service is healthy | The dev server listens on `127.0.0.1` inside the container. Bind `0.0.0.0` in Docker only (a `docker` configuration or a `start:docker` script), never in the local `npm start` |
 | Edits do not reach the container | Start with `--watch`, and check the service's `develop.watch` paths |
-| `docker compose watch` says "cannot take exclusive lock" | Another `watch` for this project is still running; stop it first |
+| `docker compose watch` says "cannot take exclusive lock" | Another `watch` for this group is still running; stop it first. Each group has its own lock |
 | nginx container is "unhealthy" but the page loads | Alpine resolves `localhost` to `::1`: nginx needs `listen [::]:80;` as well as `listen 80;` |
 | `esbuild` or `rollup` binary errors in a container | Host `node_modules` leaked in: keep `node_modules` in every `.dockerignore` |
 | An event never arrives | Event names are case-sensitive, and the listener must be on the element itself |

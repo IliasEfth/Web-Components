@@ -1,6 +1,6 @@
 # Act 1: Web Components basics
 
-`examples/web-components-basics` opens the talk. Three small components show the whole native
+`apps/basics/web-components-basics` opens the talk. Three small components show the whole native
 API before any framework appears. Each one is a single plain JavaScript file. Acts 2 and 3 use
 exactly the same contract (attributes and properties in, `CustomEvent`s out), only written
 with Angular, React and Vue.
@@ -26,7 +26,7 @@ Every component does the same four things:
 ## Run it
 
 ```bash
-docker compose up --build --watch web-components-basics
+docker compose -f compose.basics.yaml up --build --watch web-components-basics
 ```
 
 Open `http://localhost:4100` and follow act 1 of [the demo script](../showcase.md).

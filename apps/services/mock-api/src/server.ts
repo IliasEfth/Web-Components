@@ -1,4 +1,4 @@
-import express, { type NextFunction, type Request, type Response } from 'express';
+import express from 'express';
 import { databaseFile, ensureDatabase } from './database.ts';
 import { isNoteText, maxNoteLength } from './note.ts';
 import { isOrderStatus, isOrderStatusFilter } from './order.ts';
@@ -10,7 +10,6 @@ await ensureDatabase();
 const store = await OrdersStore.open(databaseFile);
 const app = express();
 
-app.use(allowEveryOrigin);
 app.use(express.json());
 
 app.get('/orders', (request, response) => {
@@ -78,20 +77,5 @@ app.use((_request, response) => {
 });
 
 app.listen(port, () => {
-  console.log(`Mock API ready on http://localhost:${port}/orders`);
+  console.log('Mock API ready');
 });
-
-function allowEveryOrigin(request: Request, response: Response, next: NextFunction): void {
-  response.set({
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  });
-
-  if (request.method === 'OPTIONS') {
-    response.sendStatus(204);
-    return;
-  }
-
-  next();
-}

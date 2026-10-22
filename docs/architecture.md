@@ -10,32 +10,83 @@ One online shop back office, told in two acts:
 
 ## The cast
 
-| Act | Folder | Role | Framework | Port | Ships |
-| --- | --- | --- | --- | --- | --- |
-| 1 | `examples/web-components-basics` | Three native components | none | 4100 | static files |
-| 2 | `apps/microfrontends/orders` | Remote: order list and order detail | current Angular, zoneless | 4201 | `remoteEntry.json` (Native Federation) |
-| 2 | `apps/microfrontends/insights` | Remote: order statistics and activity feed | React 18 | 4202 | `remoteEntry.js` (Module Federation) |
-| 2 | `apps/microfrontends/notes` | Remote: order notes | Vue 3.5 | 4402 | `remoteEntry.js` (Module Federation) |
-| 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | 4200 | the site |
-| 2 | `apps/backoffices/backoffice-vue` | Host, on an older Vue | Vue 3.4 + Vue Router | 4400 | the site |
-| 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | 4500 | the site |
-| all | `tools/mock-api` | Orders REST API | Express, TypeScript | 3000 | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
+| Act | Folder | Role | Framework | Group | Reached at | Ships |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `apps/basics/web-components-basics` | Three native components | none | `shop-basics` | `localhost:4100` | static files |
+| 2 | `apps/microfrontends/orders` | Remote: order list and order detail | current Angular, zoneless | `shop-microfrontends` | internal: `orders:4201/mf/orders/` | `remoteEntry.json` (Native Federation) |
+| 2 | `apps/microfrontends/insights` | Remote: order statistics and activity feed | React 18 | `shop-microfrontends` | internal: `insights:4202/mf/insights/` | `remoteEntry.js` (Module Federation) |
+| 2 | `apps/microfrontends/notes` | Remote: order notes | Vue 3.5 | `shop-microfrontends` | internal: `notes:4402/mf/notes/` | `remoteEntry.js` (Module Federation) |
+| 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | `shop-backoffices` | `localhost:4200`, through its proxy | the site |
+| 2 | `apps/backoffices/backoffice-vue` | Host, on an older Vue | Vue 3.4 + Vue Router | `shop-backoffices` | `localhost:4400`, through its proxy | the site |
+| 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | `shop-backoffices` | `localhost:4500`, through its proxy | the site |
+| all | `apps/services/mock-api` | Orders REST API | Express, TypeScript | `shop-services` | internal: `mock-api:3000` | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
+| all | `tools/edge` | One nginx proxy per back office | nginx | `shop-edge` | `localhost:4200`, `4400`, `4500` | the way in |
 
 ```text
-Act 1   examples/web-components-basics          user-card · counter-button · todo-list
+Act 1   localhost:4100 ──► web-components-basics          user-card · counter-button · todo-list
+                           shop-basics, on its own
 
-Act 2   remotes                                   hosts
-        apps/microfrontends/orders     Angular  :4201  ──┐
-          shop-orders-list                 ├──── federation runtime ───►  backoffice-react      :4200
-          shop-order-detail                │                                backoffice-vue        :4400
-        apps/microfrontends/insights   React    :4202  ──┤                                backoffice-angular16  :4500
-          shop-order-stats                 │
-          shop-activity-feed               │
-        apps/microfrontends/notes      Vue      :4402  ──┘
-          shop-order-notes
+Act 2   localhost:4200 ─┐   shop-edge            ┌─► backoffice-react       React 19     ┐
+        localhost:4400 ─┼─► one proxy per site ──┼─► backoffice-vue         Vue 3.4      ├ shop-backoffices
+        localhost:4500 ─┘   (published)          ├─► backoffice-angular16   Angular 16   ┘
+                                                 │
+                              /mf/orders/   ─────┼─► orders:4201     shop-orders-list · shop-order-detail     ┐
+                              /mf/insights/ ─────┼─► insights:4202   shop-order-stats · shop-activity-feed    ├ shop-microfrontends
+                              /mf/notes/    ─────┼─► notes:4402      shop-order-notes                         ┘
+                              /api/         ─────┴─► mock-api:3000   GET/PATCH /orders · notes                  shop-services
 
-All     tools/mock-api :3000   GET/PATCH /orders · GET/POST /orders/:id/notes
+                              everything right of the proxies: shop-network, internal
 ```
+
+## Groups and networks
+
+The apps form five groups, one Docker Compose project each, the way separate teams would own
+them. Docker Desktop shows each group on its own, and each one starts, stops and deploys on its
+own.
+
+| Group | Compose file | Contains | Networks | Published |
+| --- | --- | --- | --- | --- |
+| `shop-services` | `compose.services.yaml` | `mock-api` | creates `shop-network` | nothing |
+| `shop-microfrontends` | `compose.microfrontends.yaml` | `orders`, `insights`, `notes` | `shop-network` | nothing |
+| `shop-backoffices` | `compose.backoffices.yaml` | the three shells | `shop-network` | nothing |
+| `shop-edge` | `compose.edge.yaml` | one proxy per shell | `shop-network` and `shop-public` | 4200, 4400, 4500 |
+| `shop-basics` | `compose.basics.yaml` | the act 1 page | its own | 4100 |
+
+`shop-network` is an `internal` Docker network: nothing outside Docker can reach it, and the
+containers on it cannot reach the internet. `shop-services` creates it, so it starts first; the
+other groups join it as `external`. Containers find each other on it by their Docker DNS names
+(`orders`, `mock-api`), across groups. The edge proxies are the only containers on both
+`shop-network` and the ordinary `shop-public` network, so they are the only way in.
+
+## One site, one origin
+
+Each proxy, a small nginx in `tools/edge`, serves its shell at `/` and forwards everything else
+the page needs by Docker DNS name: `/mf/orders/` to `http://orders:4201`, `/mf/insights/` to
+`http://insights:4202`, `/mf/notes/` to `http://notes:4402`, and `/api/` to
+`http://mock-api:3000`. Each remote serves itself under that same `/mf/<name>/` path, so the
+files its remote entry points to resolve inside whichever site loads it. The `/mf/` prefix keeps
+the remotes clear of the shells' own routes such as `/orders/A-1003`.
+
+A page therefore loads everything from its own site: no hard-coded hosts, no CDN, no CORS. nginx
+looks a service up when a request arrives, not when it starts, so a proxy stays up while a
+remote is stopped; only that remote's card fails.
+
+### Who may call the API
+
+Each proxy only lets its site's pages call `/api/`. Browsers add `Sec-Fetch-Site` and
+`Sec-Fetch-Mode` to every request, and a page cannot change them:
+
+| Caller | `Sec-Fetch-Site` : `Sec-Fetch-Mode` | Proxy answers |
+| --- | --- | --- |
+| A shell or element on `localhost:4200` calling `fetch('/api/orders')` | `same-origin:cors` | the API's response |
+| The API URL typed in the address bar | `none:navigate` | `403` |
+| A page on another site | `cross-site:cors` | `403` |
+| curl, Postman, scripts | not sent | `403` |
+
+Only `GET`, `POST` and `PATCH` get through, the methods the API uses. The API itself sends no
+CORS headers, so no other origin can read its responses either. The headers say which page a
+browser request comes from; they do not prove who the user is. That takes authentication, which
+this demo leaves out.
 
 ## Rules every app follows
 
@@ -61,7 +112,7 @@ stops the build of the owner and of every app that uses it.
 
 | Package | Owner | What it describes |
 | --- | --- | --- |
-| `@shop/api-contract` | `tools/mock-api/contract` | the models, the parameters and `IOrdersApi`: one documented method per HTTP operation |
+| `@shop/api-contract` | `apps/services/mock-api/contract` | the models, the parameters and `IOrdersApi`: one documented method per HTTP operation |
 | `@shop/orders-contract` | `apps/microfrontends/orders/contract` | `shop-orders-list`, `shop-order-detail` and `defineElements` |
 | `@shop/insights-contract` | `apps/microfrontends/insights/contract` | `shop-order-stats`, `shop-activity-feed` and `defineElements` |
 | `@shop/notes-contract` | `apps/microfrontends/notes/contract` | `shop-order-notes` and `defineElements` |
@@ -136,7 +187,7 @@ Every back office has a Settings page that switches between its own colour, Dark
 
 ## The data
 
-`tools/mock-api` serves five orders and their notes from `db.seed.json`:
+`apps/services/mock-api` serves five orders and their notes from `db.seed.json`:
 
 | Request | Result |
 | --- | --- |
@@ -152,11 +203,11 @@ Every back office has a Settings page that switches between its own colour, Dark
 { "id": 1, "orderId": "A-1001", "text": "Customer asked for gift wrapping.", "createdAt": "2026-10-12T09:30:00.000Z" }
 ```
 
-The server is about 150 lines of Express in `tools/mock-api/src`, run by Node's built-in
+The server is about 150 lines of Express in `apps/services/mock-api/src`, run by Node's built-in
 TypeScript support with no build step. On start it copies `db.seed.json` to `db.json` if that
 file is missing, and saves every change there. The file lives inside the container, so
-`docker compose up -d --force-recreate mock-api` restores the seed after a demo. CORS is open
-(`Content-Type` and `Authorization` headers allowed), so every app can call it from its own port.
+`tools\scripts\services\deploy-mock-api.bat` restores the seed after a demo. It is internal:
+pages reach it at `/api` on their own site, through the site's edge proxy.
 
 ## Remotes are live services
 

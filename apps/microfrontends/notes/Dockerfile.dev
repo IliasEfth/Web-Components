@@ -4,7 +4,7 @@ FROM node:${NODE_VERSION} AS dev
 
 WORKDIR /repo/apps/microfrontends/notes
 
-COPY tools/mock-api/contract /repo/tools/mock-api/contract
+COPY apps/services/mock-api/contract /repo/apps/services/mock-api/contract
 COPY apps/microfrontends/notes/contract /repo/apps/microfrontends/notes/contract
 COPY apps/microfrontends/notes/package.json apps/microfrontends/notes/package-lock.json ./
 
@@ -15,6 +15,6 @@ COPY apps/microfrontends/notes ./
 EXPOSE 4402
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=20s --retries=10 \
-  CMD wget -qO- http://127.0.0.1:4402/ > /dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1:4402/mf/notes/ > /dev/null || exit 1
 
 CMD ["npm", "run", "dev", "--", "--host"]

@@ -4,7 +4,7 @@ FROM node:${NODE_VERSION} AS dev
 
 WORKDIR /repo/apps/microfrontends/insights
 
-COPY tools/mock-api/contract /repo/tools/mock-api/contract
+COPY apps/services/mock-api/contract /repo/apps/services/mock-api/contract
 COPY apps/microfrontends/insights/contract /repo/apps/microfrontends/insights/contract
 COPY apps/microfrontends/insights/package.json apps/microfrontends/insights/package-lock.json ./
 
@@ -15,6 +15,6 @@ COPY apps/microfrontends/insights ./
 EXPOSE 4202
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=20s --retries=10 \
-  CMD wget -qO- http://127.0.0.1:4202/ > /dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1:4202/mf/insights/ > /dev/null || exit 1
 
 CMD ["npm", "run", "dev", "--", "--host"]

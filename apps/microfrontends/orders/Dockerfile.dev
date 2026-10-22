@@ -7,7 +7,7 @@ ENV NG_CLI_ANALYTICS=false
 
 WORKDIR /repo/apps/microfrontends/orders
 
-COPY tools/mock-api/contract /repo/tools/mock-api/contract
+COPY apps/services/mock-api/contract /repo/apps/services/mock-api/contract
 COPY apps/microfrontends/orders/contract /repo/apps/microfrontends/orders/contract
 COPY apps/microfrontends/orders/package.json apps/microfrontends/orders/package-lock.json ./
 
@@ -18,6 +18,6 @@ COPY apps/microfrontends/orders ./
 EXPOSE 4201
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=30s --retries=10 \
-  CMD wget -qO- http://127.0.0.1:4201/ > /dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1:4201/mf/orders/ > /dev/null || exit 1
 
 CMD ["npm", "run", "start:docker"]

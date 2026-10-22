@@ -3,12 +3,12 @@
 Two acts: write a Web Component by hand, then let three micro-frontends, each with its own
 framework and its own server, run together in three different shells.
 
-Start everything first with `tools\scripts\start-all.bat` (or `docker compose up --build
---detach`), and restore the seed data afterwards with `tools\scripts\deploy-mock-api.bat`.
+Start everything first with `tools\scripts\start-all.bat`, and restore the seed data afterwards
+with `tools\scripts\services\deploy-mock-api.bat`.
 
 ## Act 1: Pure Web Components
 
-**Open** `http://localhost:4100` (`examples/web-components-basics`).
+**Open** `http://localhost:4100` (`apps/basics/web-components-basics`).
 
 - Type a new name: `<user-card>` updates through an attribute and `attributeChangedCallback`.
 - Click the counter: the page hears the `count-changed` event.
@@ -80,11 +80,12 @@ In Docker Desktop, stop the `orders` container and reload `http://localhost:4500
 
 Open `apps/microfrontends/orders/src/app/orders/components/orders-list/orders-list.html` and
 change the heading `Orders` to `Orders to ship`. Save, then deploy only the Orders team's
-service with `tools\scripts\deploy-mf-orders.bat`. Reload `http://localhost:4200/orders`,
+service with `tools\scripts\microfrontends\deploy-mf-orders.bat`. Reload `http://localhost:4200/orders`,
 `http://localhost:4400/orders` and `http://localhost:4500/orders`.
 
 - All three shells show the new heading. None of them was rebuilt or restarted.
-- DevTools, Network tab: the Angular code comes from `localhost:4201`, the Orders team's server.
+- DevTools, Network tab: the Angular code comes from `/mf/orders/` on the site itself. The site's
+  edge proxy fetched it from the Orders team's server, which the browser cannot reach.
 - Change the heading back and deploy again with the same script.
 
 **Message:** each team deploys on its own; a new release reaches every page at the next load.

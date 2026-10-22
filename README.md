@@ -10,7 +10,7 @@
 
 ### Act 1: Pure Web Components
 
-[`examples/web-components-basics`](examples/web-components-basics): three components written
+[`apps/basics/web-components-basics`](apps/basics/web-components-basics): three components written
 with nothing but the browser. A class, a tag, attributes in, events out.
 
 ```js
@@ -56,29 +56,92 @@ list.addEventListener('orderSelected', (event) => {
 
 ## How it fits together
 
+Every app is its own server, and the servers form five groups, one Docker Compose project each,
+the way separate teams would own them. Only the edge is published: one proxy per back office, on
+its own port. Everything else lives on `shop-network`, an internal Docker network the browser
+never reaches. Each proxy serves its shell at `/` and fetches the remotes and the API by their
+Docker DNS names, so everything a page loads comes from that site and from our own servers:
+
 ```mermaid
 flowchart LR
-  subgraph act1[Act 1: pure]
-    basics[web-components-basics<br/>user-card · counter-button · todo-list]
+  browser([Browser])
+
+  subgraph basics[shop-basics · published]
+    wcb[web-components-basics · act 1<br/>localhost:4100]
   end
 
-  subgraph act2[Act 2: micro-frontends calling each other]
-    direction LR
-    subgraph remotes[export custom elements, each on its own server]
-      orders[orders · latest Angular<br/>shop-orders-list<br/>shop-order-detail]
-      insights[insights · React<br/>shop-order-stats<br/>shop-activity-feed]
-      notes[notes · Vue<br/>shop-order-notes]
-    end
-    subgraph shells[host them on one page]
-      react[backoffice-react]
-      vue[backoffice-vue]
-      ng16[backoffice-angular16]
-    end
-    remotes -- "loaded at runtime (Native / Module Federation)" --> shells
+  subgraph edge[shop-edge · published · the only way in]
+    direction TB
+    rp[backoffice-react-proxy<br/>localhost:4200]
+    vp[backoffice-vue-proxy<br/>localhost:4400]
+    ap[backoffice-angular16-proxy<br/>localhost:4500]
   end
 
-  api[(mock-api<br/>/orders)]
-  remotes -- fetch --> api
+  subgraph net[shop-network · internal · not reachable from your computer]
+    direction TB
+    subgraph backoffices[shop-backoffices]
+      react[backoffice-react:4200 · React 19]
+      vue[backoffice-vue:4400 · Vue 3.4]
+      ng16[backoffice-angular16:4500 · Angular 16]
+    end
+    subgraph mfs[shop-microfrontends]
+      orders[orders:4201 · latest Angular<br/>shop-orders-list · shop-order-detail]
+      insights[insights:4202 · React 18<br/>shop-order-stats · shop-activity-feed]
+      notes[notes:4402 · Vue 3.5<br/>shop-order-notes]
+    end
+    subgraph services[shop-services]
+      api[(mock-api:3000)]
+    end
+  end
+
+  browser --> wcb
+  browser --> edge
+  rp -- "/" --> react
+  vp -- "/" --> vue
+  ap -- "/" --> ng16
+  edge -- "/mf/orders/ · /mf/insights/ · /mf/notes/" --> mfs
+  edge -- "/api/" --> services
+```
+
+| Group | Compose file | Contains | Published |
+| --- | --- | --- | --- |
+| `shop-services` | `compose.services.yaml` | `mock-api`; creates `shop-network` | nothing |
+| `shop-microfrontends` | `compose.microfrontends.yaml` | `orders`, `insights`, `notes` | nothing |
+| `shop-backoffices` | `compose.backoffices.yaml` | the three shells | nothing |
+| `shop-edge` | `compose.edge.yaml` | one nginx proxy per shell, from `tools/edge` | 4200, 4400, 4500 |
+| `shop-basics` | `compose.basics.yaml` | the act 1 page, on its own | 4100 |
+
+The shell loads each remote's `remoteEntry` from its own site (`/mf/orders/remoteEntry.json`),
+and the elements call `/api` on the same site. The proxy forwards both inside the network.
+
+On the page, a shell and its elements talk only through the custom element contract: the shell
+sets attributes and properties, the elements answer with `CustomEvent`s. Elements never talk to
+each other directly; the shell listens and passes the news on:
+
+```mermaid
+sequenceDiagram
+  participant Shell as Shell (React, Vue or Angular 16)
+  participant List as shop-orders-list (Orders)
+  participant Detail as shop-order-detail (Orders)
+  participant Notes as shop-order-notes (Notes)
+  participant Stats as shop-order-stats (Insights)
+  participant Feed as shop-activity-feed (Insights)
+  participant API as /api (through the shell's proxy)
+
+  Shell->>Shell: load /mf/*/remoteEntry, await defineElements()
+  Shell->>List: status="open"
+  List->>API: GET /orders?status=open
+  List-->>Shell: orderSelected { id }
+  Shell->>Detail: order-id="A-1003"
+  Shell->>Notes: order-id="A-1003"
+  Detail->>API: PATCH /orders/A-1003
+  Detail-->>Shell: orderUpdated { id, status }
+  Shell->>Stats: refresh-key (new value)
+  Notes->>API: POST /orders/A-1003/notes
+  Notes-->>Shell: noteAdded { orderId, text }
+  Shell->>Feed: entries = [...entries, entry]
+  Stats-->>Shell: statusPicked { status }
+  Shell->>List: status="shipped"
 ```
 
 The full contract (tags, attributes, events, theme tokens) is in
@@ -87,9 +150,9 @@ The full contract (tags, attributes, events, theme tokens) is in
 ## Repository layout
 
 ```text
-examples/
-  web-components-basics/    act 1   plain JavaScript
 apps/
+  basics/                   the act 1 page, deployed on its own
+    web-components-basics/  act 1   plain JavaScript
   microfrontends/           the apps that export custom elements
     orders/                 act 2   latest Angular
       contract/                     @shop/orders-contract
@@ -101,9 +164,11 @@ apps/
     backoffice-react/       act 2   React 19
     backoffice-vue/         act 2   Vue 3.4
     backoffice-angular16/   act 2   Angular 16
+  services/                 the back-end services the elements call
+    mock-api/               the orders REST API
+      contract/                     @shop/api-contract
 tools/
-  mock-api/                 the orders REST API
-    contract/                       @shop/api-contract
+  edge/                     one nginx proxy per back office: serves the site, forwards /mf/ and /api/
   scripts/                  Windows shortcuts around docker compose
 docs/                       architecture, demo script, one guide per app
 ```
@@ -119,37 +184,45 @@ You only need [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 no Angular CLI, no version manager: every app builds and runs in its own container, and the
 Angular 16 shell simply uses a Node 18 image.
 
+Start the groups in this order; `shop-services` creates the network the others join:
+
 ```bash
-docker compose up --build --watch
+docker compose -f compose.services.yaml up --build --detach --wait
+docker compose -f compose.microfrontends.yaml up --build --detach --wait
+docker compose -f compose.backoffices.yaml up --build --detach --wait
+docker compose -f compose.edge.yaml up --build --detach --wait
+docker compose -f compose.basics.yaml up --build --detach --wait
 ```
 
-`--watch` copies every edit into the running containers, so the code on screen and the page
-in the browser stay in step. `docker compose down` stops everything, and
-`docker compose up -d --force-recreate mock-api` puts the orders back to their starting state
-after a demo.
+Docker Desktop shows each group on its own. Stopping one group stops only that team's part:
+stop `shop-microfrontends` and the back offices stay up and show an error card per remote.
+`docker compose -f compose.services.yaml up -d --force-recreate mock-api` puts the orders back to
+their starting state after a demo.
 
 | Act | Open | Project |
 | --- | --- | --- |
-| 1 | `http://localhost:4100` | `examples/web-components-basics` |
+| 1 | `http://localhost:4100` | `apps/basics/web-components-basics` |
 | 2 | `http://localhost:4500/orders` | `apps/backoffices/backoffice-angular16` |
 | 2 | `http://localhost:4400/orders` | `apps/backoffices/backoffice-vue` |
 | 2 | `http://localhost:4200/orders` | `apps/backoffices/backoffice-react` |
-| | `http://localhost:3000/orders` | `tools/mock-api` |
 
-The remotes run on 4201 (`orders`), 4202 (`insights`) and 4402 (`notes`).
+Only these four ports are published: the act 1 page and the three edge proxies. The
+micro-frontends, the shells and `mock-api` have no port on your computer; each proxy reaches them
+by name on the internal `shop-network`. `/api/` answers only the pages' own `fetch` calls;
+opening it in the address bar or with curl returns `403`.
 
 ### Windows shortcuts
 
-Double-click a script in `tools/scripts`. Each one runs a single `docker compose` command.
+Double-click a script in `tools/scripts`. Each one runs the `docker compose` commands for you.
 
 | Script | What it does |
 | --- | --- |
-| `start-all.bat` | Builds and starts every service and waits until all are healthy |
-| `live-all.bat` | Starts everything with Compose Watch: saved edits reach the containers at once |
-| `deploy-mf-orders.bat`, `deploy-mf-insights.bat`, `deploy-mf-notes.bat` | Rebuilds and restarts one micro-frontend from the current source; everything else keeps running |
-| `deploy-backoffice-react.bat`, `deploy-backoffice-vue.bat`, `deploy-backoffice-angular16.bat` | The same for one back office |
-| `deploy-mock-api.bat` | The same for the API; the orders and notes go back to the seed data |
-| `deploy-web-components-basics.bat` | The same for the act 1 page |
+| `start-all.bat` | Builds and starts the five groups in order and waits until all are healthy |
+| `live-all.bat` | Starts every group with Compose Watch, one window per group: saved edits reach the containers at once |
+| `microfrontends/deploy-mf-orders.bat`, `deploy-mf-insights.bat`, `deploy-mf-notes.bat` | Rebuilds and restarts one micro-frontend from the current source; everything else keeps running |
+| `backoffices/deploy-backoffice-react.bat`, `deploy-backoffice-vue.bat`, `deploy-backoffice-angular16.bat` | The same for one back office |
+| `services/deploy-mock-api.bat` | The same for the API; the orders and notes go back to the seed data |
+| `basics/deploy-web-components-basics.bat` | The same for the act 1 page |
 
 Stop and start single containers, or all of them, from Docker Desktop.
 
