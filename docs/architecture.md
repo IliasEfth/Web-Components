@@ -216,7 +216,7 @@ Every remote runs on its own server and every shell loads it at runtime:
 | Remote | Format | Loaded by the shells with |
 | --- | --- | --- |
 | `orders` | Native Federation, `remoteEntry.json` | `@softarc/native-federation-orchestrator` |
-| `insights`, `notes` | Module Federation, `remoteEntry.js` | `@module-federation/vite` (Vite shells), `@module-federation/runtime` (Angular 16) |
+| `insights`, `notes` | Module Federation, `remoteEntry.js` | `@module-federation/runtime`, in all three shells |
 
 What that gives the teams:
 

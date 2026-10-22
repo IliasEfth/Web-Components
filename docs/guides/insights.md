@@ -163,20 +163,18 @@ The same dev server serves the app and the remote:
 | `http://localhost:4200/mf/insights/components`, `/web-components` | the app, exactly as before |
 | `http://localhost:4200/mf/insights/remoteEntry.js` | the Module Federation container, exposing `./elements` |
 
-A shell built with Vite lists it as a remote of the same plugin and imports it like a module;
-[backoffice-react.md](backoffice-react.md) shows the whole host:
+Every shell loads it with the Module Federation runtime, `@module-federation/runtime`, the same
+way in React, Vue and Angular 16; [backoffice-react.md](backoffice-react.md) shows the whole host:
 
 ```ts
-federation({
+const moduleFederation = createInstance({
   name: 'backoffice',
-  remotes: {
-    insights: { type: 'module', name: 'insights', entry: '/mf/insights/remoteEntry.js' },
-  },
-  shared: ['react', 'react-dom'],
+  remotes: [{ name: 'insights', entry: '/mf/insights/remoteEntry.js', type: 'module' }],
+  shared: {},
 });
 
-const { defineElements } = await import('insights/elements');
-await defineElements();
+const elements = await moduleFederation.loadRemote<IInsightsRemote>('insights/elements');
+await elements?.defineElements();
 ```
 
 **Two federation systems.** Orders uses Native Federation (`remoteEntry.json`), Insights uses

@@ -11,12 +11,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@module-federation/runtime": "^2.9.2",
     "@softarc/native-federation-orchestrator": "^4.8.0",
     "vue": "~3.4.38",
     "vue-router": "~4.5.1"
   },
   "devDependencies": {
-    "@module-federation/vite": "^1.23.5",
     "@shop/insights-contract": "file:../../microfrontends/insights/contract",
     "@shop/notes-contract": "file:../../microfrontends/notes/contract",
     "@shop/orders-contract": "file:../../microfrontends/orders/contract",
