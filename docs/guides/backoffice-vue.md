@@ -24,13 +24,13 @@ what is different.
 
 ```text
 src/
-  remote-entries.ts          where each remote lives (also read by vite.config.ts)
+  remote-entries.ts          where each remote lives
   remotes/
     orders-remote.ts         Native Federation
     insights-remote.ts       Module Federation
     notes-remote.ts          Module Federation
+    module-federation.ts     the Module Federation runtime instance
     RemoteGate.vue           loading text, then the slot or an error card with Retry
-    remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
   components/StatusFilter.vue the shell's own All / Open / Shipped filter (defineModel)
   pages/                     DashboardPage.vue, OrdersPage.vue, SettingsPage.vue
   theme/themes.ts            the three themes and the injection key
@@ -39,28 +39,28 @@ src/
 ```
 
 The same packages as the React shell, in their Vue versions: `vue-router`,
-`@softarc/native-federation-orchestrator` and `@module-federation/vite`, plus the three element contracts
+`@softarc/native-federation-orchestrator` and `@module-federation/runtime`, plus the three element contracts
 as dev dependencies. The event handlers on the Orders page take their `detail` types from the
 contracts, for example `(event: CustomEvent<IOrderSelectedDetail>)` from `@shop/orders-contract`.
 
 ## Three remotes, two runtimes
 
 ```ts
-federation({
+export const moduleFederation = createInstance({
   name: 'backoffice_vue',
-  remotes: {
-    insights: { type: 'module', name: 'insights', entry: remoteEntries.insights },
-    notes: { type: 'module', name: 'notes', entry: remoteEntries.notes },
-  },
-  shared: ['vue'],
+  remotes: [
+    { name: 'insights', entry: remoteEntries.insights, type: 'module' },
+    { name: 'notes', entry: remoteEntries.notes, type: 'module' },
+  ],
+  shared: {},
   shareStrategy: 'loaded-first',
-  dts: false,
-}),
+});
 ```
 
-- **`shared: ['vue']`** offers the shell's Vue 3.4. Notes asks for Vue 3.5, so it does not match
-  and Notes loads its own Vue 3.5 next to the shell's. Insights shares React, which this shell
-  does not have, so Insights falls back to its own copy too.
+- **The same loaders as the React shell**, with `@module-federation/runtime`; `vite.config.ts`
+  has only the Vue plugin.
+- **`shared: {}`.** The shell's Vue 3.4 is never offered: Notes asks for Vue 3.5, so it loads its
+  own Vue 3.5 next to the shell's, and Insights brings its own React.
 - **Props without destructuring.** `const { orderId } = defineProps()` only stays reactive from
   Vue 3.5, so the pages read `props.orderId`.
 - **Orders** is loaded by the orchestrator, exactly as in the React shell.

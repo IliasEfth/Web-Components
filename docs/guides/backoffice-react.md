@@ -23,13 +23,13 @@ shell changes.
 
 ```text
 src/
-  remote-entries.ts          where each remote lives (also read by vite.config.ts)
+  remote-entries.ts          where each remote lives
   remotes/
     orders-remote.ts         Native Federation
     insights-remote.ts       Module Federation
     notes-remote.ts          Module Federation
+    module-federation.ts     the Module Federation runtime instance
     RemoteGate.tsx           loading text, then the elements or an error card with Retry
-    remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
   web-components/
     custom-elements.d.ts     JSX typings for the five shop- tags, built from the three contracts
   components/StatusFilter.tsx the shell's own All / Open / Shipped filter
@@ -45,7 +45,7 @@ Three packages are added to the template:
 | --- | --- |
 | `react-router` | The shell owns the URL. The order id in `/orders/:orderId` becomes `order-id` |
 | `@softarc/native-federation-orchestrator` | The Native Federation runtime for any page; loads Orders' `remoteEntry.json` |
-| `@module-federation/vite` (dev) | Loads Insights' and Notes' `remoteEntry.js` and offers the shell's React to them |
+| `@module-federation/runtime` | Loads Insights' and Notes' `remoteEntry.js`; the same runtime the Angular 16 shell uses |
 
 And the three element contracts, as dev dependencies installed from their teams' folders:
 `@shop/orders-contract`, `@shop/insights-contract` and `@shop/notes-contract`. The shell never
@@ -84,35 +84,40 @@ export function loadOrdersElements(): Promise<void> {
 ```
 
 ```ts
+export const moduleFederation = createInstance({
+  name: 'backoffice',
+  remotes: [
+    { name: 'insights', entry: remoteEntries.insights, type: 'module' },
+    { name: 'notes', entry: remoteEntries.notes, type: 'module' },
+  ],
+  shared: {},
+  shareStrategy: 'loaded-first',
+});
+
 export function loadNotesElements(): Promise<void> {
-  notesReady ??= import('notes/elements')
-    .then(({ defineElements }) => defineElements())
+  notesReady ??= moduleFederation
+    .loadRemote<INotesRemote>('notes/elements')
+    .then((elements) => {
+      if (!elements) {
+        throw new Error('notes exposes no elements');
+      }
+      return elements.defineElements();
+    })
     .catch(/* the same reset */);
   return notesReady;
 }
 ```
 
 - **Native Federation.** The orchestrator reads `remoteEntry.json`, writes a native import map
-  for Angular's shared packages, and imports `./elements`. The shell is not built with federation
-  and shares nothing with Angular, so it needs only this runtime.
-- **Module Federation.** `vite.config.ts` lists Insights and Notes as remotes of the same plugin:
-
-  ```ts
-  federation({
-    name: 'backoffice',
-    remotes: {
-      insights: { type: 'module', name: 'insights', entry: remoteEntries.insights },
-      notes: { type: 'module', name: 'notes', entry: remoteEntries.notes },
-    },
-    shared: ['react', 'react-dom'],
-    shareStrategy: 'loaded-first',
-    dts: false,
-  }),
-  ```
-
-  `shared` offers the shell's React 19 to the remotes. Insights asks for React 18, so it does not
-  match and Insights loads its own React 18 next to the shell's React 19; Notes brings its own Vue. `shareStrategy: 'loaded-first'` keeps the remotes lazy: nothing is fetched before
-  `/orders` opens.
+  for Angular's shared packages, and imports `./elements`.
+- **Module Federation.** `remotes/module-federation.ts` creates one runtime instance with
+  `@module-federation/runtime`, exactly as the Angular 16 shell does, and `loadRemote` reads
+  `remoteEntry.js`.
+- **No federation build.** The shell only consumes remotes, so it needs the two runtimes and no
+  build plugin: `vite.config.ts` has only the React plugin. `shared: {}` offers the shell's
+  React 19 to nobody; Insights asks for React 18 and Notes brings Vue, so each remote loads its
+  own copy anyway. `shareStrategy: 'loaded-first'` keeps the remotes lazy: nothing is fetched
+  before `/orders` opens.
 - **Retrying.** A failed load resets the cached promise, so Retry starts again.
 
 ## The page wires everything

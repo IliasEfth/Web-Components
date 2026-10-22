@@ -44,7 +44,7 @@ Two browser runtimes are added to the template:
 | Package | Why |
 | --- | --- |
 | `@softarc/native-federation-orchestrator` | Reads Orders' `remoteEntry.json`, writes the import map for Angular 22, imports `./elements` |
-| `@module-federation/runtime` | Loads Insights' and Notes' `remoteEntry.js`; the runtime underneath `@module-federation/vite` |
+| `@module-federation/runtime` | Loads Insights' and Notes' `remoteEntry.js`; the same runtime the React and Vue shells use |
 
 The shell exposes nothing and cannot share Angular 16 with Angular 22, so it needs no federation
 build: only the two runtimes, in the browser.

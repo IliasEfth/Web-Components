@@ -232,6 +232,6 @@ Stop and start single containers, or all of them, from Docker Desktop.
 | --- | --- |
 | Contract | Custom elements: attributes, properties, `CustomEvent`s |
 | Styling | Shadow DOM and `--shop-*` CSS custom properties set by each shell |
-| Loading | Native Federation (Angular), Module Federation (React, Vue), from each remote's own server |
+| Loading | Native Federation (Angular), Module Federation (React, Vue), from each remote's own server. Every shell loads both with the same two runtimes: `@softarc/native-federation-orchestrator` and `@module-federation/runtime` |
 | Safety | `textContent` everywhere, one error card per remote |
 | Code style | Strict TypeScript, ESLint and oxlint, VS Code's built-in formatters |
