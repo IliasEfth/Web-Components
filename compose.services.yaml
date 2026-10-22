@@ -1,0 +1,23 @@
+name: shop-services
+
+services:
+  mock-api:
+    build:
+      context: tools/mock-api
+      dockerfile: Dockerfile.dev
+    networks:
+      - shop-network
+    develop:
+      watch:
+        - action: sync+restart
+          path: tools/mock-api/src
+          target: /app/src
+        - action: rebuild
+          path: tools/mock-api/package.json
+        - action: rebuild
+          path: tools/mock-api/db.seed.json
+
+networks:
+  shop-network:
+    name: shop-network
+    internal: true

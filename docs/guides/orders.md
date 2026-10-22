@@ -6,8 +6,8 @@ them. The app shows both side by side:
 
 | Route | What it shows |
 | --- | --- |
-| `http://localhost:8080/orders/components` | Step 1: the components used by Angular, the normal way |
-| `http://localhost:8080/orders/web-components` | Step 2: the same components as `<shop-orders-list>` and `<shop-order-detail>` |
+| `http://localhost:4200/mf/orders/components` | Step 1: the components used by Angular, the normal way |
+| `http://localhost:4200/mf/orders/web-components` | Step 2: the same components as `<shop-orders-list>` and `<shop-order-detail>` |
 
 ## Step 1: a correct Angular app
 
@@ -190,13 +190,13 @@ The same dev server now serves both the app and the remote:
 
 | URL | What it is |
 | --- | --- |
-| `http://localhost:8080/orders/components`, `/web-components` | the app, exactly as before |
-| `http://localhost:8080/orders/remoteEntry.json` | the manifest: `name: orders`, exposes `./elements` |
+| `http://localhost:4200/mf/orders/components`, `/web-components` | the app, exactly as before |
+| `http://localhost:4200/mf/orders/remoteEntry.json` | the manifest: `name: orders`, exposes `./elements` |
 
 A shell loads it like this:
 
 ```ts
-await initFederation({ orders: '/orders/remoteEntry.json' });
+await initFederation({ orders: '/mf/orders/remoteEntry.json' });
 const { defineElements } = await loadRemoteModule({ remoteName: 'orders', exposedModule: './elements' });
 await defineElements();
 ```
@@ -204,13 +204,15 @@ await defineElements();
 ## Run it
 
 ```bash
-docker compose up --build --watch gateway orders    # http://localhost:8080/orders
+docker compose -f compose.microfrontends.yaml up --build --watch orders
 ```
+
+The remote is internal; the shells load it through their proxies. Start everything once with `tools\scripts\start-all.bat`, then this command rebuilds the remote and watches its files.
 
 ## What to try
 
 - `/components` lists 5 orders; the status select filters them; a click fills the detail; "Mark
   as shipped" updates the list; the event log shows `(orderSelected)`, `(orderUpdated)`, `(closed)`.
 - `/web-components` does the same with the custom elements, and its log shows the DOM events.
-- `http://localhost:8080/orders/remoteEntry.json` lists `./elements`.
+- `http://localhost:4200/mf/orders/remoteEntry.json` lists `./elements`.
 - The Network tab shows no `zone.js`: the app is zoneless.

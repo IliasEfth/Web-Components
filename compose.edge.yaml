@@ -1,0 +1,57 @@
+name: shop-edge
+
+services:
+  backoffice-react-proxy:
+    build:
+      context: tools/edge
+      dockerfile: Dockerfile.dev
+      args:
+        SITE: backoffice-react
+    ports:
+      - '4200:80'
+    networks:
+      - public
+      - shop-network
+    develop:
+      watch:
+        - action: rebuild
+          path: tools/edge/backoffice-react.conf
+
+  backoffice-vue-proxy:
+    build:
+      context: tools/edge
+      dockerfile: Dockerfile.dev
+      args:
+        SITE: backoffice-vue
+    ports:
+      - '4400:80'
+    networks:
+      - public
+      - shop-network
+    develop:
+      watch:
+        - action: rebuild
+          path: tools/edge/backoffice-vue.conf
+
+  backoffice-angular16-proxy:
+    build:
+      context: tools/edge
+      dockerfile: Dockerfile.dev
+      args:
+        SITE: backoffice-angular16
+    ports:
+      - '4500:80'
+    networks:
+      - public
+      - shop-network
+    develop:
+      watch:
+        - action: rebuild
+          path: tools/edge/backoffice-angular16.conf
+
+networks:
+  public:
+    name: shop-public
+  shop-network:
+    name: shop-network
+    external: true
