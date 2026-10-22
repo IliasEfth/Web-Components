@@ -140,7 +140,7 @@ always load from Notes, whichever page imports it.
 
 ## The API
 
-The notes are stored by `tools/mock-api` next to the orders:
+The notes are stored by `apps/services/mock-api` next to the orders:
 
 | Request | Result |
 | --- | --- |

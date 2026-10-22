@@ -55,7 +55,7 @@ export class OrdersClient
 ```
 
 `IOrdersApi`, the models and the parameter types come from `@shop/api-contract`, installed from
-`tools/mock-api/contract`. A wrong parameter or result type does not compile. `OrdersService` is
+`apps/services/mock-api/contract`. A wrong parameter or result type does not compile. `OrdersService` is
 what the components use; today it mostly calls the client, and it is where the app's own logic
 goes. Both are plain `@Injectable()` classes with no
 `providedIn: 'root'`: they exist only where an app calls `provideOrders(...)`, and the components

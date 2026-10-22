@@ -7,7 +7,7 @@ ENV NG_CLI_ANALYTICS=false
 
 WORKDIR /repo/apps/microfrontends/orders
 
-COPY tools/mock-api/contract /repo/tools/mock-api/contract
+COPY apps/services/mock-api/contract /repo/apps/services/mock-api/contract
 COPY apps/microfrontends/orders/contract /repo/apps/microfrontends/orders/contract
 COPY apps/microfrontends/orders/package.json apps/microfrontends/orders/package-lock.json ./
 

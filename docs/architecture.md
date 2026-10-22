@@ -12,14 +12,14 @@ One online shop back office, told in two acts:
 
 | Act | Folder | Role | Framework | Group | Reached at | Ships |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `examples/web-components-basics` | Three native components | none | `shop-basics` | `localhost:4100` | static files |
+| 1 | `apps/basics/web-components-basics` | Three native components | none | `shop-basics` | `localhost:4100` | static files |
 | 2 | `apps/microfrontends/orders` | Remote: order list and order detail | current Angular, zoneless | `shop-microfrontends` | internal: `orders:4201/mf/orders/` | `remoteEntry.json` (Native Federation) |
 | 2 | `apps/microfrontends/insights` | Remote: order statistics and activity feed | React 18 | `shop-microfrontends` | internal: `insights:4202/mf/insights/` | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/microfrontends/notes` | Remote: order notes | Vue 3.5 | `shop-microfrontends` | internal: `notes:4402/mf/notes/` | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | `shop-backoffices` | `localhost:4200`, through its proxy | the site |
 | 2 | `apps/backoffices/backoffice-vue` | Host, on an older Vue | Vue 3.4 + Vue Router | `shop-backoffices` | `localhost:4400`, through its proxy | the site |
 | 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | `shop-backoffices` | `localhost:4500`, through its proxy | the site |
-| all | `tools/mock-api` | Orders REST API | Express, TypeScript | `shop-services` | internal: `mock-api:3000` | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
+| all | `apps/services/mock-api` | Orders REST API | Express, TypeScript | `shop-services` | internal: `mock-api:3000` | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
 | all | `tools/edge` | One nginx proxy per back office | nginx | `shop-edge` | `localhost:4200`, `4400`, `4500` | the way in |
 
 ```text
@@ -112,7 +112,7 @@ stops the build of the owner and of every app that uses it.
 
 | Package | Owner | What it describes |
 | --- | --- | --- |
-| `@shop/api-contract` | `tools/mock-api/contract` | the models, the parameters and `IOrdersApi`: one documented method per HTTP operation |
+| `@shop/api-contract` | `apps/services/mock-api/contract` | the models, the parameters and `IOrdersApi`: one documented method per HTTP operation |
 | `@shop/orders-contract` | `apps/microfrontends/orders/contract` | `shop-orders-list`, `shop-order-detail` and `defineElements` |
 | `@shop/insights-contract` | `apps/microfrontends/insights/contract` | `shop-order-stats`, `shop-activity-feed` and `defineElements` |
 | `@shop/notes-contract` | `apps/microfrontends/notes/contract` | `shop-order-notes` and `defineElements` |
@@ -187,7 +187,7 @@ Every back office has a Settings page that switches between its own colour, Dark
 
 ## The data
 
-`tools/mock-api` serves five orders and their notes from `db.seed.json`:
+`apps/services/mock-api` serves five orders and their notes from `db.seed.json`:
 
 | Request | Result |
 | --- | --- |
@@ -203,7 +203,7 @@ Every back office has a Settings page that switches between its own colour, Dark
 { "id": 1, "orderId": "A-1001", "text": "Customer asked for gift wrapping.", "createdAt": "2026-10-12T09:30:00.000Z" }
 ```
 
-The server is about 150 lines of Express in `tools/mock-api/src`, run by Node's built-in
+The server is about 150 lines of Express in `apps/services/mock-api/src`, run by Node's built-in
 TypeScript support with no build step. On start it copies `db.seed.json` to `db.json` if that
 file is missing, and saves every change there. The file lives inside the container, so
 `tools\scripts\services\deploy-mock-api.bat` restores the seed after a demo. It is internal:

@@ -10,7 +10,7 @@
 
 ### Act 1: Pure Web Components
 
-[`examples/web-components-basics`](examples/web-components-basics): three components written
+[`apps/basics/web-components-basics`](apps/basics/web-components-basics): three components written
 with nothing but the browser. A class, a tag, attributes in, events out.
 
 ```js
@@ -150,9 +150,9 @@ The full contract (tags, attributes, events, theme tokens) is in
 ## Repository layout
 
 ```text
-examples/
-  web-components-basics/    act 1   plain JavaScript
 apps/
+  basics/                   the act 1 page, deployed on its own
+    web-components-basics/  act 1   plain JavaScript
   microfrontends/           the apps that export custom elements
     orders/                 act 2   latest Angular
       contract/                     @shop/orders-contract
@@ -164,10 +164,11 @@ apps/
     backoffice-react/       act 2   React 19
     backoffice-vue/         act 2   Vue 3.4
     backoffice-angular16/   act 2   Angular 16
+  services/                 the back-end services the elements call
+    mock-api/               the orders REST API
+      contract/                     @shop/api-contract
 tools/
   edge/                     one nginx proxy per back office: serves the site, forwards /mf/ and /api/
-  mock-api/                 the orders REST API
-    contract/                       @shop/api-contract
   scripts/                  Windows shortcuts around docker compose
 docs/                       architecture, demo script, one guide per app
 ```
@@ -200,7 +201,7 @@ their starting state after a demo.
 
 | Act | Open | Project |
 | --- | --- | --- |
-| 1 | `http://localhost:4100` | `examples/web-components-basics` |
+| 1 | `http://localhost:4100` | `apps/basics/web-components-basics` |
 | 2 | `http://localhost:4500/orders` | `apps/backoffices/backoffice-angular16` |
 | 2 | `http://localhost:4400/orders` | `apps/backoffices/backoffice-vue` |
 | 2 | `http://localhost:4200/orders` | `apps/backoffices/backoffice-react` |

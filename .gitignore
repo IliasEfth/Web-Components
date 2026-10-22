@@ -21,7 +21,7 @@ test-results/
 blob-report/
 
 # Mock API working data (recreated from db.seed.json on npm start)
-tools/mock-api/db.json
+apps/services/mock-api/db.json
 
 # Local environment overrides (the committed .env files hold only localhost URLs)
 .env.local

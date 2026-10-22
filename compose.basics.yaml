@@ -3,14 +3,14 @@ name: shop-basics
 services:
   web-components-basics:
     build:
-      context: examples/web-components-basics
+      context: apps/basics/web-components-basics
       dockerfile: Dockerfile.dev
     ports:
       - '4100:80'
     develop:
       watch:
         - action: sync
-          path: examples/web-components-basics
+          path: apps/basics/web-components-basics
           target: /usr/share/nginx/html
           ignore:
             - node_modules/
@@ -20,4 +20,4 @@ services:
             - package.json
             - package-lock.json
         - action: rebuild
-          path: examples/web-components-basics/nginx.conf
+          path: apps/basics/web-components-basics/nginx.conf

@@ -8,7 +8,7 @@ with `tools\scripts\services\deploy-mock-api.bat`.
 
 ## Act 1: Pure Web Components
 
-**Open** `http://localhost:4100` (`examples/web-components-basics`).
+**Open** `http://localhost:4100` (`apps/basics/web-components-basics`).
 
 - Type a new name: `<user-card>` updates through an attribute and `attributeChangedCallback`.
 - Click the counter: the page hears the `count-changed` event.

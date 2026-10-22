@@ -15,7 +15,7 @@ services:
         - action: rebuild
           path: apps/microfrontends/orders/package.json
         - action: rebuild
-          path: tools/mock-api/contract
+          path: apps/services/mock-api/contract
         - action: rebuild
           path: apps/microfrontends/orders/contract
         - action: rebuild
@@ -40,7 +40,7 @@ services:
         - action: rebuild
           path: apps/microfrontends/insights/package.json
         - action: rebuild
-          path: tools/mock-api/contract
+          path: apps/services/mock-api/contract
         - action: rebuild
           path: apps/microfrontends/insights/contract
         - action: rebuild
@@ -63,7 +63,7 @@ services:
         - action: rebuild
           path: apps/microfrontends/notes/package.json
         - action: rebuild
-          path: tools/mock-api/contract
+          path: apps/services/mock-api/contract
         - action: rebuild
           path: apps/microfrontends/notes/contract
         - action: rebuild

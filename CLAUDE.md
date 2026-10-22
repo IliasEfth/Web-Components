@@ -3,7 +3,7 @@
 This repository is a conference demo: one online shop back office, told in two acts.
 The audience reads the code on screen, so the code must be clean and obvious.
 
-1. **Pure Web Components:** `examples/web-components-basics`, the native API with no framework.
+1. **Pure Web Components:** `apps/basics/web-components-basics`, the native API with no framework.
 2. **Micro-frontends calling each other:** the latest Angular (`apps/microfrontends/orders`),
    React (`apps/microfrontends/insights`) and Vue (`apps/microfrontends/notes`) export custom
    elements, each from its own live server; the React, Vue and Angular 16 shells load them at
@@ -41,7 +41,7 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
    `ng new`), on the host and in containers. Give the exact command and folder, then wait.
    Docker image builds that run `npm ci` from a reviewed `package-lock.json` are fine.
    **Contracts are local packages.** Each team publishes a types-only contract in its own folder
-   (`tools/mock-api/contract` → `@shop/api-contract`, `apps/microfrontends/<name>/contract` →
+   (`apps/services/mock-api/contract` → `@shop/api-contract`, `apps/microfrontends/<name>/contract` →
    `@shop/<name>-contract`). Consumers install it as a `devDependency` with `npm install <folder>`
    (a `file:` link); nothing is published to a registry (`"private": true`). No app keeps a copy
    of a shared type: models, parameters, event details and `defineElements` come from the
@@ -49,7 +49,7 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
    takes no configuration, and shells pass none. Each micro-frontend writes its own HTTP client for the operations it calls and declares them
    (`implements Pick<IOrdersApi, '…'>`); each remote's elements are checked against their contract.
 7. **Strict TypeScript** (`"strict": true`) in every TypeScript project. Plain JavaScript only
-   where the point is "no build": `examples/`.
+   where the point is "no build": `apps/basics/`.
 8. **Each framework's default linter** behind `npm run lint`: ESLint with angular-eslint for
    Angular and the plain projects, oxlint (what `npm create vite` generates) for React and Vue.
    **No Prettier.** Formatting is VS Code's built-in formatters, set in the committed
@@ -80,7 +80,10 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
 ## Layout and ports
 
 Apps that export custom elements live in `apps/microfrontends/`; the shells that host them live
-in `apps/backoffices/`. A reader should see from the path which side an app is on.
+in `apps/backoffices/`; the back-end services they call live in `apps/services/`; the act 1 page
+lives in `apps/basics/`. A reader should see from the path which side an app is on, and each
+folder matches a Compose group. `tools/` holds only what runs around the apps: the edge proxies
+and the scripts.
 
 The apps form five Docker Compose projects, one per group, each with its own file in the repo
 root. Docker Desktop shows each group on its own; `depends_on` never crosses groups.
@@ -99,14 +102,14 @@ the host, no internet at runtime. The edge proxies are the only containers on bo
 
 | Act | Folder | What | Internal address | Public address |
 | --- | --- | --- | --- | --- |
-| 1 | `examples/web-components-basics` | Three native Web Components | | `localhost:4100` |
+| 1 | `apps/basics/web-components-basics` | Three native Web Components | | `localhost:4100` |
 | 2 | `apps/microfrontends/orders` | Latest Angular, exports `shop-orders-list`, `shop-order-detail` | `orders:4201/mf/orders/` | none |
 | 2 | `apps/microfrontends/insights` | React 18, exports `shop-order-stats`, `shop-activity-feed` | `insights:4202/mf/insights/` | none |
 | 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-order-notes` | `notes:4402/mf/notes/` | none |
 | 2 | `apps/backoffices/backoffice-react` | React 19 shell | `backoffice-react:4200/` | `localhost:4200` through its proxy |
 | 2 | `apps/backoffices/backoffice-vue` | Vue 3.4 shell | `backoffice-vue:4400/` | `localhost:4400` through its proxy |
 | 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | `backoffice-angular16:4500/` | `localhost:4500` through its proxy |
-| all | `tools/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | `mock-api:3000` | none |
+| all | `apps/services/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | `mock-api:3000` | none |
 | all | `tools/edge` | One nginx proxy per shell: `<shell>.conf` and one `Dockerfile.dev` with `ARG SITE` | | 4200, 4400, 4500 |
 
 Each proxy serves its shell at `/` and forwards `/mf/orders/`, `/mf/insights/`, `/mf/notes/` and
@@ -133,7 +136,7 @@ docker compose -f compose.services.yaml up -d --force-recreate mock-api     # ba
 `tools/scripts/start-all.bat` and `live-all.bat` run the groups in this order; the `deploy-*.bat`
 scripts sit in one folder per group.
 
-Plain JavaScript projects (`examples/`) are served by `nginx:stable-alpine` with no
+Plain JavaScript projects (`apps/basics/`) are served by `nginx:stable-alpine` with no
 npm at runtime; Node projects start with `npm start` (or `npm run start:docker`) inside their
 image. Dev servers must listen on `0.0.0.0` in Docker only.
 Use Compose Watch (`develop.watch`), not bind mounts, so edits on Windows reach the container.
