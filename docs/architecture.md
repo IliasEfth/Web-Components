@@ -4,7 +4,7 @@ One online shop back office, told in two acts:
 
 1. **Pure Web Components.** How to write a component with nothing but the browser.
 2. **Micro-frontends calling each other.** Angular, React and Vue ship their features as custom
-   elements, each from its own server, and React, Vue and Angular 16 hosts load them at runtime
+   elements, each from its own server, and React, Vue and Angular hosts load them at runtime
    and use them all on one page. No app imports another app's code; they meet only through tags:
    attributes and properties go down, `CustomEvent`s come up.
 
@@ -18,7 +18,7 @@ One online shop back office, told in two acts:
 | 2 | `apps/microfrontends/notes` | Remote: order notes | Vue 3.5 | `shop-microfrontends` | internal: `notes:4402/mf/notes/` | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | `shop-backoffices` | `localhost:4200`, through its proxy | the site |
 | 2 | `apps/backoffices/backoffice-vue` | Host, on an older Vue | Vue 3.5.42 + Vue Router | `shop-backoffices` | `localhost:4400`, through its proxy | the site |
-| 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | `shop-backoffices` | `localhost:4500`, through its proxy | the site |
+| 2 | `apps/backoffices/backoffice-angular` | Host, on an older Angular on purpose | Angular 20, NgModules, Zone.js | `shop-backoffices` | `localhost:4500`, through its proxy | the site |
 | all | `apps/services/mock-api` | Orders REST API | Express, TypeScript | `shop-services` | internal: `mock-api:3000` | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
 | all | `tools/edge` | One nginx proxy per back office | nginx | `shop-edge` | `localhost:4200`, `4400`, `4500` | the way in |
 
@@ -28,7 +28,7 @@ Act 1   localhost:4100 ──► web-components-basics          user-card · cou
 
 Act 2   localhost:4200 ─┐   shop-edge            ┌─► backoffice-react       React 19     ┐
         localhost:4400 ─┼─► one proxy per site ──┼─► backoffice-vue         Vue 3.5.42   ├ shop-backoffices
-        localhost:4500 ─┘   (published)          ├─► backoffice-angular16   Angular 16   ┘
+        localhost:4500 ─┘   (published)          ├─► backoffice-angular   Angular 20   ┘
                                                  │
                               /mf/orders/   ─────┼─► orders:4201     shop-orders-list · shop-order-detail     ┐
                               /mf/insights/ ─────┼─► insights:4202   shop-order-stats · shop-activity-feed    ├ shop-microfrontends
@@ -181,7 +181,7 @@ Each host sets these on `:root`; every component reads them, with a fallback of 
 | each remote's own dev page | teal `#0d9488` |
 | `backoffice-react` | blue `#2563eb` |
 | `backoffice-vue` | green `#16a34a` |
-| `backoffice-angular16` | red `#dc2626` |
+| `backoffice-angular` | red `#dc2626` |
 
 Every back office has a Settings page that switches between its own colour, Dark and Orange.
 

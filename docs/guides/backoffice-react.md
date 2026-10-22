@@ -16,7 +16,7 @@ React 18: the header shows the shell's version, and each Insights element carrie
 | `http://localhost:4200/orders/A-1003` | The same page opened with an order (a deep link) |
 | `http://localhost:4200/settings` | The theme switch |
 
-The Vue and Angular 16 shells have the same pages and the same layout; only the framework of the
+The Vue and Angular shells have the same pages and the same layout; only the framework of the
 shell changes.
 
 ## The project
@@ -45,7 +45,7 @@ Three packages are added to the template:
 | --- | --- |
 | `react-router` | The shell owns the URL. The order id in `/orders/:orderId` becomes `order-id` |
 | `@softarc/native-federation-orchestrator` | The Native Federation runtime for any page; loads Orders' `remoteEntry.json` |
-| `@module-federation/runtime` | Loads Insights' and Notes' `remoteEntry.js`; the same runtime the Angular 16 shell uses |
+| `@module-federation/runtime` | Loads Insights' and Notes' `remoteEntry.js`; the same runtime the Angular shell uses |
 
 And the three element contracts, as dev dependencies installed from their teams' folders:
 `@shop/orders-contract`, `@shop/insights-contract` and `@shop/notes-contract`. The shell never
@@ -111,7 +111,7 @@ export function loadNotesElements(): Promise<void> {
 - **Native Federation.** The orchestrator reads `remoteEntry.json`, writes a native import map
   for Angular's shared packages, and imports `./elements`.
 - **Module Federation.** `remotes/module-federation.ts` creates one runtime instance with
-  `@module-federation/runtime`, exactly as the Angular 16 shell does, and `loadRemote` reads
+  `@module-federation/runtime`, exactly as the Angular shell does, and `loadRemote` reads
   `remoteEntry.js`.
 - **No federation build.** The shell only consumes remotes, so it needs the two runtimes and no
   build plugin: `vite.config.ts` has only the React plugin. `shared: {}` offers the shell's

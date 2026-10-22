@@ -133,7 +133,7 @@ Each element stamps the React it runs on, like Angular's `ng-version`:
 
 ## Step 3: share it with Module Federation
 
-To let the Vue, Angular 16 and React shells load `defineElements` at runtime, the app is also a
+To let the Vue, Angular and React shells load `defineElements` at runtime, the app is also a
 Module Federation remote. One dev dependency is added: `@module-federation/vite`.
 
 ```ts
@@ -164,7 +164,7 @@ The same dev server serves the app and the remote:
 | `http://localhost:4200/mf/insights/remoteEntry.js` | the Module Federation container, exposing `./elements` |
 
 Every shell loads it with the Module Federation runtime, `@module-federation/runtime`, the same
-way in React, Vue and Angular 16; [backoffice-react.md](backoffice-react.md) shows the whole host:
+way in React, Vue and Angular; [backoffice-react.md](backoffice-react.md) shows the whole host:
 
 ```ts
 const moduleFederation = createInstance({
@@ -186,7 +186,7 @@ loader per system, the same `defineElements` contract behind each.
 | | React component (step 1) | Custom element (step 2) |
 | --- | --- | --- |
 | Tag | `<OrderStats>` | `<shop-order-stats>` |
-| Usable from | this React app only | any page: Angular, Vue, Angular 16, plain HTML |
+| Usable from | this React app only | any page: Angular, Vue, an older Angular, plain HTML |
 | Data in | props, typed | attribute `refresh-key`, property `entries` |
 | Events out | `onStatusPicked(detail)` | `CustomEvent('statusPicked')`, value in `event.detail` |
 | Configuration | `<InsightsProvider config>` | none: `defineElements()` once, the element knows its API |

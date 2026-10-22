@@ -4,13 +4,12 @@ import type { IInsightsRemote } from '@shop/insights-contract';
 import type { INotesRemote } from '@shop/notes-contract';
 import type { IOrdersRemote } from '@shop/orders-contract';
 import { initFederation } from '@softarc/native-federation-orchestrator';
-import { useDefaultImportMap } from '@softarc/native-federation-orchestrator/options';
 import { remoteEntries } from '../remote-entries';
 
 @Injectable({ providedIn: 'root' })
 export class RemoteElementsService {
   private readonly moduleFederation = createInstance({
-    name: 'backoffice_angular16',
+    name: 'backoffice_angular',
     remotes: [
       { name: 'insights', entry: remoteEntries.insights, type: 'module' },
       { name: 'notes', entry: remoteEntries.notes, type: 'module' },
@@ -23,13 +22,7 @@ export class RemoteElementsService {
 
   loadOrders(): Promise<void> {
     return this.loadOnce('orders', async () => {
-      const nativeFederation = await initFederation(
-        { orders: remoteEntries.orders },
-        {
-          ...useDefaultImportMap(),
-          loadModuleFn: (url: string) => import(/* webpackIgnore: true */ url),
-        },
-      );
+      const nativeFederation = await initFederation({ orders: remoteEntries.orders });
       return nativeFederation.loadRemoteModule<IOrdersRemote>('orders', './elements');
     });
   }

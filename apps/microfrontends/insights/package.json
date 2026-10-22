@@ -17,14 +17,14 @@
   },
   "devDependencies": {
     "@module-federation/vite": "^1.23.5",
-    "@shop/api-contract": "file:../../services/mock-api/contract",
-    "@shop/insights-contract": "file:contract",
     "@types/node": "^24.19.2",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.1.2",
     "oxlint": "^1.88.0",
     "typescript": "~6.0.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "@shop/api-contract": "file:../../services/mock-api/contract",
+    "@shop/insights-contract": "file:contract"
   }
 }

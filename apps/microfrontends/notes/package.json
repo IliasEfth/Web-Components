@@ -16,14 +16,14 @@
   },
   "devDependencies": {
     "@module-federation/vite": "^1.23.5",
-    "@shop/api-contract": "file:../../services/mock-api/contract",
-    "@shop/notes-contract": "file:contract",
     "@types/node": "^24.19.2",
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/tsconfig": "^0.9.1",
     "oxlint": "^1.88.0",
     "typescript": "~6.0.3",
     "vite": "^8.3.4",
-    "vue-tsc": "^3.3.13"
+    "vue-tsc": "^3.3.13",
+    "@shop/api-contract": "file:../../services/mock-api/contract",
+    "@shop/notes-contract": "file:contract"
   }
 }

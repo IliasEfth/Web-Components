@@ -7,9 +7,7 @@ are loaded at runtime, the first time `/orders` opens. Its colour is green (`#16
 
 The shell runs **Vue 3.5.42** on purpose, older than the Notes components it hosts (Vue 3.5.44):
 the header shows the shell's version, and each Notes element carries `data-vue-version="3.5.44"`.
-`package.json` pins `vue` to exactly `3.5.42`, so npm cannot move it to the newer release. It is
-the oldest Vue without the published `@vue/server-renderer` security advisory, which affects every
-version up to 3.5.41, so the shell stays older without being vulnerable.
+`package.json` pins `vue` to exactly `3.5.42`, so npm cannot move it to the newer release.
 
 | Route | What it shows |
 | --- | --- |

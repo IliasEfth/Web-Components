@@ -37,9 +37,9 @@ its own server:
 Three shells load them at runtime, through Native Federation and Module Federation, and put all
 of them on one page: [`backoffice-react`](apps/backoffices/backoffice-react),
 [`backoffice-vue`](apps/backoffices/backoffice-vue) and
-[`backoffice-angular16`](apps/backoffices/backoffice-angular16). Every shell brings its own
+[`backoffice-angular`](apps/backoffices/backoffice-angular). Every shell brings its own
 framework, at its own version, and so does every micro-frontend: the React 19 shell hosts React 18
-components, the Vue 3.5.42 shell hosts Vue 3.5.44 components, and the Angular 16 shell hosts the
+components, the Vue 3.5.42 shell hosts Vue 3.5.44 components, and the Angular 20 shell hosts the
 latest Angular. No app imports another app's code, and a new release of a remote reaches every shell at the next page
 load. They use the same contract as act 1:
 
@@ -74,7 +74,7 @@ flowchart LR
     direction TB
     rp[backoffice-react-proxy<br/>localhost:4200]
     vp[backoffice-vue-proxy<br/>localhost:4400]
-    ap[backoffice-angular16-proxy<br/>localhost:4500]
+    ap[backoffice-angular-proxy<br/>localhost:4500]
   end
 
   subgraph net[shop-network · internal · not reachable from your computer]
@@ -82,7 +82,7 @@ flowchart LR
     subgraph backoffices[shop-backoffices]
       react[backoffice-react:4200 · React 19]
       vue[backoffice-vue:4400 · Vue 3.5.42]
-      ng16[backoffice-angular16:4500 · Angular 16]
+      ng16[backoffice-angular:4500 · Angular 20]
     end
     subgraph mfs[shop-microfrontends]
       orders[orders:4201 · latest Angular<br/>shop-orders-list · shop-order-detail]
@@ -120,7 +120,7 @@ each other directly; the shell listens and passes the news on:
 
 ```mermaid
 sequenceDiagram
-  participant Shell as Shell (React, Vue or Angular 16)
+  participant Shell as Shell (React, Vue or Angular)
   participant List as shop-orders-list (Orders)
   participant Detail as shop-order-detail (Orders)
   participant Notes as shop-order-notes (Notes)
@@ -163,7 +163,7 @@ apps/
   backoffices/              the shells that host them
     backoffice-react/       act 2   React 19
     backoffice-vue/         act 2   Vue 3.5.42
-    backoffice-angular16/   act 2   Angular 16
+    backoffice-angular/     act 2   Angular 20
   services/                 the back-end services the elements call
     mock-api/               the orders REST API
       contract/                     @shop/api-contract
@@ -181,8 +181,7 @@ folder, and the other apps install it from there (`npm install <folder>`), with 
 ## Run it
 
 You only need [Docker Desktop](https://www.docker.com/products/docker-desktop/). No Node.js,
-no Angular CLI, no version manager: every app builds and runs in its own container, and the
-Angular 16 shell simply uses a Node 18 image.
+no Angular CLI, no version manager: every app builds and runs in its own container.
 
 Start the groups in this order; `shop-services` creates the network the others join:
 
@@ -202,7 +201,7 @@ their starting state after a demo.
 | Act | Open | Project |
 | --- | --- | --- |
 | 1 | `http://localhost:4100` | `apps/basics/web-components-basics` |
-| 2 | `http://localhost:4500/orders` | `apps/backoffices/backoffice-angular16` |
+| 2 | `http://localhost:4500/orders` | `apps/backoffices/backoffice-angular` |
 | 2 | `http://localhost:4400/orders` | `apps/backoffices/backoffice-vue` |
 | 2 | `http://localhost:4200/orders` | `apps/backoffices/backoffice-react` |
 
@@ -220,7 +219,7 @@ Double-click a script in `tools/scripts`. Each one runs the `docker compose` com
 | `start-all.bat` | Builds and starts the five groups in order and waits until all are healthy |
 | `live-all.bat` | Starts every group with Compose Watch, one window per group: saved edits reach the containers at once |
 | `microfrontends/deploy-mf-orders.bat`, `deploy-mf-insights.bat`, `deploy-mf-notes.bat` | Rebuilds and restarts one micro-frontend from the current source; everything else keeps running |
-| `backoffices/deploy-backoffice-react.bat`, `deploy-backoffice-vue.bat`, `deploy-backoffice-angular16.bat` | The same for one back office |
+| `backoffices/deploy-backoffice-react.bat`, `deploy-backoffice-vue.bat`, `deploy-backoffice-angular.bat` | The same for one back office |
 | `services/deploy-mock-api.bat` | The same for the API; the orders and notes go back to the seed data |
 | `basics/deploy-web-components-basics.bat` | The same for the act 1 page |
 

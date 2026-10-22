@@ -1,19 +1,19 @@
-ARG NODE_VERSION=18.20.8-alpine
+ARG NODE_VERSION=24.22.0-alpine
 
 FROM node:${NODE_VERSION} AS dev
 
 ENV NG_CLI_ANALYTICS=false
 
-WORKDIR /repo/apps/backoffices/backoffice-angular16
+WORKDIR /repo/apps/backoffices/backoffice-angular
 
 COPY apps/microfrontends/insights/contract /repo/apps/microfrontends/insights/contract
 COPY apps/microfrontends/notes/contract /repo/apps/microfrontends/notes/contract
 COPY apps/microfrontends/orders/contract /repo/apps/microfrontends/orders/contract
-COPY apps/backoffices/backoffice-angular16/package.json apps/backoffices/backoffice-angular16/package-lock.json ./
+COPY apps/backoffices/backoffice-angular/package.json apps/backoffices/backoffice-angular/package-lock.json ./
 
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
-COPY apps/backoffices/backoffice-angular16 ./
+COPY apps/backoffices/backoffice-angular ./
 
 EXPOSE 4500
 

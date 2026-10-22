@@ -51,19 +51,19 @@ services:
         - action: rebuild
           path: apps/backoffices/backoffice-vue/vite.config.ts
 
-  backoffice-angular16:
+  backoffice-angular:
     build:
       context: .
-      dockerfile: apps/backoffices/backoffice-angular16/Dockerfile.dev
+      dockerfile: apps/backoffices/backoffice-angular/Dockerfile.dev
     networks:
       - shop-network
     develop:
       watch:
         - action: sync
-          path: apps/backoffices/backoffice-angular16/src
-          target: /repo/apps/backoffices/backoffice-angular16/src
+          path: apps/backoffices/backoffice-angular/src
+          target: /repo/apps/backoffices/backoffice-angular/src
         - action: rebuild
-          path: apps/backoffices/backoffice-angular16/package.json
+          path: apps/backoffices/backoffice-angular/package.json
         - action: rebuild
           path: apps/microfrontends/orders/contract
         - action: rebuild
@@ -71,7 +71,7 @@ services:
         - action: rebuild
           path: apps/microfrontends/notes/contract
         - action: rebuild
-          path: apps/backoffices/backoffice-angular16/angular.json
+          path: apps/backoffices/backoffice-angular/angular.json
 
 networks:
   shop-network:
