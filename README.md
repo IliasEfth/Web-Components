@@ -37,10 +37,10 @@ its own server:
 Three shells load them at runtime, through Native Federation and Module Federation, and put all
 of them on one page: [`backoffice-react`](apps/backoffices/backoffice-react),
 [`backoffice-vue`](apps/backoffices/backoffice-vue) and
-[`backoffice-angular16`](apps/backoffices/backoffice-angular16). Every shell runs a different version of its
-framework than the micro-frontend it hosts: the React 19 shell hosts React 18 components, the
-Vue 3.4 shell hosts Vue 3.5 components, and the Angular 16 shell hosts the latest Angular. No app
-imports another app's code, and a new release of a remote reaches every shell at the next page
+[`backoffice-angular16`](apps/backoffices/backoffice-angular16). Every shell brings its own
+framework, at its own version, and so does every micro-frontend: the React 19 shell hosts React 18
+components, the Vue 3.5.42 shell hosts Vue 3.5.44 components, and the Angular 16 shell hosts the
+latest Angular. No app imports another app's code, and a new release of a remote reaches every shell at the next page
 load. They use the same contract as act 1:
 
 ```html
@@ -81,7 +81,7 @@ flowchart LR
     direction TB
     subgraph backoffices[shop-backoffices]
       react[backoffice-react:4200 · React 19]
-      vue[backoffice-vue:4400 · Vue 3.4]
+      vue[backoffice-vue:4400 · Vue 3.5.42]
       ng16[backoffice-angular16:4500 · Angular 16]
     end
     subgraph mfs[shop-microfrontends]
@@ -162,7 +162,7 @@ apps/
       contract/                     @shop/notes-contract
   backoffices/              the shells that host them
     backoffice-react/       act 2   React 19
-    backoffice-vue/         act 2   Vue 3.4
+    backoffice-vue/         act 2   Vue 3.5.42
     backoffice-angular16/   act 2   Angular 16
   services/                 the back-end services the elements call
     mock-api/               the orders REST API

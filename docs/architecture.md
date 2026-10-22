@@ -17,7 +17,7 @@ One online shop back office, told in two acts:
 | 2 | `apps/microfrontends/insights` | Remote: order statistics and activity feed | React 18 | `shop-microfrontends` | internal: `insights:4202/mf/insights/` | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/microfrontends/notes` | Remote: order notes | Vue 3.5 | `shop-microfrontends` | internal: `notes:4402/mf/notes/` | `remoteEntry.js` (Module Federation) |
 | 2 | `apps/backoffices/backoffice-react` | Host | React 19 + React Router | `shop-backoffices` | `localhost:4200`, through its proxy | the site |
-| 2 | `apps/backoffices/backoffice-vue` | Host, on an older Vue | Vue 3.4 + Vue Router | `shop-backoffices` | `localhost:4400`, through its proxy | the site |
+| 2 | `apps/backoffices/backoffice-vue` | Host, on an older Vue | Vue 3.5.42 + Vue Router | `shop-backoffices` | `localhost:4400`, through its proxy | the site |
 | 2 | `apps/backoffices/backoffice-angular16` | Host, on an old Angular on purpose | Angular 16, Zone.js | `shop-backoffices` | `localhost:4500`, through its proxy | the site |
 | all | `apps/services/mock-api` | Orders REST API | Express, TypeScript | `shop-services` | internal: `mock-api:3000` | `GET/PATCH /orders`, `GET/POST /orders/:id/notes` |
 | all | `tools/edge` | One nginx proxy per back office | nginx | `shop-edge` | `localhost:4200`, `4400`, `4500` | the way in |
@@ -27,7 +27,7 @@ Act 1   localhost:4100 ──► web-components-basics          user-card · cou
                            shop-basics, on its own
 
 Act 2   localhost:4200 ─┐   shop-edge            ┌─► backoffice-react       React 19     ┐
-        localhost:4400 ─┼─► one proxy per site ──┼─► backoffice-vue         Vue 3.4      ├ shop-backoffices
+        localhost:4400 ─┼─► one proxy per site ──┼─► backoffice-vue         Vue 3.5.42   ├ shop-backoffices
         localhost:4500 ─┘   (published)          ├─► backoffice-angular16   Angular 16   ┘
                                                  │
                               /mf/orders/   ─────┼─► orders:4201     shop-orders-list · shop-order-detail     ┐
