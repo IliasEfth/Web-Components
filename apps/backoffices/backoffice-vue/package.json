@@ -17,6 +17,10 @@
   },
   "devDependencies": {
     "@module-federation/vite": "^1.23.5",
+    "@shop/api-contract": "file:../../../tools/mock-api/contract",
+    "@shop/insights-contract": "file:../../microfrontends/insights/contract",
+    "@shop/notes-contract": "file:../../microfrontends/notes/contract",
+    "@shop/orders-contract": "file:../../microfrontends/orders/contract",
     "@types/node": "^24.19.2",
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/tsconfig": "^0.9.1",

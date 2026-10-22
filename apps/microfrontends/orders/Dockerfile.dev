@@ -5,13 +5,15 @@ FROM node:${NODE_VERSION} AS dev
 ENV NODE_ENV=development
 ENV NG_CLI_ANALYTICS=false
 
-WORKDIR /app
+WORKDIR /repo/apps/microfrontends/orders
 
-COPY package.json package-lock.json ./
+COPY tools/mock-api/contract /repo/tools/mock-api/contract
+COPY apps/microfrontends/orders/contract /repo/apps/microfrontends/orders/contract
+COPY apps/microfrontends/orders/package.json apps/microfrontends/orders/package-lock.json ./
 
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
-COPY . .
+COPY apps/microfrontends/orders ./
 
 EXPOSE 4201
 

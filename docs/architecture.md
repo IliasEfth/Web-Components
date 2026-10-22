@@ -55,7 +55,43 @@ All     tools/mock-api :3000   GET/PATCH /orders · GET/POST /orders/:id/notes
 
 ## Contracts
 
-These names are shared between apps. Renaming one breaks another app silently.
+Every team publishes its contract as a small, types-only npm package in its own folder. Other
+apps install it from that folder (`npm install <folder>`, saved as a `file:` link), so nothing
+goes through a registry. The owner implements its own contract, and a change that breaks it
+stops the build of the owner and of every app that uses it.
+
+| Package | Owner | What it describes |
+| --- | --- | --- |
+| `@shop/api-contract` | `tools/mock-api/contract` | the models, the parameters and `IOrdersApi`: one documented method per HTTP operation |
+| `@shop/orders-contract` | `apps/microfrontends/orders/contract` | `shop-orders-list`, `shop-order-detail` and `defineElements` |
+| `@shop/insights-contract` | `apps/microfrontends/insights/contract` | `shop-order-stats`, `shop-activity-feed` and `defineElements` |
+| `@shop/notes-contract` | `apps/microfrontends/notes/contract` | `shop-status-filter`, `shop-order-notes` and `defineElements` |
+
+Each element contract has the same shape, so a host can turn any of them into typings for its
+own framework with one generic type:
+
+```ts
+export interface IOrdersListContract {
+  tagName: 'shop-orders-list';
+  attributes: { status: OrderStatusFilter; 'page-size': string };
+  properties: { status: OrderStatusFilter; pageSize: number };
+  events: { orderSelected: IOrderSelectedDetail };
+}
+```
+
+Every app writes its own HTTP client for the operations it calls, and declares which ones:
+
+```ts
+export class OrdersClient implements Pick<IOrdersApi, 'listOrders'> {
+  listOrders(params: IListOrdersParams = {}): Promise<IOrder[]> { … }
+}
+```
+
+The contracts are `devDependencies`: they are types, needed to type-check and build, never at
+runtime.
+
+The names below are shared between apps. Renaming one breaks another app, which is exactly what
+the contract packages catch at build time.
 
 | Tag | Owner | Inputs (attribute / property) | Events (`detail`) |
 | --- | --- | --- | --- |

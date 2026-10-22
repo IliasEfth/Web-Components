@@ -18,7 +18,7 @@ export const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <DashboardPage />,
-        loader: () => ordersClient.list(),
+        loader: () => ordersClient.listOrders(),
         errorElement: <ErrorPage />,
       },
       { path: 'orders/:orderId?', element: <OrdersPage /> },

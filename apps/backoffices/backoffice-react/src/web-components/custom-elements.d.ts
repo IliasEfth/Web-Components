@@ -1,47 +1,33 @@
+import type { InsightsContracts } from '@shop/insights-contract';
+import type { NotesContracts } from '@shop/notes-contract';
+import type { OrdersContracts } from '@shop/orders-contract';
 import type { DetailedHTMLProps, HTMLAttributes } from 'react';
-import type { IActivityEntry } from '../models/activity-entry';
-import type {
-  INoteAddedDetail,
-  IOrderClosedDetail,
-  IOrderSelectedDetail,
-  IOrderUpdatedDetail,
-  IStatusChangeDetail,
-  IStatusPickedDetail,
-} from '../models/element-events';
-import type { OrderStatusFilter } from '../models/order';
 
-type CustomElementProps<TProps> = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> &
-  TProps;
+interface IElementContract {
+  tagName: string;
+  attributes: object;
+  properties: object;
+  events: object;
+}
+
+type ElementProps<TContract extends IElementContract> = DetailedHTMLProps<
+  HTMLAttributes<HTMLElement>,
+  HTMLElement
+> &
+  Partial<TContract['attributes']> &
+  Partial<TContract['properties']> & {
+    [K in keyof TContract['events'] as `on${K & string}`]?: (
+      event: CustomEvent<TContract['events'][K]>,
+    ) => void;
+  };
+
+type ContractElements<TContracts extends IElementContract> = {
+  [TContract in TContracts as TContract['tagName']]: ElementProps<TContract>;
+};
 
 declare module 'react' {
   namespace JSX {
-    interface IntrinsicElements {
-      'shop-orders-list': CustomElementProps<{
-        status?: OrderStatusFilter;
-        'page-size'?: string;
-        onorderSelected?: (event: CustomEvent<IOrderSelectedDetail>) => void;
-      }>;
-      'shop-order-detail': CustomElementProps<{
-        'order-id'?: string;
-        onorderUpdated?: (event: CustomEvent<IOrderUpdatedDetail>) => void;
-        onclosed?: (event: CustomEvent<IOrderClosedDetail>) => void;
-      }>;
-      'shop-order-stats': CustomElementProps<{
-        'refresh-key'?: string;
-        onstatusPicked?: (event: CustomEvent<IStatusPickedDetail>) => void;
-      }>;
-      'shop-activity-feed': CustomElementProps<{
-        entries?: IActivityEntry[];
-        oncleared?: (event: CustomEvent<object>) => void;
-      }>;
-      'shop-status-filter': CustomElementProps<{
-        value?: OrderStatusFilter;
-        onstatusChange?: (event: CustomEvent<IStatusChangeDetail>) => void;
-      }>;
-      'shop-order-notes': CustomElementProps<{
-        'order-id'?: string;
-        onnoteAdded?: (event: CustomEvent<INoteAddedDetail>) => void;
-      }>;
-    }
+    interface IntrinsicElements
+      extends ContractElements<OrdersContracts | InsightsContracts | NotesContracts> {}
   }
 }

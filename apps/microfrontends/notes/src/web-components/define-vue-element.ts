@@ -8,12 +8,12 @@ import {
   useHost,
 } from 'vue';
 
-type VueComponent = Component & {
+export type VueComponent = Component & {
   props?: object;
   emits?: readonly string[] | object;
 };
 
-interface IVueElementOptions {
+export interface IVueElementOptions {
   styles?: string[];
   configureApp?: (app: App) => void;
 }

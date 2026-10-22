@@ -26,7 +26,7 @@ src/app/
   app-routing.module.ts       /dashboard, and /orders as a lazy OrdersModule
   app.component.*             header and navigation
   remote-entries.ts           where each remote lives
-  models/                     the contract shapes and the REMOTE_CONFIG token
+  models/remote-config.ts     the REMOTE_CONFIG injection token
   services/
     remote-elements.service.ts   loads the three remotes, once each
     orders-client.service.ts     HttpClient for the dashboard
@@ -49,6 +49,11 @@ Two browser runtimes are added to the template:
 
 The shell exposes nothing and cannot share Angular 16 with Angular 22, so it needs no federation
 build: only the two runtimes, in the browser.
+
+The four contracts are dev dependencies, installed from their teams' folders. The dashboard's
+`OrdersClientService` implements `listOrders` from `@shop/api-contract` with Observables, the
+remote loader is typed with each remote's `defineElements`, and the Orders page's handlers take
+their `detail` types from the element contracts.
 
 ## Loading three remotes in a webpack app
 
@@ -75,7 +80,7 @@ loadOrders(): Promise<void> {
         loadModuleFn: (url: string) => import(/* webpackIgnore: true */ url),
       },
     );
-    return nativeFederation.loadRemoteModule<IRemoteElements>('orders', './elements');
+    return nativeFederation.loadRemoteModule<IOrdersRemote>('orders', './elements');
   });
 }
 ```

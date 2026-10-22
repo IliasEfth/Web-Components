@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
+import type { IOrder } from '@shop/api-contract';
 import { EMPTY, Observable, catchError, map } from 'rxjs';
-import { IOrder } from '../models/order';
 import { OrdersClientService } from '../services/orders-client.service';
 
 interface IDashboard {
@@ -18,7 +18,7 @@ export class DashboardPageComponent {
   loadFailed = false;
 
   constructor(ordersClient: OrdersClientService) {
-    this.dashboard$ = ordersClient.list().pipe(
+    this.dashboard$ = ordersClient.listOrders().pipe(
       map((orders) => {
         const openOrders = orders.filter((order) => order.status === 'open');
         return {

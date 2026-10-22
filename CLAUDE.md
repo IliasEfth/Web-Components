@@ -43,6 +43,13 @@ reference material only. Read it for ideas, never edit it, and never copy its ol
    **The user runs every `npm` and `npx` command** (install, ci, run, scaffolders such as
    `ng new`), on the host and in containers. Give the exact command and folder, then wait.
    Docker image builds that run `npm ci` from a reviewed `package-lock.json` are fine.
+   **Contracts are local packages.** Each team publishes a types-only contract in its own folder
+   (`tools/mock-api/contract` → `@shop/api-contract`, `apps/microfrontends/<name>/contract` →
+   `@shop/<name>-contract`). Consumers install it as a `devDependency` with `npm install <folder>`
+   (a `file:` link); nothing is published to a registry (`"private": true`). No app keeps a copy
+   of a shared type: models, parameters, event details and `defineElements` come from the
+   contracts. Each app writes its own HTTP client for the operations it calls and declares them
+   (`implements Pick<IOrdersApi, '…'>`); each remote's elements are checked against their contract.
 7. **Strict TypeScript** (`"strict": true`) in every TypeScript project. Plain JavaScript only
    where the point is "no build": `examples/`.
 8. **Each framework's default linter** behind `npm run lint`: ESLint with angular-eslint for
@@ -118,6 +125,10 @@ every app arrives with its `Dockerfile.dev` and its `compose.yaml` service.
 | CORS error loading `remoteEntry.json` | Add `Access-Control-Allow-Origin: *` to the `serve` options of `apps/microfrontends/orders` |
 | `Failed to resolve component: shop-...` in Vue | Set `isCustomElement` for `shop-` tags in the Vite Vue plugin |
 | Vue custom element events have an array `detail` and do not bubble | Vue's `defineCustomElement` dispatches `detail: [...args]` without `bubbles`/`composed`. `defineVueElement` in `apps/microfrontends/notes` wraps the component and dispatches the contract `CustomEvent` from `useHost()` instead |
+| Vue build: `Failed to resolve index type into finite keys` | `defineEmits` cannot take a mapped type over a contract's event keys. Write the event names literally (`{ statusChange: [detail: Events['statusChange']] }`); `defineProps<Partial<IContract['properties']>>()` works. `elements.ts` checks the names against the contract |
+| `npm ci` in a Docker build fails on a `file:` contract | The contract folder is not in the image. App images build from the repo root (`context: .`) and `COPY` each contract folder to the same relative path under `/repo` before `npm ci` |
+| Native Federation warns `No meta data found for shared lib @shop/...` | A contract is in `dependencies`; it holds only types. Keep contracts in `devDependencies` |
+| `tsc` passes but `ng build` fails in an Angular app | `tsc` does not check templates. Run `ng build` after changing an `input()` type a template binds to |
 | oxlint reports React hook rules in a Vue project | Use the Vue plugins in `.oxlintrc.json` (`vue`, `typescript`, `oxc`), not the React config |
 | React remote in another page: `@vitejs/plugin-react can't detect preamble` | Exclude the exposed folder from Fast Refresh: `react({ exclude: [/\/node_modules\//, /\/src\/insights\//] })` |
 | Remote files load from the shell's port instead of the remote's | Set `server.origin` to the remote's own URL in `vite.config.ts` |

@@ -1,0 +1,15 @@
+{
+  "name": "@shop/orders-contract",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The public contract of the Orders micro-frontend: its custom elements, their attributes, properties and events, and defineElements",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts"
+    }
+  },
+  "files": [
+    "index.d.ts"
+  ]
+}

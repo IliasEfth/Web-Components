@@ -12,18 +12,14 @@ changing a line inside them. The app shows both side by side:
 ## Step 1: a correct Vue app
 
 ```text
+contract/                         @shop/notes-contract: what other apps may use
 src/
   notes/                          everything about notes, grouped by kind
-    models/
-      order.ts                    OrderStatus, OrderStatusFilter
-      note.ts                     INote
-      notes-events.ts             IStatusChangeDetail, INoteAddedDetail
     clients/
-      notes-client.ts             NotesClient: GET and POST /orders/:id/notes
+      notes-client.ts             NotesClient: implements listOrderNotes and addOrderNote
     services/
       notes-service.ts            NotesService: what the components use; calls the client
     config/
-      notes-config.ts             INotesConfig
       create-notes.ts             createNotes(config): a Vue plugin that provides the service
       use-notes-service.ts        inject() for components
     components/
@@ -57,6 +53,19 @@ URL or a token.
 <OrderNotes :order-id="orderId" @note-added="noteAdded" />
 ```
 
+Their props and event details come from the element contract the team publishes:
+
+```ts
+const { value = 'all' } = defineProps<Partial<IStatusFilterContract['properties']>>();
+const emit = defineEmits<{ statusChange: [detail: Events['statusChange']] }>();
+```
+
+The event name is written out because Vue's compiler needs the literal key to generate the
+runtime emits; `elements.ts` checks it against the contract (step 2).
+
+`NotesClient` implements the two API operations the app calls, from the API team's contract:
+`class NotesClient implements Pick<IOrdersApi, 'listOrderNotes' | 'addOrderNote'>`.
+
 Their CSS lives in a file next to them (`<style src="./status-filter.css">`), with class names
 that carry the component name, so the same file works on the page and inside a shadow root.
 
@@ -80,19 +89,23 @@ bubbles nor crosses the shadow root. The contract needs `detail: { status }` wit
 
 The emit names come from the compiled component, so nothing is listed twice.
 
-`elements.ts` uses it for both tags:
+`elements.ts` uses it for both tags, through `defineNotesElement`, which finds the contract by the
+tag name and checks the component against it:
 
 ```ts
-function registerElements(config: INotesConfig): void {
+function registerElements(config: IRemoteConfig): void {
   const notes = createNotes(config);
 
-  defineVueElement('shop-status-filter', StatusFilter, { styles: [statusFilterStyles] });
-  defineVueElement('shop-order-notes', OrderNotes, {
+  defineNotesElement('shop-status-filter', StatusFilter, { styles: [statusFilterStyles] });
+  defineNotesElement('shop-order-notes', OrderNotes, {
     styles: [orderNotesStyles],
     configureApp: (app) => app.use(notes),
   });
 }
 ```
+
+A component is accepted only if it has every property of the contract and an `on…` handler for
+every event, with the contract's types. Rename the `statusChange` emit and the build stops.
 
 `main.ts` awaits `defineElements(notesConfig)` before mounting, and the web components page uses
 the tags like any host would:

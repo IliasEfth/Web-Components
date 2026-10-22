@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import type { IStatusChangeDetail } from '../../models/notes-events';
-import type { OrderStatusFilter } from '../../models/order';
+import type { IStatusFilterContract, OrderStatusFilter } from '@shop/notes-contract';
 
-const { value = 'all' } = defineProps<{ value?: OrderStatusFilter }>();
+type Events = IStatusFilterContract['events'];
 
-const emit = defineEmits<{ statusChange: [detail: IStatusChangeDetail] }>();
+const { value = 'all' } = defineProps<Partial<IStatusFilterContract['properties']>>();
+
+const emit = defineEmits<{ statusChange: [detail: Events['statusChange']] }>();
 
 const statuses: OrderStatusFilter[] = ['all', 'open', 'shipped'];
 </script>

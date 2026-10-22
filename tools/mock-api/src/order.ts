@@ -1,16 +1,8 @@
-export const orderStatuses = ['open', 'shipped'] as const;
+import type { OrderStatus, OrderStatusFilter } from '../contract/index.d.ts';
 
-export type OrderStatus = (typeof orderStatuses)[number];
+export type { IOrder, OrderStatus, OrderStatusFilter } from '../contract/index.d.ts';
 
-export type OrderStatusFilter = OrderStatus | 'all';
-
-export interface IOrder {
-  id: string;
-  customer: string;
-  total: number;
-  status: OrderStatus;
-  createdAt: string;
-}
+export const orderStatuses: readonly OrderStatus[] = ['open', 'shipped'];
 
 export function isOrderStatus(value: unknown): value is OrderStatus {
   return typeof value === 'string' && orderStatuses.some((status) => status === value);

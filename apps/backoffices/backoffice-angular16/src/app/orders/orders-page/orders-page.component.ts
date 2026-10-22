@@ -1,16 +1,14 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, map } from 'rxjs';
-import { IActivityEntry } from '../../models/activity-entry';
-import {
-  INoteAddedDetail,
+import type { OrderStatusFilter } from '@shop/api-contract';
+import type { IActivityEntry, IStatusPickedDetail } from '@shop/insights-contract';
+import type { INoteAddedDetail, IStatusChangeDetail } from '@shop/notes-contract';
+import type {
   IOrderClosedDetail,
   IOrderSelectedDetail,
   IOrderUpdatedDetail,
-  IStatusChangeDetail,
-  IStatusPickedDetail,
-} from '../../models/element-events';
-import { OrderStatusFilter } from '../../models/order';
+} from '@shop/orders-contract';
+import { Observable, map } from 'rxjs';
 import { RemoteElementsService } from '../../services/remote-elements.service';
 
 @Component({

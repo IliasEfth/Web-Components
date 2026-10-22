@@ -1,5 +1,5 @@
+import type { IActivityEntry } from '@shop/insights-contract';
 import { ref } from 'vue';
-import type { IActivityEntry } from '../models/activity-entry';
 
 export function useActivityLog() {
   const entries = ref<IActivityEntry[]>([]);

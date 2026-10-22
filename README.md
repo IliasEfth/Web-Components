@@ -91,20 +91,26 @@ examples/
 apps/
   microfrontends/           the apps that export custom elements
     orders/                 act 2   latest Angular
+      contract/                     @shop/orders-contract
     insights/               act 2   React 19
+      contract/                     @shop/insights-contract
     notes/                  act 2   Vue 3.5
+      contract/                     @shop/notes-contract
   backoffices/              the shells that host them
     backoffice-react/       act 2   React
     backoffice-vue/         act 2   Vue
     backoffice-angular16/   act 2   Angular 16
 tools/
   mock-api/                 the orders REST API
+    contract/                       @shop/api-contract
   scripts/                  Windows shortcuts around docker compose
 docs/                       architecture, demo script, one guide per app
 ```
 
 Every folder is its own npm project with its own `package.json`, as if a different team owned
-each one.
+each one. Each team publishes what others may use as a types-only contract package in its own
+folder, and the other apps install it from there (`npm install <folder>`), with no registry. See
+[docs/architecture.md](docs/architecture.md#contracts).
 
 ## Run it
 

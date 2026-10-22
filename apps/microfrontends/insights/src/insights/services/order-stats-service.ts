@@ -9,7 +9,7 @@ export class OrderStatsService {
   }
 
   async getStats(signal?: AbortSignal): Promise<IOrderStats> {
-    const orders = await this.#client.listOrders(signal);
+    const orders = await this.#client.listOrders({}, signal);
     const open = orders.filter((order) => order.status === 'open').length;
     return {
       open,

@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import type { INote } from '@shop/api-contract';
+import type { IOrderNotesContract } from '@shop/notes-contract';
 import { ref, watch } from 'vue';
 import { useNotesService } from '../../config/use-notes-service';
-import type { INote } from '../../models/note';
-import type { INoteAddedDetail } from '../../models/notes-events';
 
-const { orderId } = defineProps<{ orderId?: string }>();
+type Events = IOrderNotesContract['events'];
 
-const emit = defineEmits<{ noteAdded: [detail: INoteAddedDetail] }>();
+const { orderId } = defineProps<Partial<IOrderNotesContract['properties']>>();
+
+const emit = defineEmits<{ noteAdded: [detail: Events['noteAdded']] }>();
 
 const notesService = useNotesService();
 const notes = ref<INote[]>([]);

@@ -28,9 +28,8 @@ src/
     RemoteGate.tsx           loading text, then the elements or an error card with Retry
     remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
   web-components/
-    custom-elements.d.ts     JSX typings for the six shop- tags
-  models/                    the contract shapes: IOrder, event details, IRemoteConfig
-  clients/orders-client.ts   the dashboard's own fetch
+    custom-elements.d.ts     JSX typings for the six shop- tags, built from the three contracts
+  clients/orders-client.ts   implements listOrders from @shop/api-contract, for the dashboard
   pages/                     DashboardPage, OrdersPage, SettingsPage, ErrorPage
   theme/themes.ts
   shared/useActivityLog.ts
@@ -45,6 +44,24 @@ Three packages are added to the template:
 | `@softarc/native-federation-orchestrator` | The Native Federation runtime for any page; loads Orders' `remoteEntry.json` |
 | `@module-federation/vite` (dev) | Loads Insights' and Notes' `remoteEntry.js` and shares the shell's React |
 
+And the four contracts, as dev dependencies installed from their teams' folders:
+`@shop/api-contract`, `@shop/orders-contract`, `@shop/insights-contract` and
+`@shop/notes-contract`. The shell has no copy of any shared type: the models, the event details,
+`IRemoteConfig` and the type of each remote's `defineElements` all come from them.
+
+```ts
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements
+      extends ContractElements<OrdersContracts | InsightsContracts | NotesContracts> {}
+  }
+}
+```
+
+`ContractElements` turns every contract into the JSX props of its tag: attributes, properties,
+and an `on<event>` prop typed with the event's `detail`. A tag, attribute or event that a team
+renames stops compiling here.
+
 ## Three remotes, two runtimes, one contract
 
 Orders is built with Native Federation, Insights and Notes with Module Federation, so there are
@@ -53,7 +70,7 @@ two loaders. Behind each is the same call: `defineElements(config)`.
 ```ts
 export function loadOrdersElements(): Promise<void> {
   ordersReady ??= initFederation({ orders: remoteEntries.orders })
-    .then(({ loadRemoteModule }) => loadRemoteModule<IRemoteElements>('orders', './elements'))
+    .then(({ loadRemoteModule }) => loadRemoteModule<IOrdersRemote>('orders', './elements'))
     .then(({ defineElements }) => defineElements(remoteConfig))
     .catch((error: unknown) => {
       ordersReady = undefined;

@@ -17,6 +17,8 @@
   },
   "devDependencies": {
     "@module-federation/vite": "^1.23.5",
+    "@shop/api-contract": "file:../../../tools/mock-api/contract",
+    "@shop/insights-contract": "file:contract",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, model } from '@angular/core';
-import type { OrderStatusFilter } from '../../models/order';
+import type { OrderStatusFilter } from '@shop/api-contract';
 
 @Component({
   selector: 'app-order-status-select',

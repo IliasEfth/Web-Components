@@ -10,8 +10,8 @@ import {
   output,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import type { IOrder, OrderStatusFilter } from '../../models/order';
-import type { IOrderSelectedDetail } from '../../models/order-events';
+import type { IOrder, OrderStatusFilter } from '@shop/api-contract';
+import type { IOrderSelectedDetail } from '@shop/orders-contract';
 import { OrdersService } from '../../services/orders-service';
 
 @Component({

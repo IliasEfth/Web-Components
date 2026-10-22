@@ -1,11 +1,6 @@
-export const maxNoteLength = 500;
+export type { INote } from '../contract/index.d.ts';
 
-export interface INote {
-  id: number;
-  orderId: string;
-  text: string;
-  createdAt: string;
-}
+export const maxNoteLength = 500;
 
 export function isNoteText(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0 && value.length <= maxNoteLength;

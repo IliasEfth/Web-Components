@@ -1,6 +1,6 @@
+import type { OrderStatusFilter } from '@shop/api-contract';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import type { OrderStatusFilter } from '../models/order';
 import { loadInsightsElements } from '../remotes/insights-remote';
 import { loadNotesElements } from '../remotes/notes-remote';
 import { loadOrdersElements } from '../remotes/orders-remote';

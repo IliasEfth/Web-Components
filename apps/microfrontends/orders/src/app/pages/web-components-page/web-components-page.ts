@@ -1,11 +1,11 @@
 import { CUSTOM_ELEMENTS_SCHEMA, ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { OrderStatusSelect } from '../../orders/components/order-status-select/order-status-select';
-import type { OrderStatusFilter } from '../../orders/models/order';
+import type { OrderStatusFilter } from '@shop/api-contract';
 import type {
   IOrderClosedDetail,
   IOrderSelectedDetail,
   IOrderUpdatedDetail,
-} from '../../orders/models/order-events';
+} from '@shop/orders-contract';
+import { OrderStatusSelect } from '../../orders/components/order-status-select/order-status-select';
 import { EventLog } from '../../shared/event-log';
 
 @Component({

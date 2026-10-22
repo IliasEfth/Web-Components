@@ -12,17 +12,16 @@ them. The app shows both side by side:
 ## Step 1: a correct Angular app
 
 ```text
+contract/                      @shop/orders-contract: what other apps may use (step 2)
 src/app/
   orders/                      everything about orders, grouped by kind
-    models/
-      order.ts                 IOrder, OrderStatus, OrderStatusFilter
-      order-events.ts          the detail of every event the components emit
     clients/
-      orders-client.ts         OrdersClient: the HTTP calls, shaped like a generated API client
+      orders-client.ts         OrdersClient: the API operations this app calls
+      observable-api.ts        ObservableApi: the API contract with Observables instead of Promises
     services/
       orders-service.ts        OrdersService: what the components use; calls the client
     config/
-      orders-config.ts         IOrdersConfig and the ORDERS_CONFIG injection token
+      orders-config.ts         the ORDERS_CONFIG injection token
       provide-orders.ts        provideOrders(config): registers the config, client and service
     components/
       orders-list/             OrdersList
@@ -38,17 +37,26 @@ src/app/
 `app.config.ts` provides them once, like `provideHttpClient()` or `provideRouter()`:
 
 ```ts
-const ordersConfig: IOrdersConfig = { apiBase: 'http://localhost:3000' };
+const ordersConfig: IRemoteConfig = { apiBase: 'http://localhost:3000' };
 
 export const appConfig: ApplicationConfig = {
   providers: [provideRouter(routes), provideHttpClient(), provideOrders(ordersConfig)],
 };
 ```
 
-**Two layers, both injected.** `OrdersClient` only talks HTTP: URLs, headers and `HttpClient`,
-returning `Observable`s, exactly the shape an OpenAPI-generated client has, so it can be replaced
-by a generated one later. `OrdersService` is what the components use; today it mostly calls the
-client, and it is where the app's own logic goes. Both are plain `@Injectable()` classes with no
+**Two layers, both injected.** `OrdersClient` only talks HTTP: URLs, headers and `HttpClient`.
+It implements the three operations of the API team's contract that this app calls, with
+`Observable`s instead of `Promise`s:
+
+```ts
+export class OrdersClient
+  implements ObservableApi<Pick<IOrdersApi, 'listOrders' | 'getOrder' | 'updateOrderStatus'>>
+```
+
+`IOrdersApi`, the models and the parameter types come from `@shop/api-contract`, installed from
+`tools/mock-api/contract`. A wrong parameter or result type does not compile. `OrdersService` is
+what the components use; today it mostly calls the client, and it is where the app's own logic
+goes. Both are plain `@Injectable()` classes with no
 `providedIn: 'root'`: they exist only where an app calls `provideOrders(...)`, and the components
 ask for the service with `inject(OrdersService)`.
 
@@ -80,22 +88,31 @@ anyway:
 | `--shop-*` custom properties with fallbacks | The host's theme crosses the Shadow DOM boundary; nothing else does |
 | Text only through `{{ }}` | Angular writes interpolations with `textContent`, so customer data never runs as HTML |
 
+**The contract.** What other apps may rely on is published in `contract/` as
+`@shop/orders-contract`: each tag with its attributes, properties and events, and the type of
+`defineElements`. The components use its event detail types for their `output()`s.
+
 Everything else lives in one file, `elements.ts`:
 
 ```ts
-export function defineElements(config: IOrdersConfig): Promise<void> {
+export const defineElements: IOrdersRemote['defineElements'] = (config) => {
   elementsDefined ??= registerElements(config);
   return elementsDefined;
-}
+};
 
-async function registerElements(config: IOrdersConfig): Promise<void> {
+async function registerElements(config: IRemoteConfig): Promise<void> {
   const application = await createApplication({
     providers: [provideZonelessChangeDetection(), provideHttpClient(), provideOrders(config)],
   });
-  defineElement('shop-orders-list', OrdersList, application.injector);
-  defineElement('shop-order-detail', OrderDetail, application.injector);
+  defineElement<IOrdersListContract>('shop-orders-list', OrdersList, application.injector);
+  defineElement<IOrderDetailContract>('shop-order-detail', OrderDetail, application.injector);
 }
 ```
+
+`defineElement` accepts a component only if it has an `input()` for every property of the
+contract and an `output()` for every event, with the contract's types. Rename `orderSelected` in
+`OrdersList` and the build stops with
+`Property 'orderSelected' is missing in type 'OrdersList'`.
 
 What each line does:
 

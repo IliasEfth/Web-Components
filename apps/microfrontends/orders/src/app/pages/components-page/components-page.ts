@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { OrderDetail } from '../../orders/components/order-detail/order-detail';
-import { OrderStatusSelect } from '../../orders/components/order-status-select/order-status-select';
-import { OrdersList } from '../../orders/components/orders-list/orders-list';
-import type { OrderStatusFilter } from '../../orders/models/order';
+import type { OrderStatusFilter } from '@shop/api-contract';
 import type {
   IOrderClosedDetail,
   IOrderSelectedDetail,
   IOrderUpdatedDetail,
-} from '../../orders/models/order-events';
+} from '@shop/orders-contract';
+import { OrderDetail } from '../../orders/components/order-detail/order-detail';
+import { OrderStatusSelect } from '../../orders/components/order-status-select/order-status-select';
+import { OrdersList } from '../../orders/components/orders-list/orders-list';
 import { EventLog } from '../../shared/event-log';
 
 @Component({
@@ -18,7 +18,7 @@ import { EventLog } from '../../shared/event-log';
 })
 export class ComponentsPage {
   readonly status = signal<OrderStatusFilter>('all');
-  readonly selectedOrderId = signal<string | undefined>(undefined);
+  readonly selectedOrderId = signal<string | null>(null);
   readonly events = signal<string[]>([]);
 
   selectOrder({ id }: IOrderSelectedDetail): void {
@@ -31,7 +31,7 @@ export class ComponentsPage {
   }
 
   closeOrder({ id }: IOrderClosedDetail): void {
-    this.selectedOrderId.set(undefined);
+    this.selectedOrderId.set(null);
     this.#log(`(closed) { id: ${id} }`);
   }
 

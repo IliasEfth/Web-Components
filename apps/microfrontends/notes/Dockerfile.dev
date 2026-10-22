@@ -2,13 +2,15 @@ ARG NODE_VERSION=24.22.0-alpine
 
 FROM node:${NODE_VERSION} AS dev
 
-WORKDIR /app
+WORKDIR /repo/apps/microfrontends/notes
 
-COPY package.json package-lock.json ./
+COPY tools/mock-api/contract /repo/tools/mock-api/contract
+COPY apps/microfrontends/notes/contract /repo/apps/microfrontends/notes/contract
+COPY apps/microfrontends/notes/package.json apps/microfrontends/notes/package-lock.json ./
 
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
-COPY . .
+COPY apps/microfrontends/notes ./
 
 EXPOSE 4402
 

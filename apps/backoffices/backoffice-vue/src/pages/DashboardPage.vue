@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { IOrder } from '@shop/api-contract';
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { remoteConfig } from '../app-config';
 import { OrdersClient } from '../clients/orders-client';
-import type { IOrder } from '../models/order';
 
 const euros = new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR' });
 const ordersClient = new OrdersClient(remoteConfig.apiBase);
@@ -13,7 +13,7 @@ const loadFailed = ref(false);
 const openOrders = computed(() => orders.value.filter((order) => order.status === 'open'));
 const revenue = computed(() => orders.value.reduce((sum, order) => sum + order.total, 0));
 
-ordersClient.list(controller.signal).then(
+ordersClient.listOrders({}, controller.signal).then(
   (loaded) => {
     orders.value = loaded;
   },

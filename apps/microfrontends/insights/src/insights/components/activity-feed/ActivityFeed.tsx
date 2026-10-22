@@ -1,12 +1,10 @@
-import type { IActivityEntry } from '../../models/activity-entry';
+import type { IActivityFeedContract } from '@shop/insights-contract';
+import type { ComponentProps } from '../../models/component-props';
 import './activity-feed.css';
 
-interface IActivityFeedProps {
-  entries?: IActivityEntry[];
-  onCleared?: () => void;
-}
+type ActivityFeedProps = ComponentProps<IActivityFeedContract>;
 
-export function ActivityFeed({ entries = [], onCleared }: IActivityFeedProps) {
+export function ActivityFeed({ entries = [], onCleared }: ActivityFeedProps) {
   return (
     <section className="activity-feed">
       <header className="activity-feed__header">
@@ -15,7 +13,7 @@ export function ActivityFeed({ entries = [], onCleared }: IActivityFeedProps) {
           type="button"
           className="activity-feed__clear"
           disabled={entries.length === 0}
-          onClick={() => onCleared?.()}
+          onClick={() => onCleared?.({})}
         >
           Clear
         </button>
