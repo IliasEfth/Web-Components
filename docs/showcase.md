@@ -22,7 +22,7 @@ events come out, and that is the whole contract.
 
 ### 2.1 Any framework hosts any other
 
-**Open** `http://localhost:4500/orders` (`backoffice-angular16`).
+**Open** `http://localhost:4500/orders` (`backoffice-angular`).
 
 - Click "Open" in the shell's own filter: the **Angular** list filters, the **React** feed logs it.
 - Click a **React** stat tile: the shell's filter and the **Angular** list follow.
@@ -48,7 +48,7 @@ document.querySelector('shop-order-notes').getAttribute('data-vue-version');    
 | --- | --- | --- |
 | `http://localhost:4200` | React 19 (newer) | React 18 components from Insights |
 | `http://localhost:4400` | Vue 3.5.42 (older) | Vue 3.5.44 components from Notes |
-| `http://localhost:4500` | Angular 16 (older) | Angular 22 components from Orders; `app-root` says `ng-version="16.x"` |
+| `http://localhost:4500` | Angular 20 (older) | Angular 22 components from Orders; `app-root` says `ng-version="20.x"` |
 
 A remote never relies on the shell's copy of its framework: Insights brings React 18 into the
 React 19 shell, Notes brings Vue 3.5.44 into the Vue 3.5.42 shell.

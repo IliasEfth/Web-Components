@@ -1,7 +1,8 @@
-# Act 2: the Angular 16 back office, an old host for new components
+# Act 2: the Angular back office, an older host for new components
 
-`apps/backoffices/backoffice-angular16` is the third shell, and it is old on purpose: Angular 16
-with NgModules, Zone.js, `*ngIf`, `@Input()` and webpack, the way most Angular teams still work.
+`apps/backoffices/backoffice-angular` is the third shell, and it is older on purpose: Angular 20,
+written the classic way with NgModules, Zone.js, `*ngIf`, `@Input()` and constructor injection,
+the way most Angular teams still work.
 On its `/orders` page it hosts the latest Angular (Orders), React (Insights) and Vue (Notes).
 Its colour is red (`#dc2626`).
 
@@ -15,8 +16,8 @@ Its colour is red (`#dc2626`).
 It has the same pages and layout as [backoffice-react](backoffice-react.md) and
 [backoffice-vue](backoffice-vue.md).
 
-It was created with the Angular 16 CLI (`ng new --standalone=false`), so it has the classic
-`AppModule` and `AppRoutingModule`.
+It uses the classic `AppModule` and `AppRoutingModule`. Its components are declared in
+NgModules, so each one says `standalone: false`.
 
 ## The project
 
@@ -46,22 +47,23 @@ Two browser runtimes are added to the template:
 | `@softarc/native-federation-orchestrator` | Reads Orders' `remoteEntry.json`, writes the import map for Angular 22, imports `./elements` |
 | `@module-federation/runtime` | Loads Insights' and Notes' `remoteEntry.js`; the same runtime the React and Vue shells use |
 
-The shell exposes nothing and cannot share Angular 16 with Angular 22, so it needs no federation
-build: only the two runtimes, in the browser.
+The shell exposes nothing and cannot share Angular 20 with Angular 22, so it needs no federation
+build: only the two runtimes, in the browser. It builds with the standard `@angular/build`
+application builder.
 
 The three element contracts are dev dependencies, installed from their teams' folders. The shell
 never calls the API, so it has no HTTP client and no `HttpClientModule`; the
 remote loader is typed with each remote's `defineElements`, and the Orders page's handlers take
 their `detail` types from the element contracts.
 
-## Loading three remotes in a webpack app
+## Loading three remotes
 
 `RemoteElementsService` keeps one promise per remote and forgets it on failure, so Retry starts
 again:
 
 ```ts
 private readonly moduleFederation = createInstance({
-  name: 'backoffice_angular16',
+  name: 'backoffice_angular',
   remotes: [
     { name: 'insights', entry: remoteEntries.insights, type: 'module' },
     { name: 'notes', entry: remoteEntries.notes, type: 'module' },
@@ -72,20 +74,14 @@ private readonly moduleFederation = createInstance({
 
 loadOrders(): Promise<void> {
   return this.loadOnce('orders', async () => {
-    const nativeFederation = await initFederation(
-      { orders: remoteEntries.orders },
-      {
-        ...useDefaultImportMap(),
-        loadModuleFn: (url: string) => import(/* webpackIgnore: true */ url),
-      },
-    );
+    const nativeFederation = await initFederation({ orders: remoteEntries.orders });
     return nativeFederation.loadRemoteModule<IOrdersRemote>('orders', './elements');
   });
 }
 ```
 
-- **`webpackIgnore`.** Webpack would try to bundle `import(url)`. The comment keeps it a real
-  browser import of the remote's URL.
+- **The same loaders as the React and Vue shells**: the orchestrator for Orders, the Module
+  Federation runtime for Insights and Notes.
 - **`shared: {}`.** The shell has no React and no Vue to offer, so each remote uses its own copy.
 
 ## The page wires everything
@@ -113,8 +109,8 @@ the same page and its activity feed. The order id comes from `route.paramMap` th
   names; the handlers read `(event as CustomEvent<…>).detail`.
 - **`CUSTOM_ELEMENTS_SCHEMA`** on `OrdersModule` lets the template use the `shop-` tags.
 
-Zone.js triggers change detection for every event and every resolved load, as in any Angular 16
-app; the Angular 22 elements run zoneless inside the same page.
+Zone.js triggers change detection for every event and every resolved load, as in any classic
+Angular app; the Angular 22 elements run zoneless inside the same page.
 
 ## Theme
 
@@ -125,19 +121,19 @@ app; the Angular 22 elements run zoneless inside the same page.
 ## Two Angular versions on one page
 
 ```js
-document.querySelector('app-root').getAttribute('ng-version');         // 16.2.12
+document.querySelector('app-root').getAttribute('ng-version');         // 20.3.34
 document.querySelector('shop-orders-list').getAttribute('ng-version'); // 22.2.3
 ```
 
 ## Reaching the remotes and the API
 
-The shell has no published port. Its proxy in `shop-edge`, `tools/edge/backoffice-angular16.conf`, is
+The shell has no published port. Its proxy in `shop-edge`, `tools/edge/backoffice-angular.conf`, is
 published on `localhost:4500`. It serves the shell at `/` and reaches everything else by
 Docker DNS name on the internal `shop-network`:
 
 | Path on `localhost:4500` | Forwarded to |
 | --- | --- |
-| `/` | `http://backoffice-angular16:4500`, the shell |
+| `/` | `http://backoffice-angular:4500`, the shell |
 | `/mf/orders/` | `http://orders:4201` |
 | `/mf/insights/` | `http://insights:4202` |
 | `/mf/notes/` | `http://notes:4402` |
@@ -149,10 +145,10 @@ elements' `fetch('/api/orders')` goes through the same proxy.
 ## Run it
 
 ```bash
-docker compose -f compose.backoffices.yaml up --build --watch backoffice-angular16
+docker compose -f compose.backoffices.yaml up --build --watch backoffice-angular
 ```
 
-The image uses Node 18, which Angular 16 needs. The shell needs the other groups running: start everything once with `tools\scripts\start-all.bat`, then this command rebuilds the shell and watches its files. The site opens through its proxy in `shop-edge`.
+The shell needs the other groups running: start everything once with `tools\scripts\start-all.bat`, then this command rebuilds the shell and watches its files. The site opens through its proxy in `shop-edge`.
 
 ## What to try
 

@@ -14,6 +14,7 @@ import { RemoteElementsService } from '../../services/remote-elements.service';
 @Component({
   selector: 'app-orders-page',
   templateUrl: './orders-page.component.html',
+  standalone: false,
 })
 export class OrdersPageComponent {
   readonly orderId$: Observable<string | null>;

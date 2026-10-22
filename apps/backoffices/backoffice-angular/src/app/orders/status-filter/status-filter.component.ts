@@ -4,6 +4,7 @@ import type { OrderStatusFilter } from '@shop/orders-contract';
 @Component({
   selector: 'app-status-filter',
   templateUrl: './status-filter.component.html',
+  standalone: false,
 })
 export class StatusFilterComponent {
   @Input() value: OrderStatusFilter = 'all';

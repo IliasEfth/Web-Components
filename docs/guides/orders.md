@@ -121,7 +121,7 @@ What each line does:
   same providers as `app.config.ts`, so the components find `OrdersService` exactly as before.
 - **`provideOrders()`**: the elements get the same API address as the app's own pages. The host
   passes nothing: the elements are standalone and call the endpoint they know.
-- **`provideZonelessChangeDetection()`** is explicit on purpose. A host such as Angular 16 loads
+- **`provideZonelessChangeDetection()`** is explicit on purpose. A host such as the Angular 20 shell loads
   Zone.js; the elements must not depend on it.
 - **One injector for both tags**, so the list and the detail share one `OrdersService`, as in
   step 1.
@@ -142,7 +142,7 @@ route renders:
 | | Angular component (step 1) | Custom element (step 2) |
 | --- | --- | --- |
 | Tag | `<app-orders-list>` | `<shop-orders-list>` |
-| Usable from | this Angular app only | any page: React, Vue, Angular 16, plain HTML |
+| Usable from | this Angular app only | any page: React, Vue, an older Angular, plain HTML |
 | Data in | `[status]="…"`, typed | attribute `status="open"` or property `list.status = 'open'` |
 | Events out | `(orderSelected)`, typed value | `CustomEvent`, value in `event.detail` |
 | Configuration | `provideOrders()` in `app.config.ts` | none: `defineElements()` once, the element knows its API |
@@ -150,7 +150,7 @@ route renders:
 
 ## Step 3: share it with Native Federation
 
-Steps 1 and 2 run inside this app. To let the React, Vue and Angular 16 shells load the same
+Steps 1 and 2 run inside this app. To let the React, Vue and Angular shells load the same
 `defineElements` at runtime, the app also publishes it as a federation remote. One dependency is
 added: `@angular-architects/native-federation`.
 

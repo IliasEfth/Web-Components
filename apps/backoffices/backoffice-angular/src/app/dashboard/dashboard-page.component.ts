@@ -6,6 +6,7 @@ import { RemoteElementsService } from '../services/remote-elements.service';
 @Component({
   selector: 'app-dashboard-page',
   templateUrl: './dashboard-page.component.html',
+  standalone: false,
 })
 export class DashboardPageComponent {
   readonly loadOrders = () => this.remoteElements.loadOrders();

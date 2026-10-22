@@ -33,12 +33,12 @@ services:
         - action: rebuild
           path: tools/edge/backoffice-vue.conf
 
-  backoffice-angular16-proxy:
+  backoffice-angular-proxy:
     build:
       context: tools/edge
       dockerfile: Dockerfile.dev
       args:
-        SITE: backoffice-angular16
+        SITE: backoffice-angular
     ports:
       - '4500:80'
     networks:
@@ -47,7 +47,7 @@ services:
     develop:
       watch:
         - action: rebuild
-          path: tools/edge/backoffice-angular16.conf
+          path: tools/edge/backoffice-angular.conf
 
 networks:
   public:

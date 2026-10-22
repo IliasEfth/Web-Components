@@ -5,6 +5,7 @@ type RemoteState = 'loading' | 'ready' | 'failed';
 @Component({
   selector: 'app-remote-gate',
   templateUrl: './remote-gate.component.html',
+  standalone: false,
 })
 export class RemoteGateComponent implements OnInit {
   @Input({ required: true }) name!: string;

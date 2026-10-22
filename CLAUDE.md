@@ -6,9 +6,9 @@ The audience reads the code on screen, so the code must be clean and obvious.
 1. **Pure Web Components:** `apps/basics/web-components-basics`, the native API with no framework.
 2. **Micro-frontends calling each other:** the latest Angular (`apps/microfrontends/orders`),
    React (`apps/microfrontends/insights`) and Vue (`apps/microfrontends/notes`) export custom
-   elements, each from its own live server; the React, Vue and Angular 16 shells load them at
-   runtime through federation and use them all on one page. The Angular 16 shell hosts web
-   components built with the latest Angular.
+   elements, each from its own live server; the React, Vue and Angular shells load them at
+   runtime through federation and use them all on one page. The Angular shell, on an older
+   Angular, hosts web components built with the latest Angular.
 
 There is no package or "installed instead of loaded" variant: remotes are always live services.
 Every README, guide and demo step should make clear which act it belongs to.
@@ -43,7 +43,8 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
    **Contracts are local packages.** Each team publishes a types-only contract in its own folder
    (`apps/services/mock-api/contract` → `@shop/api-contract`, `apps/microfrontends/<name>/contract` →
    `@shop/<name>-contract`). Consumers install it as a `devDependency` with `npm install <folder>`
-   (a `file:` link); nothing is published to a registry (`"private": true`). No app keeps a copy
+   (a `file:` link), listed last in its section so local packages stand out; nothing is published
+   to a registry (`"private": true`). No app keeps a copy
    of a shared type: models, parameters, event details and `defineElements` come from the
    contracts. Only micro-frontends call the API, each with its own endpoint; `defineElements()`
    takes no configuration, and shells pass none. Each micro-frontend writes its own HTTP client for the operations it calls and declares them
@@ -58,16 +59,16 @@ it works. Build warnings, workarounds and package debates go in the pitfalls bel
    **Interfaces start with `I`** (`IOrder`, `IOrdersConfig`, `IOrderSelectedDetail`) so a reader
    can tell an interface from a class (`OrdersService`, `OrdersClient`) at a glance. Type aliases
    (`OrderStatus`) and classes keep plain names.
-9. **Latest stable versions**, except `apps/backoffices/backoffice-angular16`, the shell, which stays on
-   Angular 16 with Zone.js, `*ngIf`, `@Input()` and NgModules (`AppModule`, `AppRoutingModule`, no standalone components)
-   on purpose, the way most Angular developers know it. The Angular
+9. **Latest stable versions**, except `apps/backoffices/backoffice-angular`, the shell, which stays on
+   Angular 20 (`~20.3`) with Zone.js, `*ngIf`, `@Input()`, constructor injection and NgModules
+   (`AppModule`, `AppRoutingModule`, components with `standalone: false`) on purpose, the way most
+   Angular developers know it. The Angular
    web components it hosts come from `apps/microfrontends/orders`, on the latest Angular.
    **Every shell runs a different version of its framework than the remote it hosts**, on purpose:
-   React shell 19 / Insights 18, Vue shell 3.5.42 / Notes 3.5.44, Angular 16 shell / Orders 22. Do
-   not "upgrade" Insights or the Vue shell. Insights keeps `react-router` 7 (8 needs React 19). The
-   Vue shell is pinned to exactly `3.5.42` (no `^` or `~`, which would install 3.5.44): the oldest
-   release without the `@vue/server-renderer` advisory GHSA-g2v6-rqmx-r4w6, which affects Vue up
-   to 3.5.41. Never hold it below that. Each remote loads its own framework copy. Elements stamp the
+   React shell 19 / Insights 18, Vue shell 3.5.42 / Notes 3.5.44, Angular shell 20 / Orders 22. Do
+   not "upgrade" Insights or the shells. Insights keeps `react-router` 7 (8 needs React 19). The
+   Vue shell is pinned to exactly `3.5.42` (no `^` or `~`, which would install 3.5.44), the Angular
+   shell to `~20.3`. Each remote loads its own framework copy. Elements stamp the
    version they run on (`ng-version`, `data-react-version`, `data-vue-version`), and each shell's
    header shows its own.
 10. When a guide's code does not work with the installed version, fix it minimally and update
@@ -94,8 +95,8 @@ root. Docker Desktop shows each group on its own; `depends_on` never crosses gro
 | --- | --- | --- | --- | --- |
 | `shop-services` | `compose.services.yaml` | `mock-api` | creates `shop-network` (`internal: true`) | nothing |
 | `shop-microfrontends` | `compose.microfrontends.yaml` | `orders`, `insights`, `notes` | `shop-network` (`external: true`) | nothing |
-| `shop-backoffices` | `compose.backoffices.yaml` | `backoffice-react`, `backoffice-vue`, `backoffice-angular16` | `shop-network` (`external: true`) | nothing |
-| `shop-edge` | `compose.edge.yaml` | `backoffice-react-proxy`, `backoffice-vue-proxy`, `backoffice-angular16-proxy` | `shop-network` and `shop-public` | 4200, 4400, 4500 |
+| `shop-backoffices` | `compose.backoffices.yaml` | `backoffice-react`, `backoffice-vue`, `backoffice-angular` | `shop-network` (`external: true`) | nothing |
+| `shop-edge` | `compose.edge.yaml` | `backoffice-react-proxy`, `backoffice-vue-proxy`, `backoffice-angular-proxy` | `shop-network` and `shop-public` | 4200, 4400, 4500 |
 | `shop-basics` | `compose.basics.yaml` | `web-components-basics` | its own default network | 4100 |
 
 `shop-services` starts first because it creates `shop-network`; a group that joins it before it
@@ -110,7 +111,7 @@ the host, no internet at runtime. The edge proxies are the only containers on bo
 | 2 | `apps/microfrontends/notes` | Vue 3.5, exports `shop-order-notes` | `notes:4402/mf/notes/` | none |
 | 2 | `apps/backoffices/backoffice-react` | React 19 shell | `backoffice-react:4200/` | `localhost:4200` through its proxy |
 | 2 | `apps/backoffices/backoffice-vue` | Vue 3.5.42 shell | `backoffice-vue:4400/` | `localhost:4400` through its proxy |
-| 2 | `apps/backoffices/backoffice-angular16` | Angular 16 shell (`node:18` image) | `backoffice-angular16:4500/` | `localhost:4500` through its proxy |
+| 2 | `apps/backoffices/backoffice-angular` | Angular 20 shell (NgModules, Zone.js) | `backoffice-angular:4500/` | `localhost:4500` through its proxy |
 | all | `apps/services/mock-api` | Orders REST API (Express, TypeScript run directly by Node) | `mock-api:3000` | none |
 | all | `tools/edge` | One nginx proxy per shell: `<shell>.conf` and one `Dockerfile.dev` with `ARG SITE` | | 4200, 4400, 4500 |
 
@@ -157,7 +158,7 @@ every app arrives with its `Dockerfile.dev` and its Compose service.
 | 5 | `feature/backoffice-react` | `apps/backoffices/backoffice-react` | dashboard, `/orders` master-detail, deep link, theme switch, error card |
 | 6 | `feature/notes-and-backoffice-vue` | `apps/microfrontends/notes`, the notes API, the `microfrontends` / `backoffices` folders | Notes' `remoteEntry.js` exposes `./elements` and works from another origin |
 | 6b | `feature/backoffice-vue` | `apps/backoffices/backoffice-vue` | Vue shell shows Angular + React + Vue on `/orders`; only the failed remote shows an error card |
-| 7 | `feature/backoffice-angular16` | `apps/backoffices/backoffice-angular16` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
+| 7 | `feature/backoffice-angular` | `apps/backoffices/backoffice-angular` | demo acts 2.1, 2.2 and 2.4 pass; two `ng-version` values on one page |
 | 8 | `feature/run-scripts` | Windows `.bat` shortcuts in `tools/scripts/` around `docker compose` `start-all`, `live-all` and one `deploy-*` per service; stopping is done from Docker Desktop |
 
 ## Known pitfalls
@@ -183,11 +184,9 @@ every app arrives with its `Dockerfile.dev` and its Compose service.
 | Two federation formats | Angular remotes: Native Federation (`remoteEntry.json`). React and Vue remotes: `@module-federation/vite` (`remoteEntry.js`). Every shell loads them with the same two runtimes: `@softarc/native-federation-orchestrator` and `@module-federation/runtime` |
 | Shells: should they use `@module-federation/vite`? | No. A host only consumes remotes and shares nothing (every remote's framework version differs from its shell's on purpose), so it needs the two runtimes and no federation build. Only the React and Vue remotes use the plugin, to build their `remoteEntry.js` |
 | Do not set `ENV NODE_ENV=development` in a Vite `Dockerfile.dev` | The React guide does not; Vite sets the mode itself |
-| Angular 16: "Module not found" for a URL import | Write `import(/* webpackIgnore: true */ url)`; this is the one allowed comment, webpack needs it |
-| Angular 16: the orchestrator's remote imports break under webpack | Its default `loadModuleFn` only has `@vite-ignore`. Pass `loadModuleFn: (url) => import(/* webpackIgnore: true */ url)` to `initFederation`; the two "Critical dependency" build warnings that remain are about the unused default |
-| Angular 16: `Cannot find module '@softarc/native-federation-orchestrator/options'` | The CLI 16 template uses `"moduleResolution": "node"`, which ignores `exports`. Use `"bundler"` and `"skipLibCheck": true` |
-| Angular 16 shell: should it use `@angular-architects/native-federation`? | No. Its 16.x runtime cannot read Orders' v4 `remoteEntry.json`, and the shell shares nothing with Angular 22. The orchestrator plus `@module-federation/runtime` load all three remotes |
-| Angular 16 CLI refuses to run | Its image must be `node:18`; run its `npm`/`ng` commands in that container, not on the host |
+| Angular shell: should it use `@angular-architects/native-federation`? | No. The shell exposes nothing and shares nothing with Angular 22. The orchestrator plus `@module-federation/runtime` load all three remotes |
+| Angular shell: `Component ... is standalone, and cannot be declared in an NgModule` | Since Angular 19 components are standalone by default. Components declared in an NgModule need `standalone: false` |
+| Angular shell: lint asks for `inject()` and standalone components | The shell keeps the classic style on purpose; `prefer-inject` and `prefer-standalone` are off in its `eslint.config.mjs` |
 | A proxy returns 502 although the service is healthy | The dev server listens on `127.0.0.1` inside the container. Bind `0.0.0.0` in Docker only (a `docker` configuration or a `start:docker` script), never in the local `npm start` |
 | Edits do not reach the container | Start with `--watch`, and check the service's `develop.watch` paths |
 | `docker compose watch` says "cannot take exclusive lock" | Another `watch` for this group is still running; stop it first. Each group has its own lock |

@@ -17,7 +17,7 @@ function noteAdded(event: CustomEvent<INoteAddedDetail>): void {
   <p class="intro">
     The same component as a custom element, registered by
     <code>defineElements({ apiBase })</code> before the app starts: attributes in, DOM events
-    out, exactly the way React, Angular and Angular 16 use it.
+    out, exactly the way React and both Angular shells use it.
   </p>
 
   <OrderPicker v-model="orderId" />

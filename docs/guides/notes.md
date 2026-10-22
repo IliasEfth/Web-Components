@@ -152,7 +152,7 @@ The notes are stored by `apps/services/mock-api` next to the orders:
 | | Vue component (step 1) | Custom element (step 2) |
 | --- | --- | --- |
 | Tag | `<OrderNotes>` | `<shop-order-notes>` |
-| Usable from | this Vue app only | any page: Angular, React, Angular 16, plain HTML |
+| Usable from | this Vue app only | any page: Angular, React, an older Angular, plain HTML |
 | Data in | props, typed | attribute `order-id` |
 | Events out | `emit('noteAdded', detail)` | `CustomEvent('noteAdded')`, value in `event.detail` |
 | Configuration | `app.use(createNotes(config))` | none: `defineElements()` once, the element knows its API |
