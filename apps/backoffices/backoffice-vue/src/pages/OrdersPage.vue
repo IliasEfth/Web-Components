@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import type { OrderStatusFilter } from '@shop/api-contract';
+import type { IStatusPickedDetail } from '@shop/insights-contract';
+import type { INoteAddedDetail, IStatusChangeDetail } from '@shop/notes-contract';
 import type {
-  INoteAddedDetail,
   IOrderClosedDetail,
   IOrderSelectedDetail,
   IOrderUpdatedDetail,
-  IStatusChangeDetail,
-  IStatusPickedDetail,
-} from '../models/element-events';
-import type { OrderStatusFilter } from '../models/order';
+} from '@shop/orders-contract';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { loadInsightsElements } from '../remotes/insights-remote';
 import { loadNotesElements } from '../remotes/notes-remote';
 import { loadOrdersElements } from '../remotes/orders-remote';

@@ -26,6 +26,8 @@
     "@angular/build": "^22.2.3",
     "@angular/cli": "^22.2.3",
     "@angular/compiler-cli": "^22.2.0",
+    "@shop/api-contract": "file:../../../tools/mock-api/contract",
+    "@shop/orders-contract": "file:contract",
     "angular-eslint": "^22.6.0",
     "eslint": "^10.13.0",
     "typescript": "~6.0.2",

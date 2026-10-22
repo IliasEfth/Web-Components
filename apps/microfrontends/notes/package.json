@@ -16,6 +16,8 @@
   },
   "devDependencies": {
     "@module-federation/vite": "^1.23.5",
+    "@shop/api-contract": "file:../../../tools/mock-api/contract",
+    "@shop/notes-contract": "file:contract",
     "@types/node": "^24.19.2",
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/tsconfig": "^0.9.1",

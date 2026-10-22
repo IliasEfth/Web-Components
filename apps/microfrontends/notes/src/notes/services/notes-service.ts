@@ -1,5 +1,5 @@
+import type { INote } from '@shop/api-contract';
 import type { NotesClient } from '../clients/notes-client';
-import type { INote } from '../models/note';
 
 export class NotesService {
   readonly #client: NotesClient;
@@ -9,10 +9,10 @@ export class NotesService {
   }
 
   list(orderId: string, signal?: AbortSignal): Promise<INote[]> {
-    return this.#client.listNotes(orderId, signal);
+    return this.#client.listOrderNotes({ id: orderId }, signal);
   }
 
   add(orderId: string, text: string): Promise<INote> {
-    return this.#client.addNote(orderId, text.trim());
+    return this.#client.addOrderNote({ id: orderId, text: text.trim() });
   }
 }

@@ -1,21 +1,30 @@
+import type { InsightsContracts } from '@shop/insights-contract';
 import type { DetailedHTMLProps, HTMLAttributes } from 'react';
-import type { IActivityEntry } from '../insights/models/activity-entry';
-import type { IStatusPickedDetail } from '../insights/models/insights-events';
 
-type CustomElementProps<TProps> = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> &
-  TProps;
+interface IElementContract {
+  tagName: string;
+  attributes: object;
+  properties: object;
+  events: object;
+}
+
+type ElementProps<TContract extends IElementContract> = DetailedHTMLProps<
+  HTMLAttributes<HTMLElement>,
+  HTMLElement
+> &
+  Partial<TContract['attributes']> &
+  Partial<TContract['properties']> & {
+    [K in keyof TContract['events'] as `on${K & string}`]?: (
+      event: CustomEvent<TContract['events'][K]>,
+    ) => void;
+  };
+
+type ContractElements<TContracts extends IElementContract> = {
+  [TContract in TContracts as TContract['tagName']]: ElementProps<TContract>;
+};
 
 declare module 'react' {
   namespace JSX {
-    interface IntrinsicElements {
-      'shop-order-stats': CustomElementProps<{
-        'refresh-key'?: string;
-        onstatusPicked?: (event: CustomEvent<IStatusPickedDetail>) => void;
-      }>;
-      'shop-activity-feed': CustomElementProps<{
-        entries?: IActivityEntry[];
-        oncleared?: (event: CustomEvent<object>) => void;
-      }>;
-    }
+    interface IntrinsicElements extends ContractElements<InsightsContracts> {}
   }
 }

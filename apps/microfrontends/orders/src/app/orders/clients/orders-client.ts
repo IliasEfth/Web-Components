@@ -1,27 +1,36 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import type {
+  IListOrdersParams,
+  IOrder,
+  IOrderParams,
+  IOrdersApi,
+  IUpdateOrderStatusParams,
+} from '@shop/api-contract';
 import type { Observable } from 'rxjs';
 import { ORDERS_CONFIG } from '../config/orders-config';
-import type { IOrder, OrderStatus } from '../models/order';
+import type { ObservableApi } from './observable-api';
 
 @Injectable()
-export class OrdersClient {
+export class OrdersClient
+  implements ObservableApi<Pick<IOrdersApi, 'listOrders' | 'getOrder' | 'updateOrderStatus'>>
+{
   readonly #http = inject(HttpClient);
   readonly #config = inject(ORDERS_CONFIG);
 
-  listOrders(status?: OrderStatus): Observable<IOrder[]> {
+  listOrders(params: IListOrdersParams = {}): Observable<IOrder[]> {
     return this.#http.get<IOrder[]>(`${this.#config.apiBase}/orders`, {
-      params: status ? { status } : {},
+      params: params.status ? { status: params.status } : {},
       headers: this.#headers(),
     });
   }
 
-  getOrder(id: string): Observable<IOrder> {
+  getOrder({ id }: IOrderParams): Observable<IOrder> {
     return this.#http.get<IOrder>(this.#orderUrl(id), { headers: this.#headers() });
   }
 
-  updateOrder(id: string, changes: Pick<IOrder, 'status'>): Observable<IOrder> {
-    return this.#http.patch<IOrder>(this.#orderUrl(id), changes, { headers: this.#headers() });
+  updateOrderStatus({ id, status }: IUpdateOrderStatusParams): Observable<IOrder> {
+    return this.#http.patch<IOrder>(this.#orderUrl(id), { status }, { headers: this.#headers() });
   }
 
   #orderUrl(id: string): string {

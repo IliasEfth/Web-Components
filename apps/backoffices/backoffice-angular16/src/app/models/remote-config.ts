@@ -1,12 +1,4 @@
 import { InjectionToken } from '@angular/core';
-
-export interface IRemoteConfig {
-  apiBase: string;
-  getAuthToken?: () => string | undefined;
-}
-
-export interface IRemoteElements {
-  defineElements(config: IRemoteConfig): Promise<void>;
-}
+import type { IRemoteConfig } from '@shop/orders-contract';
 
 export const REMOTE_CONFIG = new InjectionToken<IRemoteConfig>('REMOTE_CONFIG');

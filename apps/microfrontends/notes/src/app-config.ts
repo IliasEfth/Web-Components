@@ -1,3 +1,3 @@
-import type { INotesConfig } from './notes/config/notes-config';
+import type { IRemoteConfig } from '@shop/notes-contract';
 
-export const notesConfig: INotesConfig = { apiBase: 'http://localhost:3000' };
+export const notesConfig: IRemoteConfig = { apiBase: 'http://localhost:3000' };

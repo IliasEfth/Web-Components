@@ -4,13 +4,17 @@ FROM node:${NODE_VERSION} AS dev
 
 ENV NG_CLI_ANALYTICS=false
 
-WORKDIR /app
+WORKDIR /repo/apps/backoffices/backoffice-angular16
 
-COPY package.json package-lock.json ./
+COPY tools/mock-api/contract /repo/tools/mock-api/contract
+COPY apps/microfrontends/insights/contract /repo/apps/microfrontends/insights/contract
+COPY apps/microfrontends/notes/contract /repo/apps/microfrontends/notes/contract
+COPY apps/microfrontends/orders/contract /repo/apps/microfrontends/orders/contract
+COPY apps/backoffices/backoffice-angular16/package.json apps/backoffices/backoffice-angular16/package-lock.json ./
 
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
-COPY . .
+COPY apps/backoffices/backoffice-angular16 ./
 
 EXPOSE 4500
 

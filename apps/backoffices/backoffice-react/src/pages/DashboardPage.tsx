@@ -1,5 +1,5 @@
+import type { IOrder } from '@shop/api-contract';
 import { Link, useLoaderData } from 'react-router';
-import type { IOrder } from '../models/order';
 
 const euros = new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR' });
 

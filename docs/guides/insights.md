@@ -12,19 +12,17 @@ changing a line inside them. The app shows both side by side:
 ## Step 1: a correct React app
 
 ```text
+contract/                         @shop/insights-contract: what other apps may use
 src/
   insights/                       everything about insights, grouped by kind
     models/
-      order.ts                    IOrder, OrderStatus, OrderStatusFilter
       order-stats.ts              IOrderStats
-      activity-entry.ts           IActivityEntry
-      insights-events.ts          IStatusPickedDetail
+      component-props.ts          ComponentProps: a component's props from its element contract
     clients/
-      orders-client.ts            OrdersClient: the HTTP calls (fetch)
+      orders-client.ts            OrdersClient: implements listOrders from @shop/api-contract (fetch)
     services/
       order-stats-service.ts      OrderStatsService: what the components use; calls the client
     config/
-      insights-config.ts          IInsightsConfig
       InsightsProvider.tsx        creates the client and the service, provides them through context
       useOrderStatsService.ts     the hook components use to get the service
     components/
@@ -56,8 +54,13 @@ ask for the service with `useOrderStatsService()`. No component receives a URL o
 <ActivityFeed entries={entries} onCleared={clear} />
 ```
 
-They know nothing about custom elements. Their CSS classes carry the component name
-(`order-stats__tile`), so the same stylesheet works on the page and inside a shadow root.
+They know nothing about custom elements, but their props come from the element contract the
+team publishes: `ComponentProps<IOrderStatsContract>` turns its properties into props and each
+event into an `on…` callback. Their CSS classes carry the component name (`order-stats__tile`), so
+the same stylesheet works on the page and inside a shadow root.
+
+`OrdersClient` implements the one API operation the app calls, from the API team's contract:
+`class OrdersClient implements Pick<IOrdersApi, 'listOrders'>`.
 
 ## Step 2: the transformation to web components
 
@@ -71,9 +74,11 @@ does the job in about 90 lines, with no extra package:
 | `styles` | the component's CSS, adopted by the element's shadow root |
 | `wrap` | wraps the component in its provider, here `InsightsProvider` with the host's config |
 
-The two lists are checked against the component's props interface (`IOrderStatsProps`), so a
+The two lists are checked against the component's props, which come from the contract, so a
 misspelled name, a value prop listed as an output, or a prop missing from the lists does not
-compile. The interface itself does not exist at runtime, which is why the names are listed once.
+compile. Add a property to `IOrderStatsContract` and `elements.tsx` stops with
+`missingInputs: "<name>"` until the element exposes it. The types do not exist at runtime, which is
+why the names are listed once.
 
 The wrapper renders straight into the shadow root (`createRoot(shadowRoot)`). It also keeps a
 property value that a host set before the element was defined, and unmounts
@@ -82,10 +87,10 @@ React only when the element really leaves the page, not when a host just moves i
 `elements.tsx` uses it for both tags:
 
 ```ts
-export function defineElements(config: IInsightsConfig): Promise<void> {
+export const defineElements: IInsightsRemote['defineElements'] = (config) => {
   elementsDefined ??= Promise.resolve().then(() => registerElements(config));
   return elementsDefined;
-}
+};
 ```
 
 The components import their CSS normally for step 1; `elements.tsx` imports the same files with
@@ -111,8 +116,8 @@ React 19 handles custom elements itself, much like an Angular template:
   listen to `StatusPicked`, which never fires. The handler receives the `CustomEvent`, with the
   value in `event.detail`.
 
-`web-components/custom-elements.d.ts` teaches TypeScript the two tags, their attributes, the
-`entries` property and the two event props.
+`web-components/custom-elements.d.ts` builds the JSX typings for the two tags from the contract:
+attributes, properties, and an `on<event>` prop per event, typed with its `detail`.
 
 ## Step 3: share it with Module Federation
 

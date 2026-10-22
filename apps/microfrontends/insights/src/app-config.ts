@@ -1,3 +1,3 @@
-import type { IInsightsConfig } from './insights/config/insights-config';
+import type { IRemoteConfig } from '@shop/insights-contract';
 
-export const insightsConfig: IInsightsConfig = { apiBase: 'http://localhost:3000' };
+export const insightsConfig: IRemoteConfig = { apiBase: 'http://localhost:3000' };

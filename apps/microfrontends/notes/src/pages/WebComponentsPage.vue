@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { INoteAddedDetail, IStatusChangeDetail } from '@shop/notes-contract';
+import type { OrderStatusFilter } from '@shop/notes-contract';
 import { ref } from 'vue';
-import type { INoteAddedDetail, IStatusChangeDetail } from '../notes/models/notes-events';
-import type { OrderStatusFilter } from '../notes/models/order';
 import EventLog from '../shared/EventLog.vue';
 import OrderPicker from '../shared/OrderPicker.vue';
 import { useEventLog } from '../shared/use-event-log';

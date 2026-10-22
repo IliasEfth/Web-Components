@@ -2,13 +2,17 @@ ARG NODE_VERSION=24.22.0-alpine
 
 FROM node:${NODE_VERSION} AS dev
 
-WORKDIR /app
+WORKDIR /repo/apps/backoffices/backoffice-vue
 
-COPY package.json package-lock.json ./
+COPY tools/mock-api/contract /repo/tools/mock-api/contract
+COPY apps/microfrontends/insights/contract /repo/apps/microfrontends/insights/contract
+COPY apps/microfrontends/notes/contract /repo/apps/microfrontends/notes/contract
+COPY apps/microfrontends/orders/contract /repo/apps/microfrontends/orders/contract
+COPY apps/backoffices/backoffice-vue/package.json apps/backoffices/backoffice-vue/package-lock.json ./
 
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts
 
-COPY . .
+COPY apps/backoffices/backoffice-vue ./
 
 EXPOSE 4400
 

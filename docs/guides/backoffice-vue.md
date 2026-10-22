@@ -27,8 +27,7 @@ src/
     notes-remote.ts          Module Federation
     RemoteGate.vue           loading text, then the slot or an error card with Retry
     remote-modules.d.ts      the types of 'insights/elements' and 'notes/elements'
-  models/                    the contract shapes, including the Notes events
-  clients/orders-client.ts   the dashboard's own fetch
+  clients/orders-client.ts   implements listOrders from @shop/api-contract, for the dashboard
   pages/                     DashboardPage.vue, OrdersPage.vue, SettingsPage.vue
   theme/themes.ts            the three themes and the injection key
   shared/use-activity-log.ts
@@ -36,7 +35,9 @@ src/
 ```
 
 The same packages as the React shell, in their Vue versions: `vue-router`,
-`@softarc/native-federation-orchestrator` and `@module-federation/vite`.
+`@softarc/native-federation-orchestrator` and `@module-federation/vite`, plus the four contracts
+as dev dependencies. The event handlers on the Orders page take their `detail` types from the
+contracts, for example `(event: CustomEvent<IOrderSelectedDetail>)` from `@shop/orders-contract`.
 
 ## Three remotes, two runtimes
 

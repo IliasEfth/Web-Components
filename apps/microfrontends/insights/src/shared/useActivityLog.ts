@@ -1,5 +1,5 @@
+import type { IActivityEntry } from '@shop/insights-contract';
 import { useCallback, useRef, useState } from 'react';
-import type { IActivityEntry } from '../insights/models/activity-entry';
 
 export function useActivityLog() {
   const [entries, setEntries] = useState<IActivityEntry[]>([]);

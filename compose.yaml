@@ -40,8 +40,8 @@ services:
 
   orders:
     build:
-      context: apps/microfrontends/orders
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/microfrontends/orders/Dockerfile.dev
     ports:
       - '4201:4201'
     depends_on:
@@ -51,9 +51,13 @@ services:
       watch:
         - action: sync
           path: apps/microfrontends/orders/src
-          target: /app/src
+          target: /repo/apps/microfrontends/orders/src
         - action: rebuild
           path: apps/microfrontends/orders/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/orders/contract
         - action: rebuild
           path: apps/microfrontends/orders/angular.json
         - action: rebuild
@@ -61,8 +65,8 @@ services:
 
   insights:
     build:
-      context: apps/microfrontends/insights
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/microfrontends/insights/Dockerfile.dev
     ports:
       - '4202:4202'
     depends_on:
@@ -72,19 +76,23 @@ services:
       watch:
         - action: sync
           path: apps/microfrontends/insights/src
-          target: /app/src
+          target: /repo/apps/microfrontends/insights/src
         - action: sync
           path: apps/microfrontends/insights/index.html
-          target: /app/index.html
+          target: /repo/apps/microfrontends/insights/index.html
         - action: rebuild
           path: apps/microfrontends/insights/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/contract
         - action: rebuild
           path: apps/microfrontends/insights/vite.config.ts
 
   notes:
     build:
-      context: apps/microfrontends/notes
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/microfrontends/notes/Dockerfile.dev
     ports:
       - '4402:4402'
     depends_on:
@@ -94,19 +102,23 @@ services:
       watch:
         - action: sync
           path: apps/microfrontends/notes/src
-          target: /app/src
+          target: /repo/apps/microfrontends/notes/src
         - action: sync
           path: apps/microfrontends/notes/index.html
-          target: /app/index.html
+          target: /repo/apps/microfrontends/notes/index.html
         - action: rebuild
           path: apps/microfrontends/notes/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/contract
         - action: rebuild
           path: apps/microfrontends/notes/vite.config.ts
 
   backoffice-react:
     build:
-      context: apps/backoffices/backoffice-react
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/backoffices/backoffice-react/Dockerfile.dev
     ports:
       - '4200:4200'
     depends_on:
@@ -122,19 +134,27 @@ services:
       watch:
         - action: sync
           path: apps/backoffices/backoffice-react/src
-          target: /app/src
+          target: /repo/apps/backoffices/backoffice-react/src
         - action: sync
           path: apps/backoffices/backoffice-react/index.html
-          target: /app/index.html
+          target: /repo/apps/backoffices/backoffice-react/index.html
         - action: rebuild
           path: apps/backoffices/backoffice-react/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/orders/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/contract
         - action: rebuild
           path: apps/backoffices/backoffice-react/vite.config.ts
 
   backoffice-vue:
     build:
-      context: apps/backoffices/backoffice-vue
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/backoffices/backoffice-vue/Dockerfile.dev
     ports:
       - '4400:4400'
     depends_on:
@@ -150,19 +170,27 @@ services:
       watch:
         - action: sync
           path: apps/backoffices/backoffice-vue/src
-          target: /app/src
+          target: /repo/apps/backoffices/backoffice-vue/src
         - action: sync
           path: apps/backoffices/backoffice-vue/index.html
-          target: /app/index.html
+          target: /repo/apps/backoffices/backoffice-vue/index.html
         - action: rebuild
           path: apps/backoffices/backoffice-vue/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/orders/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/contract
         - action: rebuild
           path: apps/backoffices/backoffice-vue/vite.config.ts
 
   backoffice-angular16:
     build:
-      context: apps/backoffices/backoffice-angular16
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/backoffices/backoffice-angular16/Dockerfile.dev
     ports:
       - '4500:4500'
     depends_on:
@@ -178,8 +206,16 @@ services:
       watch:
         - action: sync
           path: apps/backoffices/backoffice-angular16/src
-          target: /app/src
+          target: /repo/apps/backoffices/backoffice-angular16/src
         - action: rebuild
           path: apps/backoffices/backoffice-angular16/package.json
+        - action: rebuild
+          path: tools/mock-api/contract
+        - action: rebuild
+          path: apps/microfrontends/orders/contract
+        - action: rebuild
+          path: apps/microfrontends/insights/contract
+        - action: rebuild
+          path: apps/microfrontends/notes/contract
         - action: rebuild
           path: apps/backoffices/backoffice-angular16/angular.json

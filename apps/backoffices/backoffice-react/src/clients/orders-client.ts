@@ -1,14 +1,15 @@
-import type { IOrder } from '../models/order';
+import type { IListOrdersParams, IOrder, IOrdersApi } from '@shop/api-contract';
 
-export class OrdersClient {
+export class OrdersClient implements Pick<IOrdersApi, 'listOrders'> {
   readonly #apiBase: string;
 
   constructor(apiBase: string) {
     this.#apiBase = apiBase;
   }
 
-  async list(): Promise<IOrder[]> {
-    const response = await fetch(`${this.#apiBase}/orders`);
+  async listOrders(params: IListOrdersParams = {}): Promise<IOrder[]> {
+    const query = params.status ? `?status=${params.status}` : '';
+    const response = await fetch(`${this.#apiBase}/orders${query}`);
     if (!response.ok) {
       throw new Error(`GET /orders failed with ${response.status}`);
     }

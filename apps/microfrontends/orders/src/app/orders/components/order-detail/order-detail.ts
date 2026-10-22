@@ -9,9 +9,9 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import type { IOrder, OrderStatus } from '@shop/api-contract';
+import type { IOrderClosedDetail, IOrderUpdatedDetail } from '@shop/orders-contract';
 import { firstValueFrom } from 'rxjs';
-import type { IOrder, OrderStatus } from '../../models/order';
-import type { IOrderClosedDetail, IOrderUpdatedDetail } from '../../models/order-events';
 import { OrdersService } from '../../services/orders-service';
 
 @Component({
@@ -23,7 +23,7 @@ import { OrdersService } from '../../services/orders-service';
   imports: [CurrencyPipe, DatePipe],
 })
 export class OrderDetail {
-  readonly orderId = input<string | null>();
+  readonly orderId = input<string | null>(null);
 
   readonly orderUpdated = output<IOrderUpdatedDetail>();
   readonly closed = output<IOrderClosedDetail>();

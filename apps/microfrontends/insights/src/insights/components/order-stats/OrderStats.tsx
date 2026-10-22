@@ -1,17 +1,15 @@
+import type { IOrderStatsContract } from '@shop/insights-contract';
 import { useEffect, useState } from 'react';
 import { useOrderStatsService } from '../../config/useOrderStatsService';
-import type { IStatusPickedDetail } from '../../models/insights-events';
+import type { ComponentProps } from '../../models/component-props';
 import type { IOrderStats } from '../../models/order-stats';
 import './order-stats.css';
 
-interface IOrderStatsProps {
-  refreshKey?: string;
-  onStatusPicked?: (detail: IStatusPickedDetail) => void;
-}
+type OrderStatsProps = ComponentProps<IOrderStatsContract>;
 
 const euros = new Intl.NumberFormat('en', { style: 'currency', currency: 'EUR' });
 
-export function OrderStats({ refreshKey, onStatusPicked }: IOrderStatsProps) {
+export function OrderStats({ refreshKey, onStatusPicked }: OrderStatsProps) {
   const orderStatsService = useOrderStatsService();
   const [stats, setStats] = useState<IOrderStats | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);

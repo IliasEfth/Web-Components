@@ -1,8 +1,11 @@
 import { Inject, Injectable } from '@angular/core';
 import { createInstance } from '@module-federation/runtime';
+import type { IInsightsRemote } from '@shop/insights-contract';
+import type { INotesRemote } from '@shop/notes-contract';
+import type { IOrdersRemote, IRemoteConfig } from '@shop/orders-contract';
 import { initFederation } from '@softarc/native-federation-orchestrator';
 import { useDefaultImportMap } from '@softarc/native-federation-orchestrator/options';
-import { IRemoteConfig, IRemoteElements, REMOTE_CONFIG } from '../models/remote-config';
+import { REMOTE_CONFIG } from '../models/remote-config';
 import { remoteEntries } from '../remote-entries';
 
 @Injectable({ providedIn: 'root' })
@@ -30,25 +33,25 @@ export class RemoteElementsService {
           loadModuleFn: (url: string) => import(/* webpackIgnore: true */ url),
         },
       );
-      return nativeFederation.loadRemoteModule<IRemoteElements>('orders', './elements');
+      return nativeFederation.loadRemoteModule<IOrdersRemote>('orders', './elements');
     });
   }
 
   loadInsights(): Promise<void> {
     return this.loadOnce('insights', () =>
-      this.moduleFederation.loadRemote<IRemoteElements>('insights/elements'),
+      this.moduleFederation.loadRemote<IInsightsRemote>('insights/elements'),
     );
   }
 
   loadNotes(): Promise<void> {
     return this.loadOnce('notes', () =>
-      this.moduleFederation.loadRemote<IRemoteElements>('notes/elements'),
+      this.moduleFederation.loadRemote<INotesRemote>('notes/elements'),
     );
   }
 
   private loadOnce(
     remoteName: string,
-    importElements: () => Promise<IRemoteElements | null>,
+    importElements: () => Promise<IOrdersRemote | IInsightsRemote | INotesRemote | null>,
   ): Promise<void> {
     let ready = this.loading.get(remoteName);
     if (!ready) {
