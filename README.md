@@ -212,7 +212,8 @@ opening it in the address bar or with curl returns `403`.
 
 ### Windows shortcuts
 
-Double-click a script in `tools/scripts`. Each one runs the `docker compose` commands for you.
+Double-click a script in `tools/scripts`, or run it from any folder in a terminal. Each one runs
+the `docker compose` commands for you and leaves the terminal where it was.
 
 | Script | What it does |
 | --- | --- |

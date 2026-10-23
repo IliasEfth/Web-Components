@@ -1,4 +1,3 @@
 @echo off
-cd "%~dp0..\..\.."
-docker compose -f compose.backoffices.yaml up --build --detach --force-recreate --wait backoffice-vue
+docker compose -f "%~dp0..\..\..\compose.backoffices.yaml" up --build --detach --force-recreate --wait backoffice-vue
 pause

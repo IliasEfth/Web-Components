@@ -1,4 +1,3 @@
 @echo off
-cd "%~dp0..\..\.."
-docker compose -f compose.microfrontends.yaml up --build --detach --force-recreate --wait notes
+docker compose -f "%~dp0..\..\..\compose.microfrontends.yaml" up --build --detach --force-recreate --wait notes
 pause
